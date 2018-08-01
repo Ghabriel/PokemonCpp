@@ -8,6 +8,7 @@
 #include "GameRenderer.hpp"
 
 int main(int argc, char** argv) {
+    XInitThreads();
     engine::entitysystem::ComponentManager componentManager;
     engine::resourcesystem::ResourceStorage resourceStorage;
 
@@ -18,8 +19,8 @@ int main(int argc, char** argv) {
         [&](auto& gameLoop, double timeSinceLastFrame) { logic(gameLoop, timeSinceLastFrame); },
         [&](auto& gameLoop) { renderer(gameLoop); }
     );
+    gameLoop.setUpdateFrequency(60);
 
-    XInitThreads();
     gameLoop.start();
     gameLoop.join();
 }
