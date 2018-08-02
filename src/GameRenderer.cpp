@@ -5,6 +5,7 @@
 #include "engine/game-loop/SingleThreadGameLoop.hpp"
 #include "engine/resource-system/include.hpp"
 #include "engine/utils/timing/print-fps.hpp"
+#include "render.hpp"
 
 GameRenderer::GameRenderer(ComponentManager& manager, ResourceStorage& storage)
  : windowPtr(new sf::RenderWindow(sf::VideoMode(800, 600), "Pokemon")),
@@ -31,6 +32,6 @@ void GameRenderer::operator()(SingleThreadGameLoop& game) {
     }
 
     window.clear();
-    // TODO: render the game objects
+    render(window, componentManager, resourceStorage);
     window.display();
 }

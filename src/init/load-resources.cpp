@@ -1,4 +1,4 @@
-#include "load-resources.hpp"
+#include "init/load-resources.hpp"
 
 #include <cassert>
 #include <SFML/Audio.hpp>

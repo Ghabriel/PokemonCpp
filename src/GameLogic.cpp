@@ -4,9 +4,9 @@
 #include "engine/entity-system/include.hpp"
 #include "engine/game-loop/SingleThreadGameLoop.hpp"
 #include "engine/resource-system/include.hpp"
-#include "load-input-tracker.hpp"
-#include "load-resources.hpp"
-#include "register-states.hpp"
+#include "init/load-input-tracker.hpp"
+#include "init/load-resources.hpp"
+#include "init/register-states.hpp"
 #include "ResourceFiles.hpp"
 #include "Settings.hpp"
 
