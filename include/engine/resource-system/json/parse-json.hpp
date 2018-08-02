@@ -13,23 +13,23 @@ namespace __detail {
     JsonValue parseArrayLiteral(JsonScanner&);
     JsonValue parseObjectLiteral(JsonScanner&);
 
-    void expect(TokenKind kind, const Token& token) {
+    inline void expect(TokenKind kind, const Token& token) {
         assert(token.kind == kind);
     }
 }
 
-JsonValue parseJSON(std::istream& inputStream) {
+inline JsonValue parseJSON(std::istream& inputStream) {
     JsonScanner scanner;
     scanner.setInputStream(inputStream);
     return __detail::parseJSON(scanner);
 }
 
 namespace __detail {
-    JsonValue parseJSON(JsonScanner& scanner) {
+    inline JsonValue parseJSON(JsonScanner& scanner) {
         return __detail::parseJSON(scanner, scanner.scan());
     }
 
-    JsonValue parseJSON(JsonScanner& scanner, const Token& token) {
+    inline JsonValue parseJSON(JsonScanner& scanner, const Token& token) {
         switch (token.kind) {
             case TokenKind::StringLiteral:
                 return token.text;
@@ -48,7 +48,7 @@ namespace __detail {
         }
     }
 
-    JsonValue parseArrayLiteral(JsonScanner& scanner) {
+    inline JsonValue parseArrayLiteral(JsonScanner& scanner) {
         std::vector<JsonValue> result;
         Token token = scanner.scan();
 
@@ -65,7 +65,7 @@ namespace __detail {
         return result;
     }
 
-    JsonValue parseObjectLiteral(JsonScanner& scanner) {
+    inline JsonValue parseObjectLiteral(JsonScanner& scanner) {
         std::unordered_map<std::string, JsonValue> result;
         Token token = scanner.scan();
 

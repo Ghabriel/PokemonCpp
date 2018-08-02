@@ -7,7 +7,7 @@
 #include "../engine/state-system/State.hpp"
 #include "../engine/utils/misc/Menu.hpp"
 #include "../engine/utils/timing/print-fps.hpp"
-#include "../GameCoreData.hpp"
+#include "../CoreStructures.hpp"
 
 class MenuState : public engine::statesystem::State {
     using Entity = engine::entitysystem::Entity;
@@ -15,7 +15,7 @@ class MenuState : public engine::statesystem::State {
     using Music = engine::soundsystem::Music;
     using ResourceStorage = engine::resourcesystem::ResourceStorage;
  public:
-    MenuState(GameCoreData& gameData)
+    MenuState(CoreStructures& gameData)
      : gameData(gameData),
        menuEntity(gameData.componentManager->createEntity()) {
         Menu menu(*gameData.stateMachine);
@@ -27,7 +27,7 @@ class MenuState : public engine::statesystem::State {
     }
 
  private:
-    GameCoreData& gameData;
+    CoreStructures& gameData;
     Entity menuEntity;
 
     void executeImpl() override {

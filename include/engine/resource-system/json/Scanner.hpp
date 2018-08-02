@@ -24,16 +24,16 @@ class JsonScanner {
     Token scanExactly(const std::string& content, TokenKind);
 };
 
-void JsonScanner::setInputStream(std::istream& inputStream) {
+inline void JsonScanner::setInputStream(std::istream& inputStream) {
     stream = &inputStream;
     currentChar = 0;
 }
 
-bool JsonScanner::eof() const {
+inline bool JsonScanner::eof() const {
     return stream->eof();
 }
 
-Token JsonScanner::scan() {
+inline Token JsonScanner::scan() {
     char ch = currentChar == 0 ? stream->get() : currentChar;
     currentChar = 0;
     constexpr auto eof = std::char_traits<char>::eof();
@@ -84,7 +84,7 @@ Token JsonScanner::scan() {
     }
 }
 
-void JsonScanner::skipComment() {
+inline void JsonScanner::skipComment() {
     char ch = stream->get();
 
     if (ch == '/') {
@@ -100,7 +100,7 @@ void JsonScanner::skipComment() {
     assert(false);
 }
 
-Token JsonScanner::scanStringLiteral() {
+inline Token JsonScanner::scanStringLiteral() {
     std::stringstream ss;
     char ch = stream->get();
 
@@ -112,7 +112,7 @@ Token JsonScanner::scanStringLiteral() {
     return {TokenKind::StringLiteral, ss.str()};
 }
 
-Token JsonScanner::scanNumberLiteral(char ch) {
+inline Token JsonScanner::scanNumberLiteral(char ch) {
     std::stringstream ss;
 
     do {
@@ -124,7 +124,7 @@ Token JsonScanner::scanNumberLiteral(char ch) {
     return {TokenKind::NumberLiteral, ss.str()};
 }
 
-Token JsonScanner::scanExactly(const std::string& content, TokenKind tokenKind) {
+inline Token JsonScanner::scanExactly(const std::string& content, TokenKind tokenKind) {
     for (size_t i = 1; i < content.size(); ++i) {
         char ch = stream->get();
 

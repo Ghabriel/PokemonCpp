@@ -4,6 +4,8 @@
 #include <iostream>
 #include <memory>
 #include <typeindex>
+#include <unordered_map>
+#include <vector>
 #include "Scanner.hpp"
 
 class JsonValue;
@@ -39,6 +41,8 @@ class JsonValue {
     using Array = __detail::Array;
     using Map = __detail::Map;
  public:
+    JsonValue();
+
     template<typename T>
     JsonValue(const T&);
 
@@ -73,77 +77,79 @@ class JsonValue {
     std::shared_ptr<void> value;
 };
 
+inline JsonValue::JsonValue() : type(typeid(void)) { }
+
 template <typename T>
-JsonValue::JsonValue(const T& value) : type(typeid(T)), value(new T(value)) { }
+inline JsonValue::JsonValue(const T& value) : type(typeid(T)), value(new T(value)) { }
 
 template<typename T>
-bool JsonValue::is() const {
+inline bool JsonValue::is() const {
     return type == typeid(T);
 }
 
 template<typename T>
-T& JsonValue::get() const {
+inline T& JsonValue::get() const {
     return *static_cast<T*>(value.get());
 }
 
-JsonValue& JsonValue::operator[](const std::string& key) {
+inline JsonValue& JsonValue::operator[](const std::string& key) {
     return get<Map>().at(key);
 }
 
-const JsonValue& JsonValue::operator[](const std::string& key) const {
+inline const JsonValue& JsonValue::operator[](const std::string& key) const {
     return get<Map>().at(key);
 }
 
-JsonValue& JsonValue::at(const std::string& key) {
+inline JsonValue& JsonValue::at(const std::string& key) {
     return get<Map>().at(key);
 }
 
-const JsonValue& JsonValue::at(const std::string& key) const {
+inline const JsonValue& JsonValue::at(const std::string& key) const {
     return get<Map>().at(key);
 }
 
-JsonValue& JsonValue::operator[](int index) {
+inline JsonValue& JsonValue::operator[](int index) {
     return get<Array>().at(index);
 }
 
-const JsonValue& JsonValue::operator[](int index) const {
+inline const JsonValue& JsonValue::operator[](int index) const {
     return get<Array>().at(index);
 }
 
-JsonValue& JsonValue::at(int index) {
+inline JsonValue& JsonValue::at(int index) {
     return get<Array>().at(index);
 }
 
-const JsonValue& JsonValue::at(int index) const {
+inline const JsonValue& JsonValue::at(int index) const {
     return get<Array>().at(index);
 }
 
 namespace __detail {
     template<typename T>
-    JsonIteratorWrapper<T>::JsonIteratorWrapper(const JsonValue& value) : value(value) { }
+    inline JsonIteratorWrapper<T>::JsonIteratorWrapper(const JsonValue& value) : value(value) { }
 
     template<typename T>
-    typename JsonIteratorWrapper<T>::iterator
+    inline typename JsonIteratorWrapper<T>::iterator
     JsonIteratorWrapper<T>::begin() { return value.get<T>().begin(); }
 
     template<typename T>
-    typename JsonIteratorWrapper<T>::const_iterator
+    inline typename JsonIteratorWrapper<T>::const_iterator
     JsonIteratorWrapper<T>::begin() const { return value.get<T>().cbegin(); }
 
     template<typename T>
-    typename JsonIteratorWrapper<T>::const_iterator
+    inline typename JsonIteratorWrapper<T>::const_iterator
     JsonIteratorWrapper<T>::cbegin() const { return value.get<T>().begin(); }
 
     template<typename T>
-    typename JsonIteratorWrapper<T>::iterator
+    inline typename JsonIteratorWrapper<T>::iterator
     JsonIteratorWrapper<T>::end() { return value.get<T>().end(); }
 
     template<typename T>
-    typename JsonIteratorWrapper<T>::const_iterator
+    inline typename JsonIteratorWrapper<T>::const_iterator
     JsonIteratorWrapper<T>::end() const { return value.get<T>().cend(); }
 
     template<typename T>
-    typename JsonIteratorWrapper<T>::const_iterator
+    inline typename JsonIteratorWrapper<T>::const_iterator
     JsonIteratorWrapper<T>::cend() const { return value.get<T>().end(); }
 }
 
