@@ -39,6 +39,13 @@ void loadAnimationData(ResourceStorage& storage) {
     storage.store("player-walking-south", playerWalkingSouth);
 }
 
+void loadSoundEffects(ResourceStorage& storage) {
+    static sf::SoundBuffer buffer;
+    buffer.loadFromFile("resources/fx/emerald_0005_select_option.wav");
+
+    storage.store("fx-select-option", sf::Sound(buffer));
+}
+
 void loadBGM(ResourceStorage& storage) {
     using namespace engine::soundsystem;
     Music littleRoot;
@@ -50,5 +57,6 @@ void loadResources(ResourceStorage& storage) {
     loadFonts(storage);
     loadTextures(storage);
     loadAnimationData(storage);
+    loadSoundEffects(storage);
     loadBGM(storage);
 }

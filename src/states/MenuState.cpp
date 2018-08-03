@@ -6,6 +6,7 @@
 #include "engine/sfml/sound-system/Music.hpp"
 #include "engine/utils/timing/print-fps.hpp"
 #include "CoreStructures.hpp"
+#include "core-functions.hpp"
 
 using engine::entitysystem::ComponentManager;
 using engine::entitysystem::Entity;
@@ -30,32 +31,31 @@ void MenuState::executeImpl() {
 }
 
 void MenuState::onEnterImpl() {
-    gameData.componentManager->addComponent(menuEntity, menu);
-    gameData.inputDispatcher->enableContext("menu-state");
-    ResourceStorage& storage = *gameData.resourceStorage;
-    storage.get<Music>("bgm-littleroot-town").play();
+    addComponent(menuEntity, menu, gameData);
+    enableInputContext("menu-state", gameData);
+    music("bgm-littleroot-town", gameData).play();
 }
 
 void MenuState::onExitImpl() {
-    gameData.componentManager->removeComponent<Menu>(menuEntity);
-    gameData.inputDispatcher->disableContext("menu-state");
-    ResourceStorage &storage = *gameData.resourceStorage;
-    storage.get<Music>("bgm-littleroot-town").stop();
+    removeComponent<Menu>(menuEntity, gameData);
+    disableInputContext("menu-state", gameData);
+    music("bgm-littleroot-town", gameData).stop();
 }
 
 void MenuState::registerInputContext() {
     InputContext context;
 
     static const auto hasMenu = [&] {
-        return gameData.componentManager->hasComponent<Menu>(menuEntity);
+        return hasComponent<Menu>(menuEntity, gameData);
     };
 
     static const auto getMenu = [&]() -> Menu& {
-        return gameData.componentManager->getData<Menu>(menuEntity);
+        return data<Menu>(menuEntity, gameData);
     };
 
     static const auto selectOption = [&] {
         if (hasMenu()) {
+            sound("fx-select-option", gameData).play();
             Menu& menu = gameData.componentManager->getData<Menu>(menuEntity);
             menu.select();
         }
