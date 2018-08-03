@@ -4,11 +4,12 @@
 #include <SFML/Audio.hpp>
 #include "engine/entity-system/include.hpp"
 #include "engine/input-system/include.hpp"
+#include "engine/resource-system/include.hpp"
 #include "engine/sfml/sound-system/include.hpp"
 #include "CoreStructures.hpp"
 
 template<typename TComponent>
-void addComponent(
+inline void addComponent(
     engine::entitysystem::Entity entity,
     TComponent&& data,
     CoreStructures& gameData
@@ -17,34 +18,34 @@ void addComponent(
 }
 
 template<typename TComponent>
-void removeComponent(engine::entitysystem::Entity entity, CoreStructures& gameData) {
+inline void removeComponent(engine::entitysystem::Entity entity, CoreStructures& gameData) {
     gameData.componentManager->removeComponent<TComponent>(entity);
 }
 
 template<typename TComponent>
-bool hasComponent(engine::entitysystem::Entity entity, CoreStructures& gameData) {
+inline bool hasComponent(engine::entitysystem::Entity entity, CoreStructures& gameData) {
     return gameData.componentManager->hasComponent<TComponent>(entity);
 }
 
 template<typename TComponent>
-TComponent& data(engine::entitysystem::Entity entity, CoreStructures& gameData) {
+inline TComponent& data(engine::entitysystem::Entity entity, CoreStructures& gameData) {
     return gameData.componentManager->getData<TComponent>(entity);
 }
 
-void enableInputContext(const std::string& id, CoreStructures& gameData) {
+inline void enableInputContext(const std::string& id, CoreStructures& gameData) {
     gameData.inputDispatcher->enableContext(id);
 }
 
-void disableInputContext(const std::string& id, CoreStructures& gameData) {
+inline void disableInputContext(const std::string& id, CoreStructures& gameData) {
     gameData.inputDispatcher->disableContext(id);
 }
 
-sf::Music& music(const std::string& id, CoreStructures& gameData) {
+inline sf::Music& music(const std::string& id, CoreStructures& gameData) {
     using engine::soundsystem::Music;
     return gameData.resourceStorage->get<Music>(id).get();
 }
 
-sf::Sound& sound(const std::string& id, CoreStructures& gameData) {
+inline sf::Sound& sound(const std::string& id, CoreStructures& gameData) {
     return gameData.resourceStorage->get<sf::Sound>(id);
 }
 

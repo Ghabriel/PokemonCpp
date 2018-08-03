@@ -3,6 +3,7 @@
 #include <memory>
 #include "engine/state-system/include.hpp"
 #include "states/MenuState.hpp"
+#include "states/OverworldState.hpp"
 #include "states/TODOState.hpp"
 
 void registerStates(CoreStructures& gameData) {
@@ -14,5 +15,10 @@ void registerStates(CoreStructures& gameData) {
     gameData.stateMachine->registerState(
         "menu-state",
         std::make_unique<MenuState>(gameData)
+    );
+
+    gameData.stateMachine->registerState(
+        "overworld-state",
+        std::make_unique<OverworldState>(gameData)
     );
 }
