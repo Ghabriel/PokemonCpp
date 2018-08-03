@@ -3,7 +3,6 @@
 
 #include "../engine/entity-system/types.hpp"
 #include "../engine/state-system/include.hpp"
-#include "../engine/utils/misc/Menu.hpp"
 
 struct CoreStructures;
 
@@ -14,6 +13,7 @@ class OverworldState : public engine::statesystem::State {
 
  private:
     CoreStructures& gameData;
+    Entity player;
 
     void executeImpl() override;
     void onEnterImpl() override;

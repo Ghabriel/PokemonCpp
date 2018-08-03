@@ -8,6 +8,10 @@
 #include "engine/sfml/sound-system/include.hpp"
 #include "CoreStructures.hpp"
 
+inline engine::entitysystem::Entity createEntity(CoreStructures& gameData) {
+    return gameData.componentManager->createEntity();
+}
+
 template<typename TComponent>
 inline void addComponent(
     engine::entitysystem::Entity entity,

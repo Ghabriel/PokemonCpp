@@ -2,8 +2,7 @@
 
 #include "engine/entity-system/include.hpp"
 #include "engine/input-system/include.hpp"
-#include "engine/resource-system/ResourceStorage.hpp"
-#include "engine/sfml/sound-system/Music.hpp"
+#include "engine/sfml/sprite-system/include.hpp"
 #include "engine/utils/timing/print-fps.hpp"
 #include "CoreStructures.hpp"
 #include "core-functions.hpp"
@@ -11,15 +10,21 @@
 using engine::entitysystem::ComponentManager;
 using engine::entitysystem::Entity;
 using engine::inputsystem::InputContext;
-using engine::utils::Menu;
+using engine::spritesystem::AnimationPlaybackData;
+using engine::spritesystem::LoopingAnimationData;
+using engine::spritesystem::playAnimations;
 
 OverworldState::OverworldState(CoreStructures& gameData)
- : gameData(gameData) {
+ : gameData(gameData),
+   player(createEntity(gameData)) {
+    auto& animation = gameData.resourceStorage->get<LoopingAnimationData>("player-walking-south");
+    addComponent(player, animation, gameData);
     registerInputContext();
 }
 
 void OverworldState::executeImpl() {
     engine::utils::printFPS<1>("Overworld Update Rate", 50);
+    playAnimations<LoopingAnimationData>(*gameData.componentManager);
 }
 
 void OverworldState::onEnterImpl() {
@@ -27,11 +32,13 @@ void OverworldState::onEnterImpl() {
     sf::Music& bgm = music("bgm-littleroot-town", gameData);
     bgm.setLoop(true);
     bgm.play();
+    addComponent(player, AnimationPlaybackData{}, gameData);
 }
 
 void OverworldState::onExitImpl() {
     disableInputContext("overworld-state", gameData);
     music("bgm-littleroot-town", gameData).pause();
+    removeComponent<AnimationPlaybackData>(player, gameData);
 }
 
 void OverworldState::registerInputContext() {
