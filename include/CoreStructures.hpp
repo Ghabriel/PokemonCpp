@@ -11,6 +11,7 @@ struct CoreStructures {
     engine::inputsystem::InputDispatcher* inputDispatcher;
     engine::resourcesystem::ResourceStorage* resourceStorage;
     engine::statesystem::StateMachine* stateMachine;
+    double* timeSinceLastFrame;
 };
 
 #endif

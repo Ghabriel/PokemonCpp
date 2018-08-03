@@ -39,7 +39,10 @@ namespace engine::spritesystem {
     };
 
     template<typename TAnimationData>
-    void playAnimations(entitysystem::ComponentManager& manager) {
+    inline void playAnimations(
+        entitysystem::ComponentManager& manager,
+        double timeSinceLastFrame
+    ) {
         static AnimationPlayer<TAnimationData> animationPlayer;
 
         manager.forEachEntity<TAnimationData, AnimationPlaybackData>(
@@ -50,8 +53,7 @@ namespace engine::spritesystem {
             ) {
                 animationPlayer.setPlaybackData(playbackData);
                 animationPlayer.setAnimationData(animationData);
-                // TODO: get the correct tick value
-                animationPlayer.tick(2);
+                animationPlayer.tick(timeSinceLastFrame);
 
                 if (animationPlayer.isFinished()) {
                     manager.removeComponent<AnimationPlaybackData>(entity);

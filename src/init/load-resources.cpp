@@ -26,13 +26,14 @@ void loadAnimationData(ResourceStorage& storage) {
 
     sf::Sprite sprite(storage.get<sf::Texture>("player-sprite"));
 
+    int lengthInMilliseconds = 150;
     LoopingAnimationData playerWalkingSouth {
         sprite,
         {
-            {0, 0, 32, 48, 10},
-            {32, 0, 32, 48, 10},
-            {64, 0, 32, 48, 10},
-            {96, 0, 32, 48, 10},
+            {0, 0, 32, 48, lengthInMilliseconds},
+            {32, 0, 32, 48, lengthInMilliseconds},
+            {64, 0, 32, 48, lengthInMilliseconds},
+            {96, 0, 32, 48, lengthInMilliseconds},
         }
     };
 

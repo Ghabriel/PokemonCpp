@@ -7,6 +7,8 @@
 #include "CoreStructures.hpp"
 #include "core-functions.hpp"
 
+#include "engine/utils/debug/xtrace.hpp"
+
 using engine::entitysystem::ComponentManager;
 using engine::entitysystem::Entity;
 using engine::inputsystem::InputContext;
@@ -24,7 +26,7 @@ OverworldState::OverworldState(CoreStructures& gameData)
 
 void OverworldState::executeImpl() {
     engine::utils::printFPS<1>("Overworld Update Rate", 50);
-    playAnimations<LoopingAnimationData>(*gameData.componentManager);
+    playAnimations<LoopingAnimationData>(*gameData.componentManager, *gameData.timeSinceLastFrame);
 }
 
 void OverworldState::onEnterImpl() {

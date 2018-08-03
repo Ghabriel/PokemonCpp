@@ -19,7 +19,8 @@ GameLogic::GameLogic(ComponentManager& manager, ResourceStorage& storage)
         &componentManager,
         &inputDispatcher,
         &resourceStorage,
-        &stateMachine
+        &stateMachine,
+        nullptr
     };
 
     loadResources(resourceStorage);
@@ -28,6 +29,7 @@ GameLogic::GameLogic(ComponentManager& manager, ResourceStorage& storage)
 }
 
 void GameLogic::operator()(SingleThreadGameLoop&, double timeSinceLastFrame) {
+    gameData.timeSinceLastFrame = &timeSinceLastFrame;
     inputDispatcher.tick();
     stateMachine.execute();
 }
