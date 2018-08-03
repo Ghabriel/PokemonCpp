@@ -80,7 +80,10 @@ namespace engine::utils {
     }
 
     inline void Menu::select() const {
-        stateMachine.pushState(targetStates.at(focusedIndex));
+        // Avoids a possible reference invalidation when the current
+        // state's onExit() causes the destruction of this Menu.
+        auto stateNameCopy = targetStates.at(focusedIndex);
+        stateMachine.pushState(stateNameCopy);
     }
 
     template<typename Functor>
