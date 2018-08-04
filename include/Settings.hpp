@@ -8,6 +8,7 @@ class Settings {
  public:
     Settings();
     std::string getInitialState() const;
+    int getTileSize() const;
 
  private:
     JsonValue data;

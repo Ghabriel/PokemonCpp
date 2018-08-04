@@ -7,6 +7,11 @@
 #include "engine/resource-system/include.hpp"
 #include "engine/sfml/sound-system/include.hpp"
 #include "CoreStructures.hpp"
+#include "Settings.hpp"
+
+inline Settings& settings(CoreStructures& gameData) {
+    return gameData.resourceStorage->get<Settings>("settings");
+}
 
 inline engine::entitysystem::Entity createEntity(CoreStructures& gameData) {
     return gameData.componentManager->createEntity();

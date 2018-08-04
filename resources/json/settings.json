@@ -1,3 +1,4 @@
 {
-    "initial-state": "menu-state"
+    "initial-state": "menu-state",
+    "tile-size": 32
 }

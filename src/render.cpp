@@ -1,5 +1,6 @@
 #include "render.hpp"
 
+#include <SFML/Graphics.hpp>
 #include "engine/entity-system/include.hpp"
 #include "engine/resource-system/include.hpp"
 #include "engine/sfml/sprite-system/include.hpp"
@@ -51,7 +52,7 @@ void renderLoopingAnimations(
         [&](
             Entity entity,
             LoopingAnimationData& animationData,
-            AnimationPlaybackData& playbackData
+            AnimationPlaybackData&
         ) {
             window.draw(animationData.sprite);
         }

@@ -23,9 +23,12 @@ GameLogic::GameLogic(ComponentManager& manager, ResourceStorage& storage)
         nullptr
     };
 
+    resourceStorage.store("settings", Settings{});
+    Settings& settings = resourceStorage.get<Settings>("settings");
+
     loadResources(resourceStorage);
     registerStates(gameData);
-    stateMachine.pushState(Settings().getInitialState());
+    stateMachine.pushState(settings.getInitialState());
 }
 
 void GameLogic::operator()(SingleThreadGameLoop&, double timeSinceLastFrame) {
