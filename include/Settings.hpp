@@ -8,6 +8,7 @@ class Settings {
  public:
     Settings();
     std::string getInitialState() const;
+    float getPlayerWalkingSpeed() const;
     int getTileSize() const;
 
  private:

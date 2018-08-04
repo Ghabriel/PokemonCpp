@@ -49,6 +49,11 @@ inline void disableInputContext(const std::string& id, CoreStructures& gameData)
     gameData.inputDispatcher->disableContext(id);
 }
 
+template<typename TResource>
+inline TResource& resource(const std::string& id, CoreStructures& gameData) {
+    return gameData.resourceStorage->get<TResource>(id);
+}
+
 inline sf::Music& music(const std::string& id, CoreStructures& gameData) {
     using engine::soundsystem::Music;
     return gameData.resourceStorage->get<Music>(id).get();

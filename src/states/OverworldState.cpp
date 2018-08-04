@@ -1,5 +1,6 @@
 #include "states/OverworldState.hpp"
 
+#include <cmath>
 #include "components/Map.hpp"
 #include "components/Position.hpp"
 #include "components/Velocity.hpp"
@@ -19,14 +20,22 @@ using engine::spritesystem::AnimationPlaybackData;
 using engine::spritesystem::LoopingAnimationData;
 using engine::spritesystem::playAnimations;
 
+bool isPositionNearInt(const Position& position, float threshold = 0.1f) {
+    return
+        (std::abs(std::round(position.x) - position.x) < threshold) &&
+        (std::abs(std::round(position.y) - position.y) < threshold);
+}
+
 OverworldState::OverworldState(CoreStructures& gameData)
  : gameData(gameData),
    player(createEntity(gameData)) {
     addComponent(player, Direction::South, gameData);
     addComponent(player, Position{0, 2}, gameData);
+    addComponent(player, Velocity{0, 0}, gameData);
 
     registerInputContext();
-    onChangePlayerDirection();
+    updatePlayerAnimation();
+    removeComponent<AnimationPlaybackData>(player, gameData);
 }
 
 void OverworldState::executeImpl() {
@@ -67,7 +76,7 @@ void OverworldState::onEnterImpl() {
 
     addComponent(player, AnimationPlaybackData{}, gameData);
 
-    auto& basicMap = gameData.resourceStorage->get<Map>("map-basic");
+    auto& basicMap = resource<Map>("map-basic", gameData);
     addComponent(map, basicMap, gameData);
 }
 
@@ -83,7 +92,7 @@ void OverworldState::registerInputContext() {
     context.actions = {
         {"Action", [&] { std::cout << "Action\n"; }},
         {"Cancel", [&] { std::cout << "Cancel\n"; }},
-        {"Start", [&] { std::cout << "Start\n"; addComponent(player, Velocity{0.005, 0}, gameData); }}
+        {"Start", [&] { std::cout << "Start\n"; }}
     };
 
     context.states = {
@@ -98,18 +107,30 @@ void OverworldState::registerInputContext() {
 
 void OverworldState::onPressDirectionKey(Direction direction) {
     Direction& currentDirection = data<Direction>(player, gameData);
+    Velocity& currentVelocity = data<Velocity>(player, gameData);
 
     if (direction == currentDirection) {
-        walk();
+        if (currentVelocity.x == 0 && currentVelocity.y == 0) {
+            startWalking();
+        }
+
         return;
     }
 
-    currentDirection = direction;
+    Position& currentPosition = data<Position>(player, gameData);
+
+    if (!isPositionNearInt(currentPosition)) {
+        // too far from tile alignment, ignore
+        return;
+    }
+
+    data<Direction>(player, gameData) = direction;
     onChangePlayerDirection();
 }
 
-void OverworldState::walk() {
-    constexpr float speed = 0.005;
+void OverworldState::startWalking() {
+    static const auto speed = settings(gameData).getPlayerWalkingSpeed();
+
     Velocity velocity;
     switch (data<Direction>(player, gameData)) {
         case Direction::North:
@@ -126,29 +147,41 @@ void OverworldState::walk() {
             break;
     }
 
-    removeComponent<Velocity>(player, gameData);
-    addComponent(player, velocity, gameData);
+    data<Velocity>(player, gameData) = velocity;
+    updatePlayerAnimation();
 }
 
 void OverworldState::onChangePlayerDirection() {
-    removeComponent<LoopingAnimationData>(player, gameData);
+    Position& currentPosition = data<Position>(player, gameData);
+    currentPosition.x = std::round(currentPosition.x);
+    currentPosition.y = std::round(currentPosition.y);
+    data<Velocity>(player, gameData) = {0, 0};
+    updatePlayerAnimation();
+}
+
+void OverworldState::updatePlayerAnimation() {
+    Velocity& currentVelocity = data<Velocity>(player, gameData);
+    bool isMoving = (currentVelocity.x != 0 || currentVelocity.y != 0);
 
     std::string animationId;
     switch (data<Direction>(player, gameData)) {
         case Direction::North:
-            animationId = "player-walking-north";
+            animationId = isMoving ? "player-walking-north" : "player-facing-north";
             break;
         case Direction::West:
-            animationId = "player-walking-west";
+            animationId = isMoving ? "player-walking-west" : "player-facing-west";
             break;
         case Direction::East:
-            animationId = "player-walking-east";
+            animationId = isMoving ? "player-walking-east" : "player-facing-east";
             break;
         case Direction::South:
-            animationId = "player-walking-south";
+            animationId = isMoving ? "player-walking-south" : "player-facing-south";
             break;
     }
 
-    auto& animation = gameData.resourceStorage->get<LoopingAnimationData>(animationId);
+    removeComponent<AnimationPlaybackData>(player, gameData);
+    removeComponent<LoopingAnimationData>(player, gameData);
+    auto& animation = resource<LoopingAnimationData>(animationId, gameData);
     addComponent(player, animation, gameData);
+    addComponent(player, AnimationPlaybackData{}, gameData);
 }

@@ -12,6 +12,10 @@ std::string Settings::getInitialState() const {
     return data["initial-state"].asString();
 }
 
+float Settings::getPlayerWalkingSpeed() const {
+    return std::stof(data["player-walking-speed"].asString());
+}
+
 int Settings::getTileSize() const {
     return data["tile-size"].asInt();
 }

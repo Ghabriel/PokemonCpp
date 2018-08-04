@@ -1,4 +1,20 @@
 {
+    "player-facing-south": {
+        "texture": "player-sprite",
+        "frames": [[0, 0, 32, 48, 9999999]]
+    },
+    "player-facing-west": {
+        "texture": "player-sprite",
+        "frames": [[0, 48, 32, 48, 9999999]]
+    },
+    "player-facing-east": {
+        "texture": "player-sprite",
+        "frames": [[0, 96, 32, 48, 9999999]]
+    },
+    "player-facing-north": {
+        "texture": "player-sprite",
+        "frames": [[0, 144, 32, 48, 9999999]]
+    },
     "player-walking-south": {
         "texture": "player-sprite",
         "frames": [

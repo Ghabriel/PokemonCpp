@@ -23,8 +23,9 @@ class OverworldState : public engine::statesystem::State {
     void registerInputContext();
 
     void onPressDirectionKey(Direction);
-    void walk();
+    void startWalking();
     void onChangePlayerDirection();
+    void updatePlayerAnimation();
 };
 
 #endif

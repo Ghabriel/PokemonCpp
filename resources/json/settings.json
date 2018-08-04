@@ -1,4 +1,5 @@
 {
     "initial-state": "menu-state",
+    "player-walking-speed": "0.005", // (tiles/ms)
     "tile-size": 32
 }
