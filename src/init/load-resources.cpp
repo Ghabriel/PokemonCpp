@@ -1,12 +1,15 @@
 #include "init/load-resources.hpp"
 
 #include <cassert>
+#include <fstream>
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
 #include "components/Map.hpp"
 #include "engine/resource-system/include.hpp"
+#include "engine/resource-system/json/include.hpp"
 #include "engine/sfml/sound-system/include.hpp"
 #include "engine/sfml/sprite-system/include.hpp"
+#include "ResourceFiles.hpp"
 
 using engine::resourcesystem::ResourceStorage;
 
@@ -32,20 +35,31 @@ void loadTextures(ResourceStorage& storage) {
 void loadAnimationData(ResourceStorage& storage) {
     using namespace engine::spritesystem;
 
-    sf::Sprite sprite(storage.get<sf::Texture>("player-sprite"));
+    std::ifstream animationsFile(ResourceFiles::ANIMATIONS);
+    JsonValue data = parseJSON(animationsFile);
 
-    int lengthInMilliseconds = 150;
-    LoopingAnimationData playerWalkingSouth {
-        sprite,
-        {
-            {0, 0, 32, 48, lengthInMilliseconds},
-            {32, 0, 32, 48, lengthInMilliseconds},
-            {64, 0, 32, 48, lengthInMilliseconds},
-            {96, 0, 32, 48, lengthInMilliseconds},
+    for (const auto& [id, animationData] : data.asIterableMap()) {
+        sf::Sprite sprite(
+            storage.get<sf::Texture>(
+                animationData["texture"].get<std::string>()
+            )
+        );
+
+        const JsonValue& jsonFrames = animationData["frames"];
+        std::vector<Frame> frames;
+
+        for (const auto& frameData : jsonFrames.asIterableArray()) {
+            frames.push_back({
+                frameData[0].get<int>(),
+                frameData[1].get<int>(),
+                frameData[2].get<int>(),
+                frameData[3].get<int>(),
+                frameData[4].get<int>()
+            });
         }
-    };
 
-    storage.store("player-walking-south", playerWalkingSouth);
+        storage.store(id, LoopingAnimationData { sprite, frames });
+    }
 }
 
 void loadSoundEffects(ResourceStorage& storage) {

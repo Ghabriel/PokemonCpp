@@ -20,7 +20,7 @@ using engine::spritesystem::playAnimations;
 OverworldState::OverworldState(CoreStructures& gameData)
  : gameData(gameData),
    player(createEntity(gameData)) {
-    auto& animation = gameData.resourceStorage->get<LoopingAnimationData>("player-walking-south");
+    auto& animation = gameData.resourceStorage->get<LoopingAnimationData>("player-walking-east");
     addComponent(player, animation, gameData);
 
     registerInputContext();

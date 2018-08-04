@@ -4,6 +4,7 @@
 namespace ResourceFiles {
     constexpr auto CONTROLS = "resources/json/controls.json";
     constexpr auto SETTINGS = "resources/json/settings.json";
+    constexpr auto ANIMATIONS = "resources/json/animations.json";
 }
 
 #endif
