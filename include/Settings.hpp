@@ -8,6 +8,9 @@ class Settings {
  public:
     Settings();
     std::string getInitialState() const;
+    std::string getWindowTitle() const;
+    int getInitialWindowWidth() const;
+    int getInitialWindowHeight() const;
     float getPlayerWalkingSpeed() const;
     int getTileSize() const;
 

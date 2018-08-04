@@ -20,6 +20,8 @@ class GameRenderer {
     sf::View view;
     ComponentManager& componentManager;
     ResourceStorage& resourceStorage;
+
+    void adjustView();
 };
 
 #endif

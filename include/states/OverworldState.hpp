@@ -25,6 +25,7 @@ class OverworldState : public engine::statesystem::State {
 
     void processMovingEntities();
     void adjustPlayerSpritePosition();
+    void adjustCameraPosition();
 
     void onPressDirectionKey(Direction);
     void startWalking();

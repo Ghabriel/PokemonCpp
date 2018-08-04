@@ -1,6 +1,7 @@
 #include "states/OverworldState.hpp"
 
 #include <cmath>
+#include "components/Camera.hpp"
 #include "components/Map.hpp"
 #include "components/Position.hpp"
 #include "components/Velocity.hpp"
@@ -30,7 +31,7 @@ OverworldState::OverworldState(CoreStructures& gameData)
  : gameData(gameData),
    player(createEntity(gameData)) {
     addComponent(player, Direction::South, gameData);
-    addComponent(player, Position{5, 5}, gameData);
+    addComponent(player, Position{15, 12}, gameData);
     addComponent(player, Velocity{0, 0}, gameData);
 
     registerInputContext();
@@ -65,8 +66,7 @@ void OverworldState::onEnterImpl() {
 
     addComponent(player, AnimationPlaybackData{}, gameData);
 
-    auto& basicMap = resource<Map>("map-basic", gameData);
-    addComponent(map, basicMap, gameData);
+    addComponent(map, resource<Map>("map-basic", gameData), gameData);
 }
 
 void OverworldState::onExitImpl() {
@@ -84,6 +84,8 @@ void OverworldState::executeImpl() {
 
     processMovingEntities();
     adjustPlayerSpritePosition();
+    adjustCameraPosition();
+
     playAnimations<LoopingAnimationData>(
         *gameData.componentManager,
         *gameData.timeSinceLastFrame
@@ -118,6 +120,16 @@ void OverworldState::adjustPlayerSpritePosition() {
         (playerPosition.x + 0.5f) * tileSize - playerWidth / 2,
         (playerPosition.y + 0.5f) * tileSize - playerHeight
     });
+}
+
+void OverworldState::adjustCameraPosition() {
+    LoopingAnimationData& playerAnimation = data<LoopingAnimationData>(player, gameData);
+    static const auto playerHeight = playerAnimation.frames[0].height;
+    auto& playerSpritePosition = playerAnimation.sprite.getPosition();
+
+    Camera& camera = resource<Camera>("camera", gameData);
+    camera.x = playerSpritePosition.x - camera.width / 2;
+    camera.y = playerSpritePosition.y - camera.height / 2 + playerHeight / 2;
 }
 
 void OverworldState::onPressDirectionKey(Direction direction) {
