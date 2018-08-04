@@ -11,12 +11,21 @@
 #include "engine/sfml/sprite-system/include.hpp"
 #include "ResourceFiles.hpp"
 
+#include "engine/utils/debug/xtrace.hpp"
+
 using engine::resourcesystem::ResourceStorage;
 
 void loadFonts(ResourceStorage& storage) {
-    sf::Font arial;
-    assert(arial.loadFromFile("resources/fonts/arial.ttf"));
-    storage.store("font-arial", arial);
+    std::ifstream fontsFile(ResourceFiles::FONTS);
+    JsonValue data = parseJSON(fontsFile);
+
+    for (const auto& [id, path] : data.asIterableMap()) {
+        sf::Font arial;
+        assert(arial.loadFromFile(path.asString()));
+        storage.store(id, arial);
+    }
+
+    ECHO("[RESOURCE] Fonts: OK");
 }
 
 void loadTextures(ResourceStorage& storage) {
@@ -28,6 +37,8 @@ void loadTextures(ResourceStorage& storage) {
         assert(texture.loadFromFile(path.asString()));
         storage.store(id, texture);
     }
+
+    ECHO("[RESOURCE] Textures: OK");
 }
 
 void loadAnimationData(ResourceStorage& storage) {
@@ -58,20 +69,35 @@ void loadAnimationData(ResourceStorage& storage) {
 
         storage.store(id, LoopingAnimationData { sprite, frames });
     }
+
+    ECHO("[RESOURCE] Animations: OK");
 }
 
 void loadSoundEffects(ResourceStorage& storage) {
-    static sf::SoundBuffer buffer;
-    buffer.loadFromFile("resources/fx/emerald_0005_select_option.wav");
+    std::ifstream sfxFile(ResourceFiles::SOUND_EFFECTS);
+    JsonValue data = parseJSON(sfxFile);
 
-    storage.store("fx-select-option", sf::Sound(buffer));
+    for (const auto& [id, path] : data.asIterableMap()) {
+        sf::SoundBuffer buffer;
+        assert(buffer.loadFromFile(path.asString()));
+        storage.store("buffer-" + id, buffer);
+        storage.store(id, sf::Sound(storage.get<sf::SoundBuffer>("buffer-" + id)));
+    }
+
+    ECHO("[RESOURCE] Sound Effects: OK");
 }
 
 void loadBGM(ResourceStorage& storage) {
-    using namespace engine::soundsystem;
-    Music littleRoot;
-    assert(littleRoot.get().openFromFile("resources/bgm/littleroot-town.wav"));
-    storage.store("bgm-littleroot-town", std::move(littleRoot));
+    std::ifstream bgmFile(ResourceFiles::BGM);
+    JsonValue data = parseJSON(bgmFile);
+
+    for (const auto& [id, path] : data.asIterableMap()) {
+        engine::soundsystem::Music bgm;
+        assert(bgm.get().openFromFile(path.asString()));
+        storage.store(id, std::move(bgm));
+    }
+
+    ECHO("[RESOURCE] BGM: OK");
 }
 
 void loadMaps(ResourceStorage& storage) {
@@ -91,6 +117,8 @@ void loadMaps(ResourceStorage& storage) {
     }
 
     storage.store("map-basic", basicMap);
+
+    ECHO("[RESOURCE] Maps: OK");
 }
 
 void loadResources(ResourceStorage& storage) {
