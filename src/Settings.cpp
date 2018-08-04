@@ -9,5 +9,5 @@ Settings::Settings() {
 }
 
 std::string Settings::getInitialState() const {
-    return data["initial-state"].get<std::string>();
+    return data["initial-state"].asString();
 }

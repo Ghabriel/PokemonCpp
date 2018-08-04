@@ -17,7 +17,7 @@ engine::inputsystem::InputTracker loadInputTracker(const std::string& controlsFi
     for (const auto& [keyboardKey, gameKey] : keyMappingJson.asIterableMap()) {
         keyMapping.insert({
             keyFromString(keyboardKey),
-            gameKey.get<std::string>()
+            gameKey.asString()
         });
     }
 

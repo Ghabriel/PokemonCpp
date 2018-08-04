@@ -51,6 +51,8 @@ class JsonValue {
 
     template<typename T>
     T& get() const;
+    int& asInt() const;
+    std::string& asString() const;
 
     JsonArrayIterator asIterableArray() const {
         return *this;
@@ -90,6 +92,14 @@ inline bool JsonValue::is() const {
 template<typename T>
 inline T& JsonValue::get() const {
     return *static_cast<T*>(value.get());
+}
+
+inline int& JsonValue::asInt() const {
+    return get<int>();
+}
+
+inline std::string& JsonValue::asString() const {
+    return get<std::string>();
 }
 
 inline JsonValue& JsonValue::operator[](const std::string& key) {

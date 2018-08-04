@@ -20,15 +20,13 @@ void loadFonts(ResourceStorage& storage) {
 }
 
 void loadTextures(ResourceStorage& storage) {
-    {
+    std::ifstream texturesFile(ResourceFiles::TEXTURES);
+    JsonValue data = parseJSON(texturesFile);
+
+    for (const auto& [id, path] : data.asIterableMap()) {
         sf::Texture texture;
-        assert(texture.loadFromFile("resources/sprites/player.png"));
-        storage.store("player-sprite", texture);
-    }
-    {
-        sf::Texture texture;
-        assert(texture.loadFromFile("resources/sprites/terrain.png"));
-        storage.store("terrain-sprite", texture);
+        assert(texture.loadFromFile(path.asString()));
+        storage.store(id, texture);
     }
 }
 
@@ -41,7 +39,7 @@ void loadAnimationData(ResourceStorage& storage) {
     for (const auto& [id, animationData] : data.asIterableMap()) {
         sf::Sprite sprite(
             storage.get<sf::Texture>(
-                animationData["texture"].get<std::string>()
+                animationData["texture"].asString()
             )
         );
 
@@ -50,11 +48,11 @@ void loadAnimationData(ResourceStorage& storage) {
 
         for (const auto& frameData : jsonFrames.asIterableArray()) {
             frames.push_back({
-                frameData[0].get<int>(),
-                frameData[1].get<int>(),
-                frameData[2].get<int>(),
-                frameData[3].get<int>(),
-                frameData[4].get<int>()
+                frameData[0].asInt(),
+                frameData[1].asInt(),
+                frameData[2].asInt(),
+                frameData[3].asInt(),
+                frameData[4].asInt()
             });
         }
 
