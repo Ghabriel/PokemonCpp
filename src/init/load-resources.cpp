@@ -101,22 +101,34 @@ void loadBGM(ResourceStorage& storage) {
 }
 
 void loadMaps(ResourceStorage& storage) {
-    using namespace engine::spritesystem;
+    std::ifstream mapsFile(ResourceFiles::MAPS);
+    JsonValue data = parseJSON(mapsFile);
 
-    sf::Sprite terrain(storage.get<sf::Texture>("terrain-sprite"));
+    for (const auto& [id, mapData] : data.asIterableMap()) {
+        Map map = {
+            static_cast<size_t>(mapData["id"].asInt()),
+            mapData["name"].asString(),
+            static_cast<size_t>(mapData["width-in-tiles"].asInt()),
+            static_cast<size_t>(mapData["height-in-tiles"].asInt()),
+            {}
+        };
 
-    constexpr int widthInTiles = 25;
-    constexpr int heightInTiles = 20;
+        sf::Sprite texture(storage.get<sf::Texture>(mapData["default-texture"].asString()));
 
-    Map basicMap = {1, "Test Map", widthInTiles, heightInTiles, {}};
-    Tile simpleTile { terrain };
-    simpleTile.sprite.setTextureRect({0, 0, 32, 32});
+        for (const auto& tileData : mapData["tiles"].asIterableArray()) {
+            Tile tile { texture };
+            tile.sprite.setTextureRect({
+                tileData[0].asInt(),
+                tileData[1].asInt(),
+                tileData[2].asInt(),
+                tileData[3].asInt()
+            });
 
-    for (size_t i = 0; i < widthInTiles * heightInTiles; ++i) {
-        basicMap.tiles.push_back(simpleTile);
+            map.tiles.push_back(tile);
+        }
+
+        storage.store(id, map);
     }
-
-    storage.store("map-basic", basicMap);
 
     ECHO("[RESOURCE] Maps: OK");
 }
