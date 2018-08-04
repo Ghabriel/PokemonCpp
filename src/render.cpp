@@ -4,6 +4,7 @@
 #include "engine/resource-system/include.hpp"
 #include "engine/sfml/sprite-system/include.hpp"
 #include "engine/utils/misc/Menu.hpp"
+#include "overworld/render-map.hpp"
 
 using engine::entitysystem::Entity;
 using engine::utils::Menu;
@@ -62,6 +63,7 @@ void render(
     engine::entitysystem::ComponentManager& manager,
     engine::resourcesystem::ResourceStorage& storage
 ) {
+    renderMap(window, manager, storage);
     renderMenus(window, manager, storage);
     renderLoopingAnimations(window, manager);
 }

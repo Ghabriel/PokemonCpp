@@ -1,11 +1,12 @@
 #include "states/OverworldState.hpp"
 
+#include "components/Map.hpp"
+#include "CoreStructures.hpp"
+#include "core-functions.hpp"
 #include "engine/entity-system/include.hpp"
 #include "engine/input-system/include.hpp"
 #include "engine/sfml/sprite-system/include.hpp"
 #include "engine/utils/timing/print-fps.hpp"
-#include "CoreStructures.hpp"
-#include "core-functions.hpp"
 
 #include "engine/utils/debug/xtrace.hpp"
 
@@ -21,6 +22,7 @@ OverworldState::OverworldState(CoreStructures& gameData)
    player(createEntity(gameData)) {
     auto& animation = gameData.resourceStorage->get<LoopingAnimationData>("player-walking-south");
     addComponent(player, animation, gameData);
+
     registerInputContext();
 }
 
@@ -35,6 +37,9 @@ void OverworldState::onEnterImpl() {
     bgm.setLoop(true);
     bgm.play();
     addComponent(player, AnimationPlaybackData{}, gameData);
+
+    auto& basicMap = gameData.resourceStorage->get<Map>("map-basic");
+    addComponent(map, basicMap, gameData);
 }
 
 void OverworldState::onExitImpl() {

@@ -14,6 +14,7 @@ class OverworldState : public engine::statesystem::State {
  private:
     CoreStructures& gameData;
     Entity player;
+    Entity map;
 
     void executeImpl() override;
     void onEnterImpl() override;

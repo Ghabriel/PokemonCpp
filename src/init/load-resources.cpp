@@ -3,6 +3,7 @@
 #include <cassert>
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
+#include "components/Map.hpp"
 #include "engine/resource-system/include.hpp"
 #include "engine/sfml/sound-system/include.hpp"
 #include "engine/sfml/sprite-system/include.hpp"
@@ -16,9 +17,16 @@ void loadFonts(ResourceStorage& storage) {
 }
 
 void loadTextures(ResourceStorage& storage) {
-    sf::Texture texture;
-    assert(texture.loadFromFile("resources/sprites/player.png"));
-    storage.store("player-sprite", texture);
+    {
+        sf::Texture texture;
+        assert(texture.loadFromFile("resources/sprites/player.png"));
+        storage.store("player-sprite", texture);
+    }
+    {
+        sf::Texture texture;
+        assert(texture.loadFromFile("resources/sprites/terrain.png"));
+        storage.store("terrain-sprite", texture);
+    }
 }
 
 void loadAnimationData(ResourceStorage& storage) {
@@ -54,10 +62,30 @@ void loadBGM(ResourceStorage& storage) {
     storage.store("bgm-littleroot-town", std::move(littleRoot));
 }
 
+void loadMaps(ResourceStorage& storage) {
+    using namespace engine::spritesystem;
+
+    sf::Sprite terrain(storage.get<sf::Texture>("terrain-sprite"));
+
+    constexpr int widthInTiles = 25;
+    constexpr int heightInTiles = 20;
+
+    Map basicMap = {1, "Test Map", widthInTiles, heightInTiles, {}};
+    Tile simpleTile { terrain };
+    simpleTile.sprite.setTextureRect({0, 0, 32, 32});
+
+    for (size_t i = 0; i < widthInTiles * heightInTiles; ++i) {
+        basicMap.tiles.push_back(simpleTile);
+    }
+
+    storage.store("map-basic", basicMap);
+}
+
 void loadResources(ResourceStorage& storage) {
     loadFonts(storage);
     loadTextures(storage);
     loadAnimationData(storage);
     loadSoundEffects(storage);
     loadBGM(storage);
+    loadMaps(storage);
 }
