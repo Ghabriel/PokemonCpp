@@ -8,7 +8,7 @@
             [96, 0, 32, 48, 150]
         ]
     },
-    "player-walking-east": {
+    "player-walking-west": {
         "texture": "player-sprite",
         "frames": [
             [0, 48, 32, 48, 150],
@@ -17,7 +17,7 @@
             [96, 48, 32, 48, 150]
         ]
     },
-    "player-walking-west": {
+    "player-walking-east": {
         "texture": "player-sprite",
         "frames": [
             [0, 96, 32, 48, 150],

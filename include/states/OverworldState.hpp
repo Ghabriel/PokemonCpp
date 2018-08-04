@@ -1,6 +1,7 @@
 #ifndef OVERWORLD_STATE_HPP
 #define OVERWORLD_STATE_HPP
 
+#include "../components/Direction.hpp"
 #include "../engine/entity-system/types.hpp"
 #include "../engine/state-system/include.hpp"
 
@@ -20,6 +21,10 @@ class OverworldState : public engine::statesystem::State {
     void onEnterImpl() override;
     void onExitImpl() override;
     void registerInputContext();
+
+    void onPressDirectionKey(Direction);
+    void walk();
+    void onChangePlayerDirection();
 };
 
 #endif
