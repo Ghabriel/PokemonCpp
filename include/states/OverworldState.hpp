@@ -16,16 +16,23 @@ class OverworldState : public engine::statesystem::State {
     CoreStructures& gameData;
     Entity player;
     Entity map;
+    bool pressingDirectionKey = false;
 
-    void executeImpl() override;
+    void registerInputContext();
     void onEnterImpl() override;
     void onExitImpl() override;
-    void registerInputContext();
+    void executeImpl() override;
+
+    void processMovingEntities();
+    void adjustPlayerSpritePosition();
 
     void onPressDirectionKey(Direction);
     void startWalking();
+    void stopWalking();
     void onChangePlayerDirection();
     void updatePlayerAnimation();
+    bool isPlayerNearlyAlignedToTile() const;
+    void alignPlayerToNearestTile();
 };
 
 #endif

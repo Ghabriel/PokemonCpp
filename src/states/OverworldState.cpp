@@ -20,7 +20,7 @@ using engine::spritesystem::AnimationPlaybackData;
 using engine::spritesystem::LoopingAnimationData;
 using engine::spritesystem::playAnimations;
 
-bool isPositionNearInt(const Position& position, float threshold = 0.1f) {
+bool isPositionNearInt(const Position& position, float threshold = 0.05f) {
     return
         (std::abs(std::round(position.x) - position.x) < threshold) &&
         (std::abs(std::round(position.y) - position.y) < threshold);
@@ -35,54 +35,6 @@ OverworldState::OverworldState(CoreStructures& gameData)
 
     registerInputContext();
     updatePlayerAnimation();
-    removeComponent<AnimationPlaybackData>(player, gameData);
-}
-
-void OverworldState::executeImpl() {
-    static const auto tileSize = settings(gameData).getTileSize();
-    double timeSinceLastFrame = *gameData.timeSinceLastFrame;
-    engine::utils::printFPS<1>("Overworld Update Rate", 50);
-
-    ComponentManager& manager = *gameData.componentManager;
-    Position& playerPosition = manager.getData<Position>(player);
-    LoopingAnimationData& playerAnimation = manager.getData<LoopingAnimationData>(player);
-    static const auto playerWidth = playerAnimation.frames[0].width;
-    static const auto playerHeight = playerAnimation.frames[0].height;
-
-    playerAnimation.sprite.setPosition({
-        (playerPosition.x + 0.5f) * tileSize - playerWidth / 2,
-        (playerPosition.y + 0.5f) * tileSize - playerHeight
-    });
-
-    playAnimations<LoopingAnimationData>(manager, timeSinceLastFrame);
-
-    manager.forEachEntity<Velocity, Position>(
-        [&](
-            Entity entity,
-            Velocity& velocity,
-            Position& position
-        ) {
-            position.x += velocity.x * timeSinceLastFrame;
-            position.y += velocity.y * timeSinceLastFrame;
-        }
-    );
-}
-
-void OverworldState::onEnterImpl() {
-    enableInputContext("overworld-state", gameData);
-    sf::Music& bgm = music("bgm-littleroot-town", gameData);
-    bgm.setLoop(true);
-    bgm.play();
-
-    addComponent(player, AnimationPlaybackData{}, gameData);
-
-    auto& basicMap = resource<Map>("map-basic", gameData);
-    addComponent(map, basicMap, gameData);
-}
-
-void OverworldState::onExitImpl() {
-    disableInputContext("overworld-state", gameData);
-    music("bgm-littleroot-town", gameData).pause();
     removeComponent<AnimationPlaybackData>(player, gameData);
 }
 
@@ -105,11 +57,76 @@ void OverworldState::registerInputContext() {
     gameData.inputDispatcher->registerContext("overworld-state", context);
 }
 
+void OverworldState::onEnterImpl() {
+    enableInputContext("overworld-state", gameData);
+    sf::Music& bgm = music("bgm-littleroot-town", gameData);
+    bgm.setLoop(true);
+    bgm.play();
+
+    addComponent(player, AnimationPlaybackData{}, gameData);
+
+    auto& basicMap = resource<Map>("map-basic", gameData);
+    addComponent(map, basicMap, gameData);
+}
+
+void OverworldState::onExitImpl() {
+    disableInputContext("overworld-state", gameData);
+    music("bgm-littleroot-town", gameData).pause();
+    removeComponent<AnimationPlaybackData>(player, gameData);
+}
+
+void OverworldState::executeImpl() {
+    engine::utils::printFPS<1>("Overworld Update Rate", 50);
+
+    if (!pressingDirectionKey) {
+        stopWalking();
+    }
+
+    processMovingEntities();
+    adjustPlayerSpritePosition();
+    playAnimations<LoopingAnimationData>(
+        *gameData.componentManager,
+        *gameData.timeSinceLastFrame
+    );
+    pressingDirectionKey = false;
+}
+
+void OverworldState::processMovingEntities() {
+    ComponentManager& manager = *gameData.componentManager;
+    double timeSinceLastFrame = *gameData.timeSinceLastFrame;
+
+    manager.forEachEntity<Velocity, Position>(
+        [&](
+            Entity entity,
+            Velocity& velocity,
+            Position& position
+        ) {
+            position.x += velocity.x * timeSinceLastFrame;
+            position.y += velocity.y * timeSinceLastFrame;
+        }
+    );
+}
+
+void OverworldState::adjustPlayerSpritePosition() {
+    static const auto tileSize = settings(gameData).getTileSize();
+    LoopingAnimationData& playerAnimation = data<LoopingAnimationData>(player, gameData);
+    static const auto playerWidth = playerAnimation.frames[0].width;
+    static const auto playerHeight = playerAnimation.frames[0].height;
+    Position& playerPosition = data<Position>(player, gameData);
+
+    playerAnimation.sprite.setPosition({
+        (playerPosition.x + 0.5f) * tileSize - playerWidth / 2,
+        (playerPosition.y + 0.5f) * tileSize - playerHeight
+    });
+}
+
 void OverworldState::onPressDirectionKey(Direction direction) {
+    pressingDirectionKey = true;
     Direction& currentDirection = data<Direction>(player, gameData);
-    Velocity& currentVelocity = data<Velocity>(player, gameData);
 
     if (direction == currentDirection) {
+        Velocity& currentVelocity = data<Velocity>(player, gameData);
+
         if (currentVelocity.x == 0 && currentVelocity.y == 0) {
             startWalking();
         }
@@ -117,10 +134,7 @@ void OverworldState::onPressDirectionKey(Direction direction) {
         return;
     }
 
-    Position& currentPosition = data<Position>(player, gameData);
-
-    if (!isPositionNearInt(currentPosition)) {
-        // too far from tile alignment, ignore
+    if (!isPlayerNearlyAlignedToTile()) {
         return;
     }
 
@@ -151,10 +165,15 @@ void OverworldState::startWalking() {
     updatePlayerAnimation();
 }
 
+void OverworldState::stopWalking() {
+    Velocity& playerVelocity = data<Velocity>(player, gameData);
+    if ((playerVelocity.x != 0 || playerVelocity.y != 0) && isPlayerNearlyAlignedToTile()) {
+        onChangePlayerDirection();
+    }
+}
+
 void OverworldState::onChangePlayerDirection() {
-    Position& currentPosition = data<Position>(player, gameData);
-    currentPosition.x = std::round(currentPosition.x);
-    currentPosition.y = std::round(currentPosition.y);
+    alignPlayerToNearestTile();
     data<Velocity>(player, gameData) = {0, 0};
     updatePlayerAnimation();
 }
@@ -184,4 +203,14 @@ void OverworldState::updatePlayerAnimation() {
     auto& animation = resource<LoopingAnimationData>(animationId, gameData);
     addComponent(player, animation, gameData);
     addComponent(player, AnimationPlaybackData{}, gameData);
+}
+
+bool OverworldState::isPlayerNearlyAlignedToTile() const {
+    return isPositionNearInt(data<Position>(player, gameData));
+}
+
+void OverworldState::alignPlayerToNearestTile() {
+    Position& currentPosition = data<Position>(player, gameData);
+    currentPosition.x = std::round(currentPosition.x);
+    currentPosition.y = std::round(currentPosition.y);
 }
