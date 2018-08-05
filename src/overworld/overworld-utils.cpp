@@ -1,12 +1,10 @@
-#include "overworld/processInteraction.hpp"
+#include "overworld/overworld-utils.hpp"
 
-#include <utility>
+#include <string>
 #include "components/Direction.hpp"
 #include "components/Map.hpp"
 #include "components/Position.hpp"
 #include "core-functions.hpp"
-
-#include "engine/utils/debug/xtrace.hpp"
 
 using engine::entitysystem::Entity;
 using engine::scriptingsystem::Lua;
@@ -39,29 +37,4 @@ std::pair<int, int> getTargetTile(Entity player, CoreStructures& gameData) {
 Lua& getMapScripts(Entity map, CoreStructures& gameData) {
     Map& mapData = data<Map>(map, gameData);
     return script("map-" + std::to_string(mapData.id), gameData);
-}
-
-void write(const std::string& str) {
-    ECHO(str);
-}
-
-void processInteraction(
-    CoreStructures& gameData,
-    Entity player,
-    Entity map
-) {
-    std::pair<int, int> targetTile = getTargetTile(player, gameData);
-    auto& mapScripts = getMapScripts(map, gameData);
-    mapScripts.registerNative("write", write);
-    mapScripts.call<void>("interact", targetTile.first, targetTile.second);
-}
-
-bool isNextTileBlocked(
-    CoreStructures& gameData,
-    Entity player,
-    Entity map
-) {
-    std::pair<int, int> targetTile = getTargetTile(player, gameData);
-    auto& mapScripts = getMapScripts(map, gameData);
-    return mapScripts.call<bool>("isTileBlocked", targetTile.first, targetTile.second);
 }

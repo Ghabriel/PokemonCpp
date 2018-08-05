@@ -11,7 +11,8 @@
 #include "engine/input-system/include.hpp"
 #include "engine/sfml/sprite-system/include.hpp"
 #include "engine/utils/timing/print-fps.hpp"
-#include "overworld/processInteraction.hpp"
+#include "overworld/is-next-tile-blocked.hpp"
+#include "overworld/process-interaction.hpp"
 
 #include "engine/utils/debug/xtrace.hpp"
 

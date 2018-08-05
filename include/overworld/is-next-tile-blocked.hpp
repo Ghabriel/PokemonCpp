@@ -1,14 +1,8 @@
-#ifndef PROCESS_INTERACTION_HPP
-#define PROCESS_INTERACTION_HPP
+#ifndef IS_NEXT_TILE_BLOCKED_HPP
+#define IS_NEXT_TILE_BLOCKED_HPP
 
 #include "../CoreStructures.hpp"
 #include "../engine/entity-system/types.hpp"
-
-void processInteraction(
-    CoreStructures& gameData,
-    engine::entitysystem::Entity player,
-    engine::entitysystem::Entity map
-);
 
 bool isNextTileBlocked(
     CoreStructures& gameData,
