@@ -61,7 +61,7 @@ namespace engine::scriptingsystem {
         LuaRAII L;
     };
 
-    LuaWrapper::LuaWrapper(const std::string& filename) : L(filename) { }
+    inline LuaWrapper::LuaWrapper(const std::string& filename) : L(filename) { }
 
     inline void LuaWrapper::pushGlobal(const std::string& variableName) {
         lua_getglobal(L.get(), variableName.c_str());

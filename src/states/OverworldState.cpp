@@ -11,6 +11,7 @@
 #include "engine/input-system/include.hpp"
 #include "engine/sfml/sprite-system/include.hpp"
 #include "engine/utils/timing/print-fps.hpp"
+#include "overworld/processInteraction.hpp"
 
 #include "engine/utils/debug/xtrace.hpp"
 
@@ -43,7 +44,7 @@ void OverworldState::registerInputContext() {
     InputContext context;
 
     context.actions = {
-        {"Action", [&] { std::cout << "Action\n"; }},
+        {"Action", [&] { processInteraction(gameData, player, map); }},
         {"Cancel", [&] { std::cout << "Cancel\n"; }},
         {"Start", [&] { std::cout << "Start\n"; }}
     };
@@ -78,7 +79,7 @@ void OverworldState::onExitImpl() {
 void OverworldState::executeImpl() {
     engine::utils::printFPS<1>("Overworld Update Rate", 50);
 
-    if (!pressingDirectionKey) {
+    if (!pressingDirectionKey || movingTowardsBlockedTile()) {
         stopWalking();
     }
 
@@ -91,6 +92,15 @@ void OverworldState::executeImpl() {
         *gameData.timeSinceLastFrame
     );
     pressingDirectionKey = false;
+}
+
+bool OverworldState::movingTowardsBlockedTile() const {
+    Velocity& playerVelocity = data<Velocity>(player, gameData);
+    if (playerVelocity.x == 0 && playerVelocity.y == 0) {
+        return false;
+    }
+
+    return isNextTileBlocked(gameData, player, map);
 }
 
 void OverworldState::processMovingEntities() {

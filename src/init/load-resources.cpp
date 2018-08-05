@@ -7,6 +7,7 @@
 #include "components/Map.hpp"
 #include "engine/resource-system/include.hpp"
 #include "engine/resource-system/json/include.hpp"
+#include "engine/scripting-system/include.hpp"
 #include "engine/sfml/sound-system/include.hpp"
 #include "engine/sfml/sprite-system/include.hpp"
 #include "ResourceFiles.hpp"
@@ -153,13 +154,20 @@ void loadSparseTileData(
     }
 }
 
+void loadScript(ResourceStorage& storage, const std::string& id) {
+    std::string filename = ResourceFiles::SCRIPTS_FOLDER + id + ".lua";
+    storage.store(id, engine::scriptingsystem::Lua(filename));
+    ECHO("[RESOURCE] Script '" + id + "': OK");
+}
+
 void loadMaps(ResourceStorage& storage) {
     std::ifstream mapsFile(ResourceFiles::MAPS);
     JsonValue data = parseJSON(mapsFile);
 
     for (const auto& [id, mapData] : data.asIterableMap()) {
+        size_t mapId = static_cast<size_t>(mapData["id"].asInt());
         Map map = {
-            static_cast<size_t>(mapData["id"].asInt()),
+            mapId,
             mapData["name"].asString(),
             static_cast<size_t>(mapData["width-in-tiles"].asInt()),
             static_cast<size_t>(mapData["height-in-tiles"].asInt()),
@@ -168,6 +176,7 @@ void loadMaps(ResourceStorage& storage) {
 
         loadSequentialTileData(mapData["layer1"], storage, map);
         loadSparseTileData(mapData["layer2"], storage, map);
+        loadScript(storage, "map-" + std::to_string(mapId));
 
         storage.store(id, map);
     }

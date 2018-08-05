@@ -23,6 +23,7 @@ class OverworldState : public engine::statesystem::State {
     void onExitImpl() override;
     void executeImpl() override;
 
+    bool movingTowardsBlockedTile() const;
     void processMovingEntities();
     void adjustPlayerSpritePosition();
     void adjustCameraPosition();

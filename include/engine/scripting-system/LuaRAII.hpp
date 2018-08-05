@@ -13,7 +13,12 @@ namespace engine::scriptingsystem {
     class LuaRAII {
      public:
         LuaRAII(const std::string& filename);
+        LuaRAII(const LuaRAII&) = delete;
+        LuaRAII(LuaRAII&&);
         ~LuaRAII();
+
+        LuaRAII& operator=(const LuaRAII&) = delete;
+        LuaRAII& operator=(LuaRAII&&);
 
         constexpr lua_State* get() const {
             return L;
@@ -23,7 +28,7 @@ namespace engine::scriptingsystem {
         lua_State* L;
     };
 
-    LuaRAII::LuaRAII(const std::string& filename) {
+    inline LuaRAII::LuaRAII(const std::string& filename) {
         L = luaL_newstate();
 
         if (luaL_loadfile(L, filename.c_str()) || lua_pcall(L, 0, 0, 0)) {
@@ -33,10 +38,21 @@ namespace engine::scriptingsystem {
         }
     }
 
-    LuaRAII::~LuaRAII() {
+    inline LuaRAII::LuaRAII(LuaRAII&& other) {
+        L = other.L;
+        other.L = nullptr;
+    }
+
+    inline LuaRAII::~LuaRAII() {
         if (L) {
             lua_close(L);
         }
+    }
+
+    inline LuaRAII& LuaRAII::operator=(LuaRAII&& other) {
+        L = other.L;
+        other.L = nullptr;
+        return *this;
     }
 }
 

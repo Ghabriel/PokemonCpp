@@ -41,7 +41,7 @@ BINARIES  :=$(BINDIR)/pokemon
 CXX      :=g++
 CXXFLAGS :=-std=c++17 -Wall
 LDFLAGS  :=
-LDLIBS   :=-lsfml-audio -lsfml-graphics -lsfml-system -lsfml-window -pthread -lX11
+LDLIBS   :=-lsfml-audio -lsfml-graphics -lsfml-system -lsfml-window -pthread -lX11 -llua
 INCLUDE  :=-I$(INCDIR)
 ### TESTS-RELATED VARIABLES
 # Files containing the main() function

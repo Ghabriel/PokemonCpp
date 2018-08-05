@@ -11,6 +11,7 @@ namespace ResourceFiles {
     constexpr auto SOUND_EFFECTS = "resources/json/sfx.json";
     constexpr auto TEXTURES = "resources/json/textures.json";
     constexpr auto TILES = "resources/json/tiles.json";
+    constexpr auto SCRIPTS_FOLDER = "resources/scripts/";
 }
 
 #endif

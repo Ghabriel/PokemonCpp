@@ -5,6 +5,7 @@
 #include "engine/entity-system/include.hpp"
 #include "engine/input-system/include.hpp"
 #include "engine/resource-system/include.hpp"
+#include "engine/scripting-system/include.hpp"
 #include "engine/sfml/sound-system/include.hpp"
 #include "CoreStructures.hpp"
 #include "Settings.hpp"
@@ -52,6 +53,11 @@ inline void disableInputContext(const std::string& id, CoreStructures& gameData)
 template<typename TResource>
 inline TResource& resource(const std::string& id, CoreStructures& gameData) {
     return gameData.resourceStorage->get<TResource>(id);
+}
+
+inline engine::scriptingsystem::Lua& script(const std::string& id, CoreStructures& gameData) {
+    using engine::scriptingsystem::Lua;
+    return gameData.resourceStorage->get<Lua>(id);
 }
 
 inline sf::Music& music(const std::string& id, CoreStructures& gameData) {
