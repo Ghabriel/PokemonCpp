@@ -23,8 +23,11 @@ void renderMap(
                 float x = (i % map.widthInTiles) * tileSize;
                 float y = (i / map.widthInTiles) * tileSize;
                 Tile& tile = map.tiles.at(i);
-                tile.sprite.setPosition({x, y});
-                window.draw(tile.sprite);
+
+                for (sf::Sprite& sprite : tile.sprites) {
+                    sprite.setPosition({x, y});
+                    window.draw(sprite);
+                }
             }
         }
     );

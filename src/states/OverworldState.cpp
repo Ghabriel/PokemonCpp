@@ -31,7 +31,7 @@ OverworldState::OverworldState(CoreStructures& gameData)
  : gameData(gameData),
    player(createEntity(gameData)) {
     addComponent(player, Direction::South, gameData);
-    addComponent(player, Position{15, 12}, gameData);
+    addComponent(player, Position{5, 5}, gameData);
     addComponent(player, Velocity{0, 0}, gameData);
 
     registerInputContext();

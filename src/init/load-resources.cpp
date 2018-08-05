@@ -100,6 +100,47 @@ void loadBGM(ResourceStorage& storage) {
     ECHO("[RESOURCE] BGM: OK");
 }
 
+void loadSequentialTileData(
+    JsonValue tileDataArray,
+    sf::Sprite& texture,
+    Map& map
+) {
+    for (const auto& tileData : tileDataArray.asIterableArray()) {
+        Tile tile;
+        tile.sprites.emplace_back(texture);
+        sf::Sprite& layer1 = tile.sprites.back();
+        layer1.setTextureRect({
+            tileData[0].asInt(),
+            tileData[1].asInt(),
+            tileData[2].asInt(),
+            tileData[3].asInt()
+        });
+
+        map.tiles.push_back(tile);
+    }
+}
+
+void loadSparseTileData(
+    JsonValue tileDataArray,
+    sf::Sprite& texture,
+    Map& map
+) {
+    for (const auto& tileData : tileDataArray.asIterableArray()) {
+        int x = tileData[0].asInt();
+        int y = tileData[1].asInt();
+        Tile& tile = map.tiles[y * map.widthInTiles + x];
+
+        tile.sprites.emplace_back(texture);
+        sf::Sprite& layer = tile.sprites.back();
+        layer.setTextureRect({
+            tileData[2][0].asInt(),
+            tileData[2][1].asInt(),
+            tileData[2][2].asInt(),
+            tileData[2][3].asInt()
+        });
+    }
+}
+
 void loadMaps(ResourceStorage& storage) {
     std::ifstream mapsFile(ResourceFiles::MAPS);
     JsonValue data = parseJSON(mapsFile);
@@ -114,18 +155,8 @@ void loadMaps(ResourceStorage& storage) {
         };
 
         sf::Sprite texture(storage.get<sf::Texture>(mapData["default-texture"].asString()));
-
-        for (const auto& tileData : mapData["tiles"].asIterableArray()) {
-            Tile tile { texture };
-            tile.sprite.setTextureRect({
-                tileData[0].asInt(),
-                tileData[1].asInt(),
-                tileData[2].asInt(),
-                tileData[3].asInt()
-            });
-
-            map.tiles.push_back(tile);
-        }
+        loadSequentialTileData(mapData["layer1"], texture, map);
+        loadSparseTileData(mapData["layer2"], texture, map);
 
         storage.store(id, map);
     }

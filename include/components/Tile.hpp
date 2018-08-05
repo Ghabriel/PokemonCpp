@@ -4,7 +4,8 @@
 #include <SFML/Graphics.hpp>
 
 struct Tile {
-    sf::Sprite sprite;
+    // ordered by layer
+    std::vector<sf::Sprite> sprites;
 };
 
 #endif
