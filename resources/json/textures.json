@@ -1,4 +1,5 @@
 {
+    "buildings-sprite": "resources/sprites/buildings.png",
     "player-sprite": "resources/sprites/player.png",
     "terrain-sprite": "resources/sprites/terrain.png"
 }

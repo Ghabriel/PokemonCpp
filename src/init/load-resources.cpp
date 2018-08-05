@@ -144,7 +144,7 @@ void loadSparseTileData(
     for (const auto& tileCoordinates : tileDataArray.asIterableArray()) {
         int x = tileCoordinates[0].asInt();
         int y = tileCoordinates[1].asInt();
-        TileData &tileData = storage.get<TileData>("tile-" + tileCoordinates[2].asString());
+        TileData& tileData = storage.get<TileData>("tile-" + tileCoordinates[2].asString());
 
         Tile& tile = map.tiles[y * map.widthInTiles + x];
         tile.sprites.emplace_back(storage.get<sf::Texture>(tileData.texture));

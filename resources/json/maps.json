@@ -6,9 +6,17 @@
         "height-in-tiles": 25,
         "layer2": [
             [1, 1, "item"],
-            [1, 2, "item"],
-            [2, 1, "item"],
-            [2, 2, "item"]
+            [2, 1, "rock"],
+            [5, 0, "cave-entrance-0-0"],
+            [6, 0, "cave-entrance-1-0"],
+            [7, 0, "cave-entrance-2-0"],
+            [5, 1, "cave-entrance-0-1"],
+            [6, 1, "cave-entrance-1-1"],
+            [7, 1, "cave-entrance-2-1"],
+            [1, 4, "bush-0-0"],
+            [1, 5, "bush-0-1"],
+            [1, 6, "bush-0-2"],
+            [1, 9, "pokecenter"]
         ],
         "layer1": [
             "grass",

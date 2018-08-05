@@ -118,7 +118,7 @@ void OverworldState::adjustPlayerSpritePosition() {
 
     playerAnimation.sprite.setPosition({
         (playerPosition.x + 0.5f) * tileSize - playerWidth / 2,
-        (playerPosition.y + 0.5f) * tileSize - playerHeight
+        (playerPosition.y + 0.75f) * tileSize - playerHeight
     });
 }
 

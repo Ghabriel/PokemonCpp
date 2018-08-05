@@ -6,13 +6,15 @@
 #include "engine/sfml/sprite-system/include.hpp"
 #include "Settings.hpp"
 
-void renderMap(
+void renderMapLayer(
+    MapLayer layer,
     sf::RenderWindow& window,
     engine::entitysystem::ComponentManager& manager,
     engine::resourcesystem::ResourceStorage& storage
 ) {
     using engine::entitysystem::Entity;
     static const auto tileSize = storage.get<Settings>("settings").getTileSize();
+    auto layerValue = static_cast<size_t>(layer);
 
     manager.forEachEntity<Map>(
         [&](
@@ -24,7 +26,8 @@ void renderMap(
                 float y = (i / map.widthInTiles) * tileSize;
                 Tile& tile = map.tiles.at(i);
 
-                for (sf::Sprite& sprite : tile.sprites) {
+                if (tile.sprites.size() > layerValue) {
+                    sf::Sprite& sprite = tile.sprites.at(layerValue);
                     sprite.setPosition({x, y});
                     window.draw(sprite);
                 }
