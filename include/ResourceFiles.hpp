@@ -10,6 +10,7 @@ namespace ResourceFiles {
     constexpr auto SETTINGS = "resources/json/settings.json";
     constexpr auto SOUND_EFFECTS = "resources/json/sfx.json";
     constexpr auto TEXTURES = "resources/json/textures.json";
+    constexpr auto TILES = "resources/json/tiles.json";
 }
 
 #endif

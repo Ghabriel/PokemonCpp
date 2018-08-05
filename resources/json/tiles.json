@@ -1,0 +1,12 @@
+{
+    // Layer 1
+    "grass": {
+        "texture": "terrain-sprite",
+        "rect": [0, 0, 32, 32]
+    },
+    // Layer 2
+    "item": {
+        "texture": "terrain-sprite",
+        "rect": [170, 170, 32, 32]
+    }
+}

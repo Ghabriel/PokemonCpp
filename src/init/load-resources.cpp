@@ -10,6 +10,7 @@
 #include "engine/sfml/sound-system/include.hpp"
 #include "engine/sfml/sprite-system/include.hpp"
 #include "ResourceFiles.hpp"
+#include "TileData.hpp"
 
 #include "engine/utils/debug/xtrace.hpp"
 
@@ -100,21 +101,36 @@ void loadBGM(ResourceStorage& storage) {
     ECHO("[RESOURCE] BGM: OK");
 }
 
+void loadTiles(ResourceStorage& storage) {
+    std::ifstream tilesFile(ResourceFiles::TILES);
+    JsonValue data = parseJSON(tilesFile);
+
+    for (const auto& [id, tileData] : data.asIterableMap()) {
+        storage.store<TileData>("tile-" + id, {
+            tileData["texture"].asString(),
+            {
+                tileData["rect"][0].asInt(),
+                tileData["rect"][1].asInt(),
+                tileData["rect"][2].asInt(),
+                tileData["rect"][3].asInt()
+            }
+        });
+    }
+
+    ECHO("[RESOURCE] TILES: OK");
+}
+
 void loadSequentialTileData(
     JsonValue tileDataArray,
-    sf::Sprite& texture,
+    ResourceStorage& storage,
     Map& map
 ) {
-    for (const auto& tileData : tileDataArray.asIterableArray()) {
+    for (const auto& tileId : tileDataArray.asIterableArray()) {
+        TileData& tileData = storage.get<TileData>("tile-" + tileId.asString());
         Tile tile;
-        tile.sprites.emplace_back(texture);
+        tile.sprites.emplace_back(storage.get<sf::Texture>(tileData.texture));
         sf::Sprite& layer1 = tile.sprites.back();
-        layer1.setTextureRect({
-            tileData[0].asInt(),
-            tileData[1].asInt(),
-            tileData[2].asInt(),
-            tileData[3].asInt()
-        });
+        layer1.setTextureRect(tileData.rect);
 
         map.tiles.push_back(tile);
     }
@@ -122,22 +138,18 @@ void loadSequentialTileData(
 
 void loadSparseTileData(
     JsonValue tileDataArray,
-    sf::Sprite& texture,
+    ResourceStorage& storage,
     Map& map
 ) {
-    for (const auto& tileData : tileDataArray.asIterableArray()) {
-        int x = tileData[0].asInt();
-        int y = tileData[1].asInt();
-        Tile& tile = map.tiles[y * map.widthInTiles + x];
+    for (const auto& tileCoordinates : tileDataArray.asIterableArray()) {
+        int x = tileCoordinates[0].asInt();
+        int y = tileCoordinates[1].asInt();
+        TileData &tileData = storage.get<TileData>("tile-" + tileCoordinates[2].asString());
 
-        tile.sprites.emplace_back(texture);
+        Tile& tile = map.tiles[y * map.widthInTiles + x];
+        tile.sprites.emplace_back(storage.get<sf::Texture>(tileData.texture));
         sf::Sprite& layer = tile.sprites.back();
-        layer.setTextureRect({
-            tileData[2][0].asInt(),
-            tileData[2][1].asInt(),
-            tileData[2][2].asInt(),
-            tileData[2][3].asInt()
-        });
+        layer.setTextureRect(tileData.rect);
     }
 }
 
@@ -154,9 +166,8 @@ void loadMaps(ResourceStorage& storage) {
             {}
         };
 
-        sf::Sprite texture(storage.get<sf::Texture>(mapData["default-texture"].asString()));
-        loadSequentialTileData(mapData["layer1"], texture, map);
-        loadSparseTileData(mapData["layer2"], texture, map);
+        loadSequentialTileData(mapData["layer1"], storage, map);
+        loadSparseTileData(mapData["layer2"], storage, map);
 
         storage.store(id, map);
     }
@@ -170,5 +181,6 @@ void loadResources(ResourceStorage& storage) {
     loadAnimationData(storage);
     loadSoundEffects(storage);
     loadBGM(storage);
+    loadTiles(storage);
     loadMaps(storage);
 }
