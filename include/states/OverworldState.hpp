@@ -32,7 +32,6 @@ class OverworldState : public engine::statesystem::State {
     void startWalking();
     void stopWalking();
     void onChangePlayerDirection();
-    void updatePlayerAnimation();
     bool isPlayerNearlyAlignedToTile() const;
     void alignPlayerToNearestTile();
 };

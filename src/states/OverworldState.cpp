@@ -11,7 +11,9 @@
 #include "engine/input-system/include.hpp"
 #include "engine/sfml/sprite-system/include.hpp"
 #include "engine/utils/timing/print-fps.hpp"
+#include "lua-native-functions.hpp"
 #include "overworld/is-next-tile-blocked.hpp"
+#include "overworld/overworld-utils.hpp"
 #include "overworld/process-interaction.hpp"
 
 #include "engine/utils/debug/xtrace.hpp"
@@ -37,8 +39,11 @@ OverworldState::OverworldState(CoreStructures& gameData)
     addComponent(player, Velocity{0, 0}, gameData);
 
     registerInputContext();
-    updatePlayerAnimation();
+    updatePlayerAnimation(player, gameData);
     removeComponent<AnimationPlaybackData>(player, gameData);
+
+    lua::internal::setCoreStructures(gameData);
+    lua::internal::setPlayer(player);
 }
 
 void OverworldState::registerInputContext() {
@@ -185,7 +190,7 @@ void OverworldState::startWalking() {
     }
 
     data<Velocity>(player, gameData) = velocity;
-    updatePlayerAnimation();
+    updatePlayerAnimation(player, gameData);
 }
 
 void OverworldState::stopWalking() {
@@ -198,34 +203,7 @@ void OverworldState::stopWalking() {
 void OverworldState::onChangePlayerDirection() {
     alignPlayerToNearestTile();
     data<Velocity>(player, gameData) = {0, 0};
-    updatePlayerAnimation();
-}
-
-void OverworldState::updatePlayerAnimation() {
-    Velocity& currentVelocity = data<Velocity>(player, gameData);
-    bool isMoving = (currentVelocity.x != 0 || currentVelocity.y != 0);
-
-    std::string animationId;
-    switch (data<Direction>(player, gameData)) {
-        case Direction::North:
-            animationId = isMoving ? "player-walking-north" : "player-facing-north";
-            break;
-        case Direction::West:
-            animationId = isMoving ? "player-walking-west" : "player-facing-west";
-            break;
-        case Direction::East:
-            animationId = isMoving ? "player-walking-east" : "player-facing-east";
-            break;
-        case Direction::South:
-            animationId = isMoving ? "player-walking-south" : "player-facing-south";
-            break;
-    }
-
-    removeComponent<AnimationPlaybackData>(player, gameData);
-    removeComponent<LoopingAnimationData>(player, gameData);
-    auto& animation = resource<LoopingAnimationData>(animationId, gameData);
-    addComponent(player, animation, gameData);
-    addComponent(player, AnimationPlaybackData{}, gameData);
+    updatePlayerAnimation(player, gameData);
 }
 
 bool OverworldState::isPlayerNearlyAlignedToTile() const {

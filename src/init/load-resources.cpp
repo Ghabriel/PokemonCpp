@@ -10,6 +10,7 @@
 #include "engine/scripting-system/include.hpp"
 #include "engine/sfml/sound-system/include.hpp"
 #include "engine/sfml/sprite-system/include.hpp"
+#include "lua-native-functions.hpp"
 #include "ResourceFiles.hpp"
 #include "TileData.hpp"
 
@@ -155,8 +156,10 @@ void loadSparseTileData(
 }
 
 void loadScript(ResourceStorage& storage, const std::string& id) {
+    using engine::scriptingsystem::Lua;
     std::string filename = ResourceFiles::SCRIPTS_FOLDER + id + ".lua";
-    storage.store(id, engine::scriptingsystem::Lua(filename));
+    storage.store(id, Lua(filename));
+    injectNativeFunctions(storage.get<Lua>(id));
     ECHO("[RESOURCE] Script '" + id + "': OK");
 }
 

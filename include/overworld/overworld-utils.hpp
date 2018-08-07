@@ -16,4 +16,9 @@ engine::scriptingsystem::Lua& getMapScripts(
     CoreStructures& gameData
 );
 
+void updatePlayerAnimation(
+    engine::entitysystem::Entity player,
+    CoreStructures& gameData
+);
+
 #endif
