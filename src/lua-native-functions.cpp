@@ -6,8 +6,10 @@
 #include "CoreStructures.hpp"
 #include "core-functions.hpp"
 #include "engine/scripting-system/include.hpp"
+#include "events/PlayerMoveEvent.hpp"
 #include "overworld/overworld-utils.hpp"
 
+#include "EventQueue.hpp"
 #include "engine/utils/debug/xtrace.hpp"
 
 CoreStructures* gameData;
@@ -60,9 +62,17 @@ void lua::enableControls() {
 }
 
 void lua::movePlayerSouth(int numTiles) {
-    std::cout << "moveSouth(" << numTiles << ")" << std::endl;
-    data<Direction>(player, *gameData) = Direction::South;
-    updatePlayerAnimation(player, *gameData);
+    // std::cout << "moveSouth(" << numTiles << ")" << std::endl;
+    // data<Direction>(player, *gameData) = Direction::South;
+    // updatePlayerAnimation(player, *gameData);
+
+    EventQueue test;
+    test.addEvent(std::make_unique<PlayerMoveEvent>(
+        Direction::South,
+        numTiles,
+        player,
+        *gameData
+    ));
 }
 
 void injectNativeFunctions(engine::scriptingsystem::Lua& script) {

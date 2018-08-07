@@ -1,0 +1,19 @@
+#ifndef EVENT_QUEUE_HPP
+#define EVENT_QUEUE_HPP
+
+#include <memory>
+#include <queue>
+
+class Event;
+
+class EventQueue {
+ public:
+    void addEvent(std::unique_ptr<Event>);
+    void tick();
+
+ private:
+    std::queue<std::unique_ptr<Event>> eventQueue;
+    std::unique_ptr<Event> currentEvent;
+};
+
+#endif
