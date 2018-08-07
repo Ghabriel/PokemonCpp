@@ -1,5 +1,6 @@
 #include "states/OverworldState.hpp"
 
+#include <algorithm>
 #include <cmath>
 #include "components/Camera.hpp"
 #include "components/Map.hpp"
@@ -35,7 +36,7 @@ OverworldState::OverworldState(CoreStructures& gameData)
  : gameData(gameData),
    player(createEntity(gameData)) {
     addComponent(player, Direction::South, gameData);
-    addComponent(player, Position{5, 5}, gameData);
+    addComponent(player, Position{15, 15}, gameData);
     addComponent(player, Velocity{0, 0}, gameData);
 
     registerInputContext();
@@ -155,6 +156,11 @@ void OverworldState::adjustCameraPosition() {
     Camera& camera = resource<Camera>("camera", gameData);
     camera.x = playerSpritePosition.x - camera.width / 2;
     camera.y = playerSpritePosition.y - camera.height / 2 + playerHeight / 2;
+
+    Map& mapData = data<Map>(map, gameData);
+    static const float tileSize = settings(gameData).getTileSize();
+    camera.x = std::clamp(camera.x, 0.f, mapData.widthInTiles * tileSize - camera.width);
+    camera.y = std::clamp(camera.y, 0.f, mapData.heightInTiles * tileSize - camera.height);
 }
 
 void OverworldState::onPressDirectionKey(Direction direction) {
