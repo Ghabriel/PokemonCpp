@@ -23,7 +23,7 @@ class PlayerMoveEvent : public Event {
     int numTiles;
     Entity player;
     CoreStructures& gameData;
-    Position* initialPosition;
+    Position initialPosition;
 
     void onStartImpl() override;
     bool tickImpl() override;

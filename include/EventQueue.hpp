@@ -4,7 +4,7 @@
 #include <memory>
 #include <queue>
 
-class Event;
+#include "events/Event.hpp"
 
 class EventQueue {
  public:

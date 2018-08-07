@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include "components/Direction.hpp"
+#include "components/DisabledControls.hpp"
 #include "components/Velocity.hpp"
 #include "CoreStructures.hpp"
 #include "core-functions.hpp"
@@ -17,32 +18,6 @@ engine::entitysystem::Entity player;
 
 void lua::internal::setCoreStructures(CoreStructures& _gameData) {
     gameData = &_gameData;
-
-    engine::inputsystem::InputContext context;
-
-    context.actions = {
-        {"Action", [] {}},
-        {"Cancel", [] {}},
-        {"Start", [] {}},
-        {"Left", [] {}},
-        {"Right", [] {}},
-        {"Up", [] {}},
-        {"Down", [] {}}
-    };
-
-    context.states = {
-        {"Action", [] {}},
-        {"Cancel", [] {}},
-        {"Start", [] {}},
-        {"Left", [] {}},
-        {"Right", [] {}},
-        {"Up", [] {}},
-        {"Down", [] {}}
-    };
-
-    context.priority = 9;
-
-    gameData->inputDispatcher->registerContext("disabled-controls", context);
 }
 
 void lua::internal::setPlayer(engine::entitysystem::Entity _player) {
@@ -54,10 +29,12 @@ void lua::write(const std::string& str) {
 }
 
 void lua::disableControls() {
+    addComponent(player, DisabledControls{}, *gameData);
     enableInputContext("disabled-controls", *gameData);
 }
 
 void lua::enableControls() {
+    removeComponent<DisabledControls>(player, *gameData);
     disableInputContext("disabled-controls", *gameData);
 }
 
@@ -66,8 +43,8 @@ void lua::movePlayerSouth(int numTiles) {
     // data<Direction>(player, *gameData) = Direction::South;
     // updatePlayerAnimation(player, *gameData);
 
-    EventQueue test;
-    test.addEvent(std::make_unique<PlayerMoveEvent>(
+    EventQueue& queue = resource<EventQueue>("player-event-queue", *gameData);
+    queue.addEvent(std::make_unique<PlayerMoveEvent>(
         Direction::South,
         numTiles,
         player,

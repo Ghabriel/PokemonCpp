@@ -1,7 +1,5 @@
 #include "EventQueue.hpp"
 
-#include "events/Event.hpp"
-
 void EventQueue::addEvent(std::unique_ptr<Event> event) {
     eventQueue.push(std::move(event));
 }

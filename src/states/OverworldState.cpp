@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include "components/DisabledControls.hpp"
 #include "components/Camera.hpp"
 #include "components/Map.hpp"
 #include "components/Position.hpp"
@@ -12,6 +13,7 @@
 #include "engine/input-system/include.hpp"
 #include "engine/sfml/sprite-system/include.hpp"
 #include "engine/utils/timing/print-fps.hpp"
+#include "EventQueue.hpp"
 #include "lua-native-functions.hpp"
 #include "overworld/is-next-tile-blocked.hpp"
 #include "overworld/overworld-utils.hpp"
@@ -36,36 +38,67 @@ OverworldState::OverworldState(CoreStructures& gameData)
  : gameData(gameData),
    player(createEntity(gameData)) {
     addComponent(player, Direction::South, gameData);
-    addComponent(player, Position{15, 15}, gameData);
+    addComponent(player, Position{5, 5}, gameData);
     addComponent(player, Velocity{0, 0}, gameData);
 
     registerInputContext();
     updatePlayerAnimation(player, gameData);
     removeComponent<AnimationPlaybackData>(player, gameData);
 
+    gameData.resourceStorage->store("player-event-queue", EventQueue());
+
     lua::internal::setCoreStructures(gameData);
     lua::internal::setPlayer(player);
 }
 
 void OverworldState::registerInputContext() {
-    InputContext context;
+    {
+        InputContext context;
 
-    context.actions = {
-        {"Action", [&] { processInteraction(gameData, player, map); }},
-        {"Cancel", [&] { std::cout << "Cancel\n"; }},
-        {"Start", [&] { std::cout << "Start\n"; }}
-    };
+        context.actions = {
+            {"Action", [&] { processInteraction(gameData, player, map); }},
+            {"Cancel", [&] { std::cout << "Cancel\n"; }},
+            {"Start", [&] { std::cout << "Start\n"; }}
+        };
 
-    context.states = {
-        {"Left", [&] { onPressDirectionKey(Direction::West); }},
-        {"Right", [&] { onPressDirectionKey(Direction::East); }},
-        {"Up", [&] { onPressDirectionKey(Direction::North); }},
-        {"Down", [&] { onPressDirectionKey(Direction::South); }}
-    };
+        context.states = {
+            {"Left", [&] { onPressDirectionKey(Direction::West); }},
+            {"Right", [&] { onPressDirectionKey(Direction::East); }},
+            {"Up", [&] { onPressDirectionKey(Direction::North); }},
+            {"Down", [&] { onPressDirectionKey(Direction::South); }}
+        };
 
-    context.priority = 0;
+        context.priority = 0;
 
-    gameData.inputDispatcher->registerContext("overworld-state", context);
+        gameData.inputDispatcher->registerContext("overworld-state", context);
+    }
+    {
+        engine::inputsystem::InputContext context;
+
+        context.actions = {
+            {"Action", [] {}},
+            {"Cancel", [] {}},
+            {"Start", [] {}},
+            {"Left", [] {}},
+            {"Right", [] {}},
+            {"Up", [] {}},
+            {"Down", [] {}}
+        };
+
+        context.states = {
+            {"Action", [] {}},
+            {"Cancel", [] {}},
+            {"Start", [] {}},
+            {"Left", [] {}},
+            {"Right", [] {}},
+            {"Up", [] {}},
+            {"Down", [] {}}
+        };
+
+        context.priority = 9;
+
+        gameData.inputDispatcher->registerContext("disabled-controls", context);
+    }
 }
 
 void OverworldState::onEnterImpl() {
@@ -89,12 +122,14 @@ void OverworldState::executeImpl() {
     engine::utils::printFPS<1>("Overworld Update Rate", 50);
 
     if (
+        !hasComponent<DisabledControls>(player, gameData) &&
         isPlayerNearlyAlignedToTile() &&
         (!pressingDirectionKey || isMovingTowardsBlockedTile())
     ) {
         stopWalking();
     }
 
+    resource<EventQueue>("player-event-queue", gameData).tick();
     processMovingEntities();
     adjustPlayerSpritePosition();
     adjustCameraPosition();
