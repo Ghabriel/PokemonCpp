@@ -1,5 +1,6 @@
 #include "overworld/overworld-utils.hpp"
 
+#include <cmath>
 #include <string>
 #include "components/Direction.hpp"
 #include "components/Map.hpp"
@@ -31,8 +32,8 @@ std::pair<int, int> getTargetTile(Entity player, CoreStructures& gameData) {
             break;
     }
 
-    int targetTileX = playerPosition.x + tileOffsetX;
-    int targetTileY = playerPosition.y + tileOffsetY;
+    int targetTileX = std::round(playerPosition.x + tileOffsetX);
+    int targetTileY = std::round(playerPosition.y + tileOffsetY);
     return std::make_pair(targetTileX, targetTileY);
 }
 

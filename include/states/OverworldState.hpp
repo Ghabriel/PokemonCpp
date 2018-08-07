@@ -23,7 +23,8 @@ class OverworldState : public engine::statesystem::State {
     void onExitImpl() override;
     void executeImpl() override;
 
-    bool movingTowardsBlockedTile() const;
+    bool isMovingTowardsBlockedTile() const;
+    bool isMoving() const;
     void processMovingEntities();
     void adjustPlayerSpritePosition();
     void adjustCameraPosition();
@@ -31,7 +32,6 @@ class OverworldState : public engine::statesystem::State {
     void onPressDirectionKey(Direction);
     void startWalking();
     void stopWalking();
-    void onChangePlayerDirection();
     bool isPlayerNearlyAlignedToTile() const;
     void alignPlayerToNearestTile();
 };

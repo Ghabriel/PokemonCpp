@@ -62,6 +62,8 @@ void OverworldState::registerInputContext() {
         {"Down", [&] { onPressDirectionKey(Direction::South); }}
     };
 
+    context.priority = 0;
+
     gameData.inputDispatcher->registerContext("overworld-state", context);
 }
 
@@ -85,7 +87,10 @@ void OverworldState::onExitImpl() {
 void OverworldState::executeImpl() {
     engine::utils::printFPS<1>("Overworld Update Rate", 50);
 
-    if (!pressingDirectionKey || movingTowardsBlockedTile()) {
+    if (
+        isPlayerNearlyAlignedToTile() &&
+        (!pressingDirectionKey || isMovingTowardsBlockedTile())
+    ) {
         stopWalking();
     }
 
@@ -100,13 +105,17 @@ void OverworldState::executeImpl() {
     pressingDirectionKey = false;
 }
 
-bool OverworldState::movingTowardsBlockedTile() const {
-    Velocity& playerVelocity = data<Velocity>(player, gameData);
-    if (playerVelocity.x == 0 && playerVelocity.y == 0) {
+bool OverworldState::isMovingTowardsBlockedTile() const {
+    if (!isMoving()) {
         return false;
     }
 
     return isNextTileBlocked(gameData, player, map);
+}
+
+bool OverworldState::isMoving() const {
+    Velocity& playerVelocity = data<Velocity>(player, gameData);
+    return (playerVelocity.x != 0 || playerVelocity.y != 0);
 }
 
 void OverworldState::processMovingEntities() {
@@ -153,9 +162,7 @@ void OverworldState::onPressDirectionKey(Direction direction) {
     Direction& currentDirection = data<Direction>(player, gameData);
 
     if (direction == currentDirection) {
-        Velocity& currentVelocity = data<Velocity>(player, gameData);
-
-        if (currentVelocity.x == 0 && currentVelocity.y == 0) {
+        if (!isMoving()) {
             startWalking();
         }
 
@@ -166,8 +173,8 @@ void OverworldState::onPressDirectionKey(Direction direction) {
         return;
     }
 
-    data<Direction>(player, gameData) = direction;
-    onChangePlayerDirection();
+    currentDirection = direction;
+    stopWalking();
 }
 
 void OverworldState::startWalking() {
@@ -194,13 +201,6 @@ void OverworldState::startWalking() {
 }
 
 void OverworldState::stopWalking() {
-    Velocity& playerVelocity = data<Velocity>(player, gameData);
-    if ((playerVelocity.x != 0 || playerVelocity.y != 0) && isPlayerNearlyAlignedToTile()) {
-        onChangePlayerDirection();
-    }
-}
-
-void OverworldState::onChangePlayerDirection() {
     alignPlayerToNearestTile();
     data<Velocity>(player, gameData) = {0, 0};
     updatePlayerAnimation(player, gameData);
