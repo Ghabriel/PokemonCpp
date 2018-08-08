@@ -28,6 +28,13 @@ void movePlayer(Direction direction, int numTiles) {
     enqueueEvent<PlayerMoveEvent>(direction, numTiles, player, *gameData);
 }
 
+void turnPlayer(Direction direction) {
+    enqueueEvent<ImmediateEvent>([&, direction] {
+        data<Direction>(player, *gameData) = direction;
+        updatePlayerAnimation(player, *gameData);
+    });
+}
+
 
 void lua::internal::setCoreStructures(CoreStructures& _gameData) {
     gameData = &_gameData;
@@ -71,6 +78,23 @@ void lua::movePlayerSouth(int numTiles) {
     movePlayer(Direction::South, numTiles);
 }
 
+void lua::turnPlayerNorth() {
+    turnPlayer(Direction::North);
+}
+
+void lua::turnPlayerWest() {
+    turnPlayer(Direction::West);
+}
+
+void lua::turnPlayerEast() {
+    turnPlayer(Direction::East);
+}
+
+void lua::turnPlayerSouth() {
+    turnPlayer(Direction::South);
+}
+
+
 void lua::wait(int ms) {
     enqueueEvent<WaitEvent>(ms, *gameData);
 }
@@ -83,5 +107,9 @@ void injectNativeFunctions(engine::scriptingsystem::Lua& script) {
     script.registerNative("movePlayerWest", lua::movePlayerWest);
     script.registerNative("movePlayerEast", lua::movePlayerEast);
     script.registerNative("movePlayerSouth", lua::movePlayerSouth);
+    script.registerNative("turnPlayerNorth", lua::turnPlayerNorth);
+    script.registerNative("turnPlayerWest", lua::turnPlayerWest);
+    script.registerNative("turnPlayerEast", lua::turnPlayerEast);
+    script.registerNative("turnPlayerSouth", lua::turnPlayerSouth);
     script.registerNative("wait", lua::wait);
 }

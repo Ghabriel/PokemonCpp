@@ -20,6 +20,10 @@ namespace lua {
     void movePlayerWest(int numTiles);
     void movePlayerEast(int numTiles);
     void movePlayerSouth(int numTiles);
+    void turnPlayerNorth();
+    void turnPlayerWest();
+    void turnPlayerEast();
+    void turnPlayerSouth();
     void wait(int ms);
 }
 
