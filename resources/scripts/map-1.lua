@@ -1,8 +1,12 @@
 function interact(x, y)
     if x == 2 and y == 1 then
         write("Taking control...")
-        disableControls();
+        disableControls()
         movePlayerSouth(5)
+        movePlayerEast(5)
+        movePlayerNorth(5)
+        movePlayerWest(5)
+        enableControls()
     end
 end
 

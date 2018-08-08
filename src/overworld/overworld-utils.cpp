@@ -7,33 +7,41 @@
 #include "components/Position.hpp"
 #include "components/Velocity.hpp"
 #include "core-functions.hpp"
+#include "CoreStructures.hpp"
 #include "engine/sfml/sprite-system/include.hpp"
 
 using engine::entitysystem::Entity;
 using engine::scriptingsystem::Lua;
 
-std::pair<int, int> getTargetTile(Entity player, CoreStructures& gameData) {
-    Position& playerPosition = data<Position>(player, gameData);
-    int tileOffsetX = 0;
-    int tileOffsetY = 0;
+std::pair<int, int> getDirectionOffsets(Direction direction) {
+    int offsetX = 0;
+    int offsetY = 0;
 
-    switch (data<Direction>(player, gameData)) {
+    switch (direction) {
         case Direction::North:
-            tileOffsetY = -1;
+            offsetY = -1;
             break;
         case Direction::West:
-            tileOffsetX = -1;
+            offsetX = -1;
             break;
         case Direction::East:
-            tileOffsetX = 1;
+            offsetX = 1;
             break;
         case Direction::South:
-            tileOffsetY = 1;
+            offsetY = 1;
             break;
     }
 
-    int targetTileX = std::round(playerPosition.x + tileOffsetX);
-    int targetTileY = std::round(playerPosition.y + tileOffsetY);
+    return std::make_pair(offsetX, offsetY);
+}
+
+std::pair<int, int> getTargetTile(Entity player, CoreStructures& gameData) {
+    Direction& playerDirection = data<Direction>(player, gameData);
+    std::pair<int, int> tileOffsets = getDirectionOffsets(playerDirection);
+
+    Position& playerPosition = data<Position>(player, gameData);
+    int targetTileX = std::round(playerPosition.x + tileOffsets.first);
+    int targetTileY = std::round(playerPosition.y + tileOffsets.second);
     return std::make_pair(targetTileX, targetTileY);
 }
 

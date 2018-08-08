@@ -2,9 +2,13 @@
 #define OVERWORLD_UTILS_HPP
 
 #include <utility>
-#include "../CoreStructures.hpp"
 #include "../engine/entity-system/types.hpp"
 #include "../engine/scripting-system/forward-declarations.hpp"
+
+struct CoreStructures;
+enum class Direction;
+
+std::pair<int, int> getDirectionOffsets(Direction);
 
 std::pair<int, int> getTargetTile(
     engine::entitysystem::Entity player,

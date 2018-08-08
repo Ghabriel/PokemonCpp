@@ -16,6 +16,9 @@ namespace lua {
     void write(const std::string& str);
     void disableControls();
     void enableControls();
+    void movePlayerNorth(int numTiles);
+    void movePlayerWest(int numTiles);
+    void movePlayerEast(int numTiles);
     void movePlayerSouth(int numTiles);
 }
 

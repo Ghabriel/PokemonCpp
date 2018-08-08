@@ -1,5 +1,7 @@
 #include "EventQueue.hpp"
 
+#include "engine/utils/debug/xtrace.hpp"
+
 void EventQueue::addEvent(std::unique_ptr<Event> event) {
     eventQueue.push(std::move(event));
 }

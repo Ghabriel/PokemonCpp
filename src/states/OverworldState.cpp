@@ -219,25 +219,13 @@ void OverworldState::onPressDirectionKey(Direction direction) {
 }
 
 void OverworldState::startWalking() {
+    Direction& playerDirection = data<Direction>(player, gameData);
+    std::pair<int, int> directionOffsets = getDirectionOffsets(playerDirection);
     static const auto speed = settings(gameData).getPlayerWalkingSpeed();
-
-    Velocity velocity;
-    switch (data<Direction>(player, gameData)) {
-        case Direction::North:
-            velocity = Velocity{0, -speed};
-            break;
-        case Direction::West:
-            velocity = Velocity{-speed, 0};
-            break;
-        case Direction::East:
-            velocity = Velocity{speed, 0};
-            break;
-        case Direction::South:
-            velocity = Velocity{0, speed};
-            break;
-    }
-
-    data<Velocity>(player, gameData) = velocity;
+    data<Velocity>(player, gameData) = {
+        speed * directionOffsets.first,
+        speed * directionOffsets.second
+    };
     updatePlayerAnimation(player, gameData);
 }
 

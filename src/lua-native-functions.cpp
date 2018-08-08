@@ -7,6 +7,7 @@
 #include "CoreStructures.hpp"
 #include "core-functions.hpp"
 #include "engine/scripting-system/include.hpp"
+#include "events/ImmediateEvent.hpp"
 #include "events/PlayerMoveEvent.hpp"
 #include "overworld/overworld-utils.hpp"
 
@@ -15,6 +16,17 @@
 
 CoreStructures* gameData;
 engine::entitysystem::Entity player;
+
+template<typename TEvent, typename... Args>
+void enqueueEvent(Args&&... args) {
+    EventQueue& queue = resource<EventQueue>("player-event-queue", *gameData);
+    queue.addEvent(std::make_unique<TEvent>(std::forward<Args>(args)...));
+}
+
+void movePlayer(Direction direction, int numTiles) {
+    enqueueEvent<PlayerMoveEvent>(direction, numTiles, player, *gameData);
+}
+
 
 void lua::internal::setCoreStructures(CoreStructures& _gameData) {
     gameData = &_gameData;
@@ -29,32 +41,41 @@ void lua::write(const std::string& str) {
 }
 
 void lua::disableControls() {
-    addComponent(player, DisabledControls{}, *gameData);
-    enableInputContext("disabled-controls", *gameData);
+    enqueueEvent<ImmediateEvent>([&] {
+        addComponent(player, DisabledControls{}, *gameData);
+        enableInputContext("disabled-controls", *gameData);
+    });
 }
 
 void lua::enableControls() {
-    removeComponent<DisabledControls>(player, *gameData);
-    disableInputContext("disabled-controls", *gameData);
+    enqueueEvent<ImmediateEvent>([&] {
+        removeComponent<DisabledControls>(player, *gameData);
+        disableInputContext("disabled-controls", *gameData);
+    });
+}
+
+void lua::movePlayerNorth(int numTiles) {
+    movePlayer(Direction::North, numTiles);
+}
+
+void lua::movePlayerWest(int numTiles) {
+    movePlayer(Direction::West, numTiles);
+}
+
+void lua::movePlayerEast(int numTiles) {
+    movePlayer(Direction::East, numTiles);
 }
 
 void lua::movePlayerSouth(int numTiles) {
-    // std::cout << "moveSouth(" << numTiles << ")" << std::endl;
-    // data<Direction>(player, *gameData) = Direction::South;
-    // updatePlayerAnimation(player, *gameData);
-
-    EventQueue& queue = resource<EventQueue>("player-event-queue", *gameData);
-    queue.addEvent(std::make_unique<PlayerMoveEvent>(
-        Direction::South,
-        numTiles,
-        player,
-        *gameData
-    ));
+    movePlayer(Direction::South, numTiles);
 }
 
 void injectNativeFunctions(engine::scriptingsystem::Lua& script) {
     script.registerNative("write", lua::write);
     script.registerNative("disableControls", lua::disableControls);
     script.registerNative("enableControls", lua::enableControls);
+    script.registerNative("movePlayerNorth", lua::movePlayerNorth);
+    script.registerNative("movePlayerWest", lua::movePlayerWest);
+    script.registerNative("movePlayerEast", lua::movePlayerEast);
     script.registerNative("movePlayerSouth", lua::movePlayerSouth);
 }

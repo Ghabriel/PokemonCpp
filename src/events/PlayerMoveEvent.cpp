@@ -21,7 +21,12 @@ PlayerMoveEvent::PlayerMoveEvent(
 void PlayerMoveEvent::onStartImpl() {
     initialPosition = data<Position>(player, gameData);
     data<Direction>(player, gameData) = direction;
-    data<Velocity>(player, gameData) = {0, 0.005};
+    std::pair<int, int> directionOffsets = getDirectionOffsets(direction);
+    static const auto speed = settings(gameData).getPlayerWalkingSpeed();
+    data<Velocity>(player, gameData) = {
+        speed * directionOffsets.first,
+        speed * directionOffsets.second
+    };
     updatePlayerAnimation(player, gameData);
 }
 
@@ -34,7 +39,6 @@ bool PlayerMoveEvent::tickImpl() {
     if (std::abs(distanceSquared - numTiles * numTiles) < 0.8f) {
         data<Velocity>(player, gameData) = {0, 0};
         updatePlayerAnimation(player, gameData);
-        lua::enableControls();
         return true;
     }
 
