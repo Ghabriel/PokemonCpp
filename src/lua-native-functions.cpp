@@ -9,6 +9,7 @@
 #include "engine/scripting-system/include.hpp"
 #include "events/ImmediateEvent.hpp"
 #include "events/PlayerMoveEvent.hpp"
+#include "events/WaitEvent.hpp"
 #include "overworld/overworld-utils.hpp"
 
 #include "EventQueue.hpp"
@@ -70,6 +71,10 @@ void lua::movePlayerSouth(int numTiles) {
     movePlayer(Direction::South, numTiles);
 }
 
+void lua::wait(int ms) {
+    enqueueEvent<WaitEvent>(ms, *gameData);
+}
+
 void injectNativeFunctions(engine::scriptingsystem::Lua& script) {
     script.registerNative("write", lua::write);
     script.registerNative("disableControls", lua::disableControls);
@@ -78,4 +83,5 @@ void injectNativeFunctions(engine::scriptingsystem::Lua& script) {
     script.registerNative("movePlayerWest", lua::movePlayerWest);
     script.registerNative("movePlayerEast", lua::movePlayerEast);
     script.registerNative("movePlayerSouth", lua::movePlayerSouth);
+    script.registerNative("wait", lua::wait);
 }

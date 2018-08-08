@@ -20,6 +20,7 @@ namespace lua {
     void movePlayerWest(int numTiles);
     void movePlayerEast(int numTiles);
     void movePlayerSouth(int numTiles);
+    void wait(int ms);
 }
 
 void injectNativeFunctions(engine::scriptingsystem::Lua& script);
