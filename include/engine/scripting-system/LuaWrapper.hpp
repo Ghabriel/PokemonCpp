@@ -3,41 +3,59 @@
 
 #include <cassert>
 #include <functional>
+#include <utility>
 #include "LuaRAII.hpp"
 #include "../utils/debug/xtrace.hpp"
 
 namespace engine::scriptingsystem {
     namespace __detail {
+        template<typename Ret, typename... Args>
+        using CFunction = Ret (*)(Args...);
+
         template<typename T>
-        T get(lua_State* L);
+        T getArgument(lua_State* L, int index);
 
         template<>
-        inline bool get(lua_State* L) {
-            return lua_toboolean(L, -1);
+        inline bool getArgument(lua_State* L, int index) {
+            return lua_toboolean(L, index);
         }
 
         template<>
-        inline float get(lua_State* L) {
-            assert(lua_isnumber(L, -1));
-            return lua_tonumber(L, -1);
+        inline float getArgument(lua_State* L, int index) {
+            assert(lua_isnumber(L, index));
+            return lua_tonumber(L, index);
         }
 
         template<>
-        inline int get(lua_State* L) {
-            assert(lua_isnumber(L, -1));
-            return lua_tonumber(L, -1);
+        inline int getArgument(lua_State* L, int index) {
+            assert(lua_isnumber(L, index));
+            return lua_tonumber(L, index);
         }
 
         template<>
-        inline std::string get(lua_State* L) {
-            assert(lua_isstring(L, -1));
-            return std::string(lua_tostring(L, -1));
+        inline std::string getArgument(lua_State* L, int index) {
+            assert(lua_isstring(L, index));
+            return std::string(lua_tostring(L, index));
+        }
+
+        template<typename T>
+        inline T get(lua_State* L) {
+            return getArgument<T>(L, -1);
+        }
+
+        template<typename Ret, typename... Args, size_t... Is>
+        inline void callWithArguments(
+            CFunction<Ret, Args...> fn,
+            const std::index_sequence<Is...>&,
+            lua_State* rawState
+        ) {
+            fn(getArgument<std::decay_t<Args>>(rawState, Is + 1)...);
         }
     }
 
     class LuaWrapper {
         template<typename Ret, typename... Args>
-        using CFunction = Ret (*)(Args...);
+        using CFunction = __detail::CFunction<Ret, Args...>;
      public:
         using LuaCFunction = CFunction<int, lua_State*>;
 
@@ -103,7 +121,11 @@ namespace engine::scriptingsystem {
             static int luaWrapper(lua_State* rawState) {
                 void* voidFn = lua_touserdata(localL.get(), lua_upvalueindex(1));
                 auto retrievedFn = reinterpret_cast<CFunction<Ret, Args...>>(voidFn);
-                retrievedFn(__detail::get<std::decay_t<Args>>(rawState)...);
+                __detail::callWithArguments(
+                    retrievedFn,
+                    std::make_index_sequence<sizeof...(Args)>{},
+                    rawState
+                );
 
                 if constexpr (std::is_same_v<Ret, void>) {
                     return 0;

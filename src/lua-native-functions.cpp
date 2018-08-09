@@ -7,13 +7,13 @@
 #include "CoreStructures.hpp"
 #include "core-functions.hpp"
 #include "engine/scripting-system/include.hpp"
+#include "EventQueue.hpp"
 #include "events/ImmediateEvent.hpp"
 #include "events/PlayerMoveEvent.hpp"
 #include "events/PlayerSpinningMoveEvent.hpp"
 #include "events/WaitEvent.hpp"
 #include "overworld/overworld-utils.hpp"
 
-#include "EventQueue.hpp"
 #include "engine/utils/debug/xtrace.hpp"
 
 CoreStructures* gameData;
@@ -95,22 +95,19 @@ void lua::movePlayerSouth(int numTiles) {
     movePlayer(Direction::South, numTiles);
 }
 
-void lua::moveSpinningPlayerNorth(int numTiles, int spinDelayMs, int clockwise) {
+void lua::moveSpinningPlayerNorth(int numTiles, int spinDelayMs, bool clockwise) {
     moveSpinningPlayer(Direction::North, numTiles, spinDelayMs, clockwise);
 }
 
-void lua::moveSpinningPlayerWest(int numTiles, int spinDelayMs, int clockwise) {
+void lua::moveSpinningPlayerWest(int numTiles, int spinDelayMs, bool clockwise) {
     moveSpinningPlayer(Direction::West, numTiles, spinDelayMs, clockwise);
 }
 
-void lua::moveSpinningPlayerEast(int numTiles, int spinDelayMs, int clockwise) {
-    XTRACE(numTiles);
-    XTRACE(spinDelayMs);
-    XTRACE(clockwise);
+void lua::moveSpinningPlayerEast(int numTiles, int spinDelayMs, bool clockwise) {
     moveSpinningPlayer(Direction::East, numTiles, spinDelayMs, clockwise);
 }
 
-void lua::moveSpinningPlayerSouth(int numTiles, int spinDelayMs, int clockwise) {
+void lua::moveSpinningPlayerSouth(int numTiles, int spinDelayMs, bool clockwise) {
     moveSpinningPlayer(Direction::South, numTiles, spinDelayMs, clockwise);
 }
 

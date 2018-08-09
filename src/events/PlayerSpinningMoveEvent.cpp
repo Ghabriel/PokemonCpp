@@ -7,9 +7,6 @@
 #include "CoreStructures.hpp"
 #include "overworld/overworld-utils.hpp"
 
-#include "lua-native-functions.hpp"
-#include "engine/utils/debug/xtrace.hpp"
-
 using engine::entitysystem::Entity;
 
 const std::unordered_map<Direction, Direction> clockwiseMove = {
@@ -38,12 +35,7 @@ PlayerSpinningMoveEvent::PlayerSpinningMoveEvent(
     spinDelayMs(spinDelayMs),
     clockwise(clockwise),
     player(player),
-    gameData(gameData) {
-
-    // XTRACE(numTiles);
-    // XTRACE(spinDelayMs);
-    // XTRACE(clockwise);
-}
+    gameData(gameData) { }
 
 void PlayerSpinningMoveEvent::onStartImpl() {
     initialPosition = data<Position>(player, gameData);

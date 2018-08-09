@@ -2,7 +2,7 @@ function interact(x, y)
     if x == 2 and y == 1 then
         write("Taking control...")
         disableControls()
-        moveSpinningPlayerEast(10, 80, 1)
+        moveSpinningPlayerEast(10, 80, true)
         -- local delay = 50
         -- for i = 0,5 do
         --     turnPlayerSouth()

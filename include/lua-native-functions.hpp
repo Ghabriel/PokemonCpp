@@ -20,10 +20,10 @@ namespace lua {
     void movePlayerWest(int numTiles);
     void movePlayerEast(int numTiles);
     void movePlayerSouth(int numTiles);
-    void moveSpinningPlayerNorth(int numTiles, int spinDelayMs, int clockwise);
-    void moveSpinningPlayerWest(int numTiles, int spinDelayMs, int clockwise);
-    void moveSpinningPlayerEast(int numTiles, int spinDelayMs, int clockwise);
-    void moveSpinningPlayerSouth(int numTiles, int spinDelayMs, int clockwise);
+    void moveSpinningPlayerNorth(int numTiles, int spinDelayMs, bool clockwise);
+    void moveSpinningPlayerWest(int numTiles, int spinDelayMs, bool clockwise);
+    void moveSpinningPlayerEast(int numTiles, int spinDelayMs, bool clockwise);
+    void moveSpinningPlayerSouth(int numTiles, int spinDelayMs, bool clockwise);
     void turnPlayerNorth();
     void turnPlayerWest();
     void turnPlayerEast();
