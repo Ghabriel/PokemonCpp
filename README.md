@@ -41,15 +41,15 @@ packages:
 
 To clean the project's **binaries and dependencies**, run
 
-**make distclean**
+	$ make distclean
 
 To clean **only the project's binary files**, run
 
-**make clean**
+	$ make clean
 
 And to build the project, run 
 
-**make**
+	$ make
 
 The executable file will be available as bin/pokemon.
 
