@@ -1,5 +1,5 @@
-#include <SFML/Graphics.hpp>
-#include <X11/Xlib.h>
+// #include <SFML/Graphics.hpp>
+// #include <X11/Xlib.h>
 #include "components/Camera.hpp"
 #include "engine/entity-system/include.hpp"
 #include "engine/game-loop/SingleThreadGameLoop.hpp"
@@ -9,7 +9,7 @@
 #include "Settings.hpp"
 
 int main(int argc, char** argv) {
-    XInitThreads();
+    // XInitThreads();
     engine::entitysystem::ComponentManager componentManager;
     engine::resourcesystem::ResourceStorage resourceStorage;
 
