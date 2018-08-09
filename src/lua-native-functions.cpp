@@ -11,12 +11,14 @@
 #include "events/ImmediateEvent.hpp"
 #include "events/PlayerMoveEvent.hpp"
 #include "events/PlayerSpinningMoveEvent.hpp"
+#include "events/TextEvent.hpp"
 #include "events/WaitEvent.hpp"
 #include "overworld/overworld-utils.hpp"
 
 #include "engine/utils/debug/xtrace.hpp"
 
 CoreStructures* gameData;
+engine::entitysystem::Entity map;
 engine::entitysystem::Entity player;
 
 template<typename TEvent, typename... Args>
@@ -55,6 +57,10 @@ void turnPlayer(Direction direction) {
 
 void lua::internal::setCoreStructures(CoreStructures& _gameData) {
     gameData = &_gameData;
+}
+
+void lua::internal::setMap(engine::entitysystem::Entity _map) {
+    map = _map;
 }
 
 void lua::internal::setPlayer(engine::entitysystem::Entity _player) {
@@ -109,6 +115,10 @@ void lua::moveSpinningPlayerEast(int numTiles, int spinDelayMs, bool clockwise) 
 
 void lua::moveSpinningPlayerSouth(int numTiles, int spinDelayMs, bool clockwise) {
     moveSpinningPlayer(Direction::South, numTiles, spinDelayMs, clockwise);
+}
+
+void lua::showText(const std::string& content) {
+    enqueueEvent<TextEvent>(content, map, *gameData);
 }
 
 void lua::turnPlayerNorth() {
