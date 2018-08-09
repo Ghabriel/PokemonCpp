@@ -9,6 +9,7 @@
 #include "engine/scripting-system/include.hpp"
 #include "events/ImmediateEvent.hpp"
 #include "events/PlayerMoveEvent.hpp"
+#include "events/PlayerSpinningMoveEvent.hpp"
 #include "events/WaitEvent.hpp"
 #include "overworld/overworld-utils.hpp"
 
@@ -26,6 +27,22 @@ void enqueueEvent(Args&&... args) {
 
 void movePlayer(Direction direction, int numTiles) {
     enqueueEvent<PlayerMoveEvent>(direction, numTiles, player, *gameData);
+}
+
+void moveSpinningPlayer(
+    Direction direction,
+    int numTiles,
+    int spinDelayMs,
+    bool clockwise
+) {
+    enqueueEvent<PlayerSpinningMoveEvent>(
+        direction,
+        numTiles,
+        spinDelayMs,
+        clockwise,
+        player,
+        *gameData
+    );
 }
 
 void turnPlayer(Direction direction) {
@@ -78,6 +95,25 @@ void lua::movePlayerSouth(int numTiles) {
     movePlayer(Direction::South, numTiles);
 }
 
+void lua::moveSpinningPlayerNorth(int numTiles, int spinDelayMs, int clockwise) {
+    moveSpinningPlayer(Direction::North, numTiles, spinDelayMs, clockwise);
+}
+
+void lua::moveSpinningPlayerWest(int numTiles, int spinDelayMs, int clockwise) {
+    moveSpinningPlayer(Direction::West, numTiles, spinDelayMs, clockwise);
+}
+
+void lua::moveSpinningPlayerEast(int numTiles, int spinDelayMs, int clockwise) {
+    XTRACE(numTiles);
+    XTRACE(spinDelayMs);
+    XTRACE(clockwise);
+    moveSpinningPlayer(Direction::East, numTiles, spinDelayMs, clockwise);
+}
+
+void lua::moveSpinningPlayerSouth(int numTiles, int spinDelayMs, int clockwise) {
+    moveSpinningPlayer(Direction::South, numTiles, spinDelayMs, clockwise);
+}
+
 void lua::turnPlayerNorth() {
     turnPlayer(Direction::North);
 }
@@ -107,6 +143,10 @@ void injectNativeFunctions(engine::scriptingsystem::Lua& script) {
     script.registerNative("movePlayerWest", lua::movePlayerWest);
     script.registerNative("movePlayerEast", lua::movePlayerEast);
     script.registerNative("movePlayerSouth", lua::movePlayerSouth);
+    script.registerNative("moveSpinningPlayerNorth", lua::moveSpinningPlayerNorth);
+    script.registerNative("moveSpinningPlayerWest", lua::moveSpinningPlayerWest);
+    script.registerNative("moveSpinningPlayerEast", lua::moveSpinningPlayerEast);
+    script.registerNative("moveSpinningPlayerSouth", lua::moveSpinningPlayerSouth);
     script.registerNative("turnPlayerNorth", lua::turnPlayerNorth);
     script.registerNative("turnPlayerWest", lua::turnPlayerWest);
     script.registerNative("turnPlayerEast", lua::turnPlayerEast);
