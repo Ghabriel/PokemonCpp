@@ -154,6 +154,7 @@ void injectNativeFunctions(engine::scriptingsystem::Lua& script) {
     script.registerNative("moveSpinningPlayerWest", lua::moveSpinningPlayerWest);
     script.registerNative("moveSpinningPlayerEast", lua::moveSpinningPlayerEast);
     script.registerNative("moveSpinningPlayerSouth", lua::moveSpinningPlayerSouth);
+    script.registerNative("showText", lua::showText);
     script.registerNative("turnPlayerNorth", lua::turnPlayerNorth);
     script.registerNative("turnPlayerWest", lua::turnPlayerWest);
     script.registerNative("turnPlayerEast", lua::turnPlayerEast);

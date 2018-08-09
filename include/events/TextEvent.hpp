@@ -15,8 +15,8 @@ class TextEvent : public Event {
  private:
     static constexpr int charDelayMs = 30;
     std::string content;
-    char nextChar;
-    float accumulator;
+    size_t nextCharIndex;
+    float timeAccumulator;
     Entity map;
     CoreStructures& gameData;
 

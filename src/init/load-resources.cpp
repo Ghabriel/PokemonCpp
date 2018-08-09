@@ -23,9 +23,9 @@ void loadFonts(ResourceStorage& storage) {
     JsonValue data = parseJSON(fontsFile);
 
     for (const auto& [id, path] : data.asIterableMap()) {
-        sf::Font arial;
-        assert(arial.loadFromFile(path.asString()));
-        storage.store(id, arial);
+        sf::Font font;
+        assert(font.loadFromFile(path.asString()));
+        storage.store(id, font);
     }
 
     ECHO("[RESOURCE] Fonts: OK");
