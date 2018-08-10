@@ -8,6 +8,8 @@
 #include "engine/resource-system/include.hpp"
 #include "engine/sfml/sprite-system/include.hpp"
 
+#include "engine/utils/debug/xtrace.hpp"
+
 using TextBoxSkinGrid = std::array<std::array<sf::Sprite, 3>, 3>;
 
 TextBoxSkinGrid getTextBoxSkinSprites(
@@ -54,6 +56,7 @@ void renderTextBoxes(
     const int textBoxY = camera.height - textBoxHeight - textBoxMargin;
     const int textX = textBoxX + textMargin;
     const int textY = textBoxY + textMargin;
+    const int textMaxWidth = textBoxWidth - 2 * textMargin;
 
     manager.forEachEntity<TextBox>(
         [&](
@@ -96,6 +99,14 @@ void renderTextBoxes(
             text.setPosition(textX, textY);
             text.setFillColor(sf::Color::Black);
             text.setCharacterSize(30);
+
+            sf::FloatRect textBounds = text.getGlobalBounds();
+            if (textBounds.width > textMaxWidth) {
+                std::string& content = textBox.content;
+                content = content.substr(0, content.size() - 1) + '\n' + content.at(content.size() - 1);
+                text.setString(content);
+            }
+
             window.draw(text);
         }
     );
