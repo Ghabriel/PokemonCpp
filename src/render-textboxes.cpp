@@ -18,7 +18,7 @@ void renderTextBoxes(
     Camera& camera = storage.get<Camera>("camera");
     const int textBoxMargin = (camera.width - 16 * std::floor((camera.width - 2 * textBoxMinMargin) / 16)) / 2;
     const int textBoxWidth = 16 * std::floor((camera.width - 2 * textBoxMinMargin) / 16);
-    const int textBoxHeight = camera.height / 5;
+    const int textBoxHeight = camera.height / 5 - ((camera.height / 5) % 16);
     const int textBoxX = textBoxMargin;
     const int textBoxY = camera.height - textBoxHeight - textBoxMargin;
     const int textX = textBoxX + textMargin;
@@ -38,8 +38,6 @@ void renderTextBoxes(
             sprite20.setTextureRect(sf::IntRect{32, 0, 16, 16});
             sf::Sprite sprite01(textBoxSkin);
             sprite01.setTextureRect(sf::IntRect{0, 16, 16, 16});
-            sf::Sprite sprite11(textBoxSkin);
-            sprite11.setTextureRect(sf::IntRect{16, 16, 16, 16});
             sf::Sprite sprite21(textBoxSkin);
             sprite21.setTextureRect(sf::IntRect{32, 16, 16, 16});
             sf::Sprite sprite02(textBoxSkin);
@@ -49,8 +47,8 @@ void renderTextBoxes(
             sf::Sprite sprite22(textBoxSkin);
             sprite22.setTextureRect(sf::IntRect{32, 32, 16, 16});
 
-            sf::RectangleShape rect(sf::Vector2f(textBoxWidth, textBoxHeight));
-            rect.setPosition(textBoxX, textBoxY);
+            sf::RectangleShape rect(sf::Vector2f(textBoxWidth - 10, textBoxHeight - 10));
+            rect.setPosition(textBoxX + 5, textBoxY + 5);
             rect.setFillColor(sf::Color::White);
             window.draw(rect);
 
@@ -64,13 +62,19 @@ void renderTextBoxes(
             window.draw(sprite22);
 
             int horizontalCentralTiles = (textBoxWidth - 32) / 16;
-            // int verticalCentralTiles = (textBoxHeight - 32) / 16;
-
             for (int i = 1; i <= horizontalCentralTiles; ++i) {
                 sprite10.setPosition(textBoxX + i * 16, textBoxY);
                 window.draw(sprite10);
                 sprite12.setPosition(textBoxX + i * 16, textBoxY + textBoxHeight - 16);
                 window.draw(sprite12);
+            }
+
+            int verticalCentralTiles = (textBoxHeight - 32) / 16;
+            for (int i = 1; i <= verticalCentralTiles; ++i) {
+                sprite01.setPosition(textBoxX, textBoxY + i * 16);
+                window.draw(sprite01);
+                sprite21.setPosition(textBoxX + textBoxWidth - 16, textBoxY + i * 16);
+                window.draw(sprite21);
             }
 
             sf::Text text(textBox.content, storage.get<sf::Font>("font-arial"));
