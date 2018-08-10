@@ -3,23 +3,49 @@
 #include "components/TextBox.hpp"
 #include "core-functions.hpp"
 #include "CoreStructures.hpp"
+#include "engine/input-system/include.hpp"
+
+using engine::inputsystem::InputContext;
+
+bool actionKeyPressed;
 
 TextEvent::TextEvent(const std::string& content, Entity map, CoreStructures& gameData)
- : content(content), map(map), gameData(gameData) { }
+ : content(content), map(map), gameData(gameData) {
+    InputContext context;
+    context.actions = {{"Action", [&] { actionKeyPressed = true; }}};
+    context.priority = 1;
+    gameData.inputDispatcher->registerContext("text-state", context);
+}
 
 void TextEvent::onStartImpl() {
+    sound("fx-select-option", gameData).play();
+    enableInputContext("text-state", gameData);
     nextCharIndex = 0;
     timeAccumulator = 0;
     addComponent(map, TextBox{}, gameData);
+    actionKeyPressed = false;
 }
 
 bool TextEvent::tickImpl() {
-    timeAccumulator += *gameData.timeSinceLastFrame;
-    if (timeAccumulator >= charDelayMs) {
-        data<TextBox>(map, gameData).content += content.at(nextCharIndex);
-        ++nextCharIndex;
+    if (nextCharIndex < content.size()) {
+        timeAccumulator += *gameData.timeSinceLastFrame;
+        if (timeAccumulator >= charDelayMs) {
+            data<TextBox>(map, gameData).content += content.at(nextCharIndex);
+            ++nextCharIndex;
+            timeAccumulator = 0;
+        }
+
+        actionKeyPressed = false;
+        return false;
     }
 
-    // TODO
-    return nextCharIndex >= content.size();
+    if (actionKeyPressed) {
+        sound("fx-select-option", gameData).play();
+        disableInputContext("text-state", gameData);
+        removeComponent<TextBox>(map, gameData);
+        return true;
+    }
+
+    actionKeyPressed = false;
+    return false;
 }

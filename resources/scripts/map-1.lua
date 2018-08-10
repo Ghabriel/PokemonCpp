@@ -1,6 +1,7 @@
 function interact(x, y)
     if x == 2 and y == 1 then
         showText("I'm a rock.");
+        showText("Never forget that.");
     end
 end
 
