@@ -26,6 +26,9 @@ GameRenderer::GameRenderer(ComponentManager& manager, ResourceStorage& storage)
 
 void GameRenderer::operator()(SingleThreadGameLoop& game) {
     engine::utils::printFPS<2>("FPS", 2000);
+    // static Settings& settings = resourceStorage.get<Settings>("settings");
+    // static int minWindowWidth = settings.getMinWindowWidth();
+    // static int minWindowHeight = settings.getMinWindowHeight();
 
     adjustView();
 
@@ -38,6 +41,32 @@ void GameRenderer::operator()(SingleThreadGameLoop& game) {
             game.stop();
         } else if (event.type == sf::Event::Resized) {
             sf::Vector2u windowSize = window.getSize();
+            // XTRACE(windowSize.x);
+            // XTRACE(windowSize.y);
+            // XTRACE(minWindowWidth);
+            // XTRACE(minWindowHeight);
+            // bool adjustedSize = false;
+
+            // if (windowSize.x < minWindowWidth) {
+            //     windowSize.x = minWindowWidth;
+            //     adjustedSize = true;
+            // }
+
+            // if (windowSize.y < minWindowHeight) {
+            //     windowSize.y = minWindowHeight;
+            //     adjustedSize = true;
+            // }
+
+            // if (adjustedSize) {
+            //     window.setSize(windowSize);
+            //     ECHO("[CHANGE]");
+            //     XTRACE(windowSize.x);
+            //     XTRACE(windowSize.y);
+            //     XTRACE(minWindowWidth);
+            //     XTRACE(minWindowHeight);
+            //     ECHO("------------");
+            // }
+
             Camera& camera = resourceStorage.get<Camera>("camera");
             camera.width = windowSize.x;
             camera.height = windowSize.y;
