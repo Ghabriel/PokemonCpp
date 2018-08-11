@@ -24,6 +24,14 @@ int Settings::getInitialWindowHeight() const {
     return data["initial-window-height"].asInt();
 }
 
+int Settings::getMinWindowWidth() const {
+    return data["min-window-width"].asInt();
+}
+
+int Settings::getMinWindowHeight() const {
+    return data["min-window-height"].asInt();
+}
+
 float Settings::getPlayerWalkingSpeed() const {
     return std::stof(data["player-walking-speed"].asString());
 }

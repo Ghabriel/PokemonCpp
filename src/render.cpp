@@ -7,6 +7,7 @@
 #include "engine/utils/misc/Menu.hpp"
 #include "overworld/render-map.hpp"
 #include "MapLayer.hpp"
+#include "render-textboxes.hpp"
 
 using engine::entitysystem::Entity;
 using engine::utils::Menu;
@@ -70,4 +71,5 @@ void render(
     renderMenus(window, manager, storage);
     renderLoopingAnimations(window, manager);
     renderMapLayer(MapLayer::Foreground, window, manager, storage);
+    renderTextBoxes(window, manager, storage);
 }

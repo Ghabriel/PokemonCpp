@@ -48,6 +48,7 @@ OverworldState::OverworldState(CoreStructures& gameData)
     gameData.resourceStorage->store("player-event-queue", EventQueue());
 
     lua::internal::setCoreStructures(gameData);
+    lua::internal::setMap(map);
     lua::internal::setPlayer(player);
 }
 

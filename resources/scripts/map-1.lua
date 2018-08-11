@@ -1,25 +1,8 @@
 function interact(x, y)
     if x == 2 and y == 1 then
-        write("Taking control...")
-        disableControls()
-        moveSpinningPlayerEast(10, 80, true)
-        -- local delay = 50
-        -- for i = 0,5 do
-        --     turnPlayerSouth()
-        --     wait(delay)
-        --     turnPlayerEast()
-        --     wait(delay)
-        --     turnPlayerNorth()
-        --     wait(delay)
-        --     turnPlayerWest()
-        --     wait(delay)
-        -- end
-        -- movePlayerSouth(5)
-        -- movePlayerEast(5)
-        -- wait(1000)
-        -- movePlayerNorth(5)
-        -- movePlayerWest(5)
-        enableControls()
+        showText("Trick Room reverses the moveorder within each priority bracket so that Pokemon with a lower Speed stat attack first, while those with a higher Speed stat will attack last. Individual brackets are still maintained; moves in higher priority brackets still work before moves in lower ones regardless of Trick Room. This effect lasts for five turns, and using Trick Room counts as the first turn. Similar to Magic Room and Wonder Room, using Trick Room while it is already in effect will end it immediately.");
+        showText("And that's all for today. Oh, and never forget:")
+        showText("I'm a rock.")
     end
 end
 

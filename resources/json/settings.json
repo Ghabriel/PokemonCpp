@@ -3,6 +3,8 @@
     "window-title": "Pokemon",
     "initial-window-width": 800,
     "initial-window-height": 600,
+    "min-window-width": 800,
+    "min-window-height": 600,
     "player-walking-speed": "0.005", // (tiles/ms)
     "tile-size": 32
 }

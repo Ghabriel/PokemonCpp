@@ -10,6 +10,7 @@ struct CoreStructures;
 namespace lua {
     namespace internal {
         void setCoreStructures(CoreStructures&);
+        void setMap(engine::entitysystem::Entity);
         void setPlayer(engine::entitysystem::Entity);
     }
 
@@ -24,6 +25,7 @@ namespace lua {
     void moveSpinningPlayerWest(int numTiles, int spinDelayMs, bool clockwise);
     void moveSpinningPlayerEast(int numTiles, int spinDelayMs, bool clockwise);
     void moveSpinningPlayerSouth(int numTiles, int spinDelayMs, bool clockwise);
+    void showText(const std::string& content);
     void turnPlayerNorth();
     void turnPlayerWest();
     void turnPlayerEast();

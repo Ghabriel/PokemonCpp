@@ -11,6 +11,8 @@ class Settings {
     std::string getWindowTitle() const;
     int getInitialWindowWidth() const;
     int getInitialWindowHeight() const;
+    int getMinWindowWidth() const;
+    int getMinWindowHeight() const;
     float getPlayerWalkingSpeed() const;
     int getTileSize() const;
 
