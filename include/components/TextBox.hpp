@@ -8,6 +8,7 @@ struct TextBox {
     std::string fullContent;
     bool overflow;
     std::string cachedParsedText;
+    size_t cachedContentSize;
 };
 
 #endif

@@ -30,11 +30,15 @@ bool TextEvent::tickImpl() {
     TextBox& textBox = data<TextBox>(map, gameData);
 
     if (textBox.overflow) {
-        ECHO("[IMMEDIATE STOP]");
-        XTRACE(textBox.content);
-        ECHO("Restrict text to:");
-        ECHO(textBox.content.substr(0, textBox.content.size() - 1));
-        return true;
+        if (actionKeyPressed) {
+            disableInputContext("text-state", gameData);
+            removeComponent<TextBox>(map, gameData);
+            content = textBox.fullContent.substr(textBox.content.size() - 1);
+            onStart();
+            return tick();
+        }
+
+        return false;
     }
 
     if (nextCharIndex < content.size()) {

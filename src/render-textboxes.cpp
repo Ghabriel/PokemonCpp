@@ -155,7 +155,7 @@ void updateTextCache(sf::Text& text, TextBox& textBox) {
     const size_t contentSize = textBox.content.size();
     const size_t fullContentSize = textBox.fullContent.size();
 
-    for (size_t i = textBox.cachedParsedText.size(); i < contentSize; ++i) {
+    for (size_t i = textBox.cachedContentSize; i < contentSize; ++i) {
         char ch = textBox.content.at(i);
 
         if (ch == ' ') {
@@ -179,14 +179,6 @@ void updateTextCache(sf::Text& text, TextBox& textBox) {
             ss << '\n';
 
             if (overflowsHeightWithContent(ss.str() + wordEndStr)) {
-                ECHO("[OVERFLOW]");
-                XTRACE(ch);
-                XTRACE(ss.str());
-                XTRACE(ss.str() + wordEndStr);
-                XTRACE(textMaxHeight);
-                XTRACE(textBoxHeight);
-                XTRACE(textMargin);
-                ECHO("----------------");
                 textBox.overflow = true;
                 break;
             }
@@ -196,10 +188,7 @@ void updateTextCache(sf::Text& text, TextBox& textBox) {
     }
 
     textBox.cachedParsedText = ss.str();
-
-    if (textBox.overflow) {
-        XTRACE(textBox.cachedParsedText);
-    }
+    textBox.cachedContentSize = contentSize;
 }
 
 void renderText(
@@ -214,7 +203,7 @@ void renderText(
     if (
         !textBox.overflow && (
             invalidateTextCacheOnResize(camera, textBox) ||
-            textBox.content.size() != textBox.cachedParsedText.size()
+            textBox.content.size() != textBox.cachedContentSize
         )
     ) {
         updateTextCache(text, textBox);

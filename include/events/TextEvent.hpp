@@ -13,7 +13,7 @@ class TextEvent : public Event {
     TextEvent(const std::string& content, Entity map, CoreStructures& gameData);
 
  private:
-    static constexpr int charDelayMs = 30;
+    static constexpr int charDelayMs = 16; // rounded to the next multiple of 16.66
     std::string content;
     size_t nextCharIndex;
     float timeAccumulator;
