@@ -130,6 +130,7 @@ bool invalidateTextCacheOnResize(
 
     if (camera.width != cachedCameraWidth || camera.height != cachedCameraHeight) {
         textBox.cachedParsedText = "";
+        textBox.cachedContentSize = 0;
         cachedCameraWidth = camera.width;
         cachedCameraHeight = camera.height;
         return true;
