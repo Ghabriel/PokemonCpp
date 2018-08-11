@@ -97,35 +97,55 @@ void renderBox(
     }
 }
 
+sf::Text buildTextInstance(ResourceStorage& storage) {
+    sf::Text text("", storage.get<sf::Font>("font-arial"));
+    text.setFillColor(sf::Color::Black);
+    text.setCharacterSize(30);
+
+    return text;
+}
+
+void adjustTextPosition(sf::Text& text) {
+    const int textX = textBoxX + textMargin;
+    const int textY = textBoxY + textMargin;
+    text.setPosition(textX, textY);
+}
+
 float getSimulatedTextWidth(sf::Text& instance, const std::string& content) {
     instance.setString(content);
     return instance.getGlobalBounds().width;
 }
 
-void renderText(
-    sf::RenderWindow& window,
-    ResourceStorage& storage,
+bool invalidateTextCacheOnResize(
+    Camera& camera,
     TextBox& textBox
 ) {
-    const int textX = textBoxX + textMargin;
-    const int textY = textBoxY + textMargin;
+    static int cachedCameraWidth = 0;
+    static int cachedCameraHeight = 0;
+
+    if (camera.width != cachedCameraWidth || camera.height != cachedCameraHeight) {
+        textBox.cachedParsedText = "";
+        cachedCameraWidth = camera.width;
+        cachedCameraHeight = camera.height;
+        return true;
+    }
+
+    return false;
+}
+
+void updateTextCache(sf::Text& text, TextBox& textBox) {
     const int textMaxWidth = textBoxWidth - 2 * textMargin;
-
-    sf::Text text("", storage.get<sf::Font>("font-arial"));
-    text.setPosition(textX, textY);
-    text.setFillColor(sf::Color::Black);
-    text.setCharacterSize(30);
-
     auto overflowsWithContent = [&](const std::string& content) {
         return getSimulatedTextWidth(text, content) > textMaxWidth;
     };
 
-    // char lastChar = textBox.content.at(textBox.content.size() - 1);
     std::stringstream ss;
-    size_t contentSize = textBox.content.size();
-    size_t fullContentSize = textBox.fullContent.size();
+    ss << textBox.cachedParsedText;
 
-    for (size_t i = 0; i < contentSize; ++i) {
+    const size_t contentSize = textBox.content.size();
+    const size_t fullContentSize = textBox.fullContent.size();
+
+    for (size_t i = textBox.cachedParsedText.size(); i < contentSize; ++i) {
         char ch = textBox.content.at(i);
 
         if (ch == ' ') {
@@ -150,7 +170,26 @@ void renderText(
         ss << ch;
     }
 
-    text.setString(ss.str());
+    textBox.cachedParsedText = ss.str();
+}
+
+void renderText(
+    sf::RenderWindow& window,
+    Camera& camera,
+    ResourceStorage& storage,
+    TextBox& textBox
+) {
+    static sf::Text text = buildTextInstance(storage);
+    adjustTextPosition(text);
+
+    if (
+        invalidateTextCacheOnResize(camera, textBox) ||
+        textBox.content.size() > textBox.cachedParsedText.size()
+    ) {
+        updateTextCache(text, textBox);
+    }
+
+    text.setString(textBox.cachedParsedText);
     window.draw(text);
 }
 
@@ -169,7 +208,7 @@ void renderTextBoxes(
             TextBox& textBox
         ) {
             renderBox(window, storage, textBox);
-            renderText(window, storage, textBox);
+            renderText(window, camera, storage, textBox);
         }
     );
 }

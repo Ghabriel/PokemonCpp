@@ -6,6 +6,7 @@
 struct TextBox {
     std::string content;
     std::string fullContent;
+    std::string cachedParsedText;
 };
 
 #endif
