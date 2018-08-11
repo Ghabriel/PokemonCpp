@@ -5,7 +5,6 @@
 #include "components/DisabledControls.hpp"
 #include "components/Camera.hpp"
 #include "components/Map.hpp"
-#include "components/Position.hpp"
 #include "components/Velocity.hpp"
 #include "CoreStructures.hpp"
 #include "core-functions.hpp"
@@ -16,6 +15,7 @@
 #include "EventQueue.hpp"
 #include "lua-native-functions.hpp"
 #include "overworld/is-next-tile-blocked.hpp"
+#include "overworld/on-tile-step.hpp"
 #include "overworld/overworld-utils.hpp"
 #include "overworld/process-interaction.hpp"
 
@@ -28,7 +28,9 @@ using engine::spritesystem::AnimationPlaybackData;
 using engine::spritesystem::LoopingAnimationData;
 using engine::spritesystem::playAnimations;
 
-bool isPositionNearInt(const Position& position, float threshold = 0.05f) {
+constexpr float tileProximityThreshold = 0.05;
+
+bool isPositionNearInt(const Position& position, float threshold = tileProximityThreshold) {
     return
         (std::abs(std::round(position.x) - position.x) < threshold) &&
         (std::abs(std::round(position.y) - position.y) < threshold);
@@ -125,9 +127,9 @@ void OverworldState::executeImpl() {
     if (
         !hasComponent<DisabledControls>(player, gameData) &&
         isPlayerNearlyAlignedToTile() &&
-        (!pressingDirectionKey || isMovingTowardsBlockedTile())
+        isMoving()
     ) {
-        stopWalking();
+        onNearTile();
     }
 
     resource<EventQueue>("player-event-queue", gameData).tick();
@@ -140,6 +142,40 @@ void OverworldState::executeImpl() {
         *gameData.timeSinceLastFrame
     );
     pressingDirectionKey = false;
+}
+
+void OverworldState::onNearTile() {
+    Position& playerPosition = data<Position>(player, gameData);
+
+    if (!pressingDirectionKey) {
+        stopWalking();
+        onTileChange();
+        return;
+    }
+
+    float distanceToLastTile =
+        (playerPosition.x - lastPlayerTile.x) * (playerPosition.x - lastPlayerTile.x) +
+        (playerPosition.y - lastPlayerTile.y) * (playerPosition.y - lastPlayerTile.y);
+
+    if (distanceToLastTile >= 1 - tileProximityThreshold) {
+        onTileChange();
+        return;
+    }
+
+    if (isMovingTowardsBlockedTile()) {
+        stopWalking();
+    }
+}
+
+void OverworldState::onTileChange() {
+    // Position& playerPosition = data<Position>(player, gameData);
+    // ECHO("onTileStep(" + std::to_string(playerPosition.x) + ", " + std::to_string(playerPosition.y) + ")");
+
+    if (onTileStep(gameData, player, map)) {
+        stopWalking();
+    }
+
+    lastPlayerTile = data<Position>(player, gameData);
 }
 
 bool OverworldState::isMovingTowardsBlockedTile() const {

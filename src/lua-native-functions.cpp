@@ -71,6 +71,7 @@ void lua::write(const std::string& str) {
     std::cout << str << std::endl;
 }
 
+// Generic events
 void lua::disableControls() {
     enqueueEvent<ImmediateEvent>([&] {
         addComponent(player, DisabledControls{}, *gameData);
@@ -85,6 +86,15 @@ void lua::enableControls() {
     });
 }
 
+void lua::showText(const std::string& content) {
+    enqueueEvent<TextEvent>(content, map, *gameData);
+}
+
+void lua::wait(int ms) {
+    enqueueEvent<WaitEvent>(ms, *gameData);
+}
+
+// Overworld events
 void lua::movePlayerNorth(int numTiles) {
     movePlayer(Direction::North, numTiles);
 }
@@ -117,10 +127,6 @@ void lua::moveSpinningPlayerSouth(int numTiles, int spinDelayMs, bool clockwise)
     moveSpinningPlayer(Direction::South, numTiles, spinDelayMs, clockwise);
 }
 
-void lua::showText(const std::string& content) {
-    enqueueEvent<TextEvent>(content, map, *gameData);
-}
-
 void lua::turnPlayerNorth() {
     turnPlayer(Direction::North);
 }
@@ -137,10 +143,11 @@ void lua::turnPlayerSouth() {
     turnPlayer(Direction::South);
 }
 
-
-void lua::wait(int ms) {
-    enqueueEvent<WaitEvent>(ms, *gameData);
+// Battle-related events
+void possibleWildBattle() {
+    // TODO
 }
+
 
 void injectNativeFunctions(engine::scriptingsystem::Lua& script) {
     script.registerNative("write", lua::write);

@@ -1,0 +1,13 @@
+{
+    "map-basic": {
+        "land": [
+            {
+                "pokemon": "pidgey",
+                "min-level": 2,
+                "max-level": 3,
+                "rate": 100,
+                "moves": ["WingAttack", "SandAttack"]
+            }
+        ]
+    }
+}

@@ -2,6 +2,7 @@
 #define OVERWORLD_STATE_HPP
 
 #include "../components/Direction.hpp"
+#include "../components/Position.hpp"
 #include "../engine/entity-system/types.hpp"
 #include "../engine/state-system/include.hpp"
 
@@ -17,12 +18,15 @@ class OverworldState : public engine::statesystem::State {
     Entity player;
     Entity map;
     bool pressingDirectionKey = false;
+    Position lastPlayerTile = {999999, 999999};
 
     void registerInputContext();
     void onEnterImpl() override;
     void onExitImpl() override;
     void executeImpl() override;
 
+    void onNearTile();
+    void onTileChange();
     bool isMovingTowardsBlockedTile() const;
     bool isMoving() const;
     void processMovingEntities();

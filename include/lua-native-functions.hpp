@@ -14,9 +14,14 @@ namespace lua {
         void setPlayer(engine::entitysystem::Entity);
     }
 
+    // Generic events
     void write(const std::string& str);
     void disableControls();
     void enableControls();
+    void showText(const std::string& content);
+    void wait(int ms);
+
+    // Overworld events
     void movePlayerNorth(int numTiles);
     void movePlayerWest(int numTiles);
     void movePlayerEast(int numTiles);
@@ -25,12 +30,13 @@ namespace lua {
     void moveSpinningPlayerWest(int numTiles, int spinDelayMs, bool clockwise);
     void moveSpinningPlayerEast(int numTiles, int spinDelayMs, bool clockwise);
     void moveSpinningPlayerSouth(int numTiles, int spinDelayMs, bool clockwise);
-    void showText(const std::string& content);
     void turnPlayerNorth();
     void turnPlayerWest();
     void turnPlayerEast();
     void turnPlayerSouth();
-    void wait(int ms);
+
+    // Battle-related events
+    void possibleWildBattle();
 }
 
 void injectNativeFunctions(engine::scriptingsystem::Lua& script);

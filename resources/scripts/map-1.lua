@@ -11,3 +11,13 @@ function isTileBlocked(x, y)
         or y < 0 or y >= 25
         or (x == 2 and y == 1)
 end
+
+function onTileStep(x, y)
+    if x == 1 and y >= 4 and y <= 6 then
+        -- possibleWildBattle()
+        showText("Welcome to this tile.")
+        return true
+    end
+
+    return false
+end
