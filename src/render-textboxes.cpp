@@ -116,6 +116,11 @@ float getSimulatedTextWidth(sf::Text& instance, const std::string& content) {
     return instance.getGlobalBounds().width;
 }
 
+float getSimulatedTextHeight(sf::Text& instance, const std::string& content) {
+    instance.setString(content);
+    return instance.getGlobalBounds().height;
+}
+
 bool invalidateTextCacheOnResize(
     Camera& camera,
     TextBox& textBox
@@ -137,6 +142,11 @@ void updateTextCache(sf::Text& text, TextBox& textBox) {
     const int textMaxWidth = textBoxWidth - 2 * textMargin;
     auto overflowsWithContent = [&](const std::string& content) {
         return getSimulatedTextWidth(text, content) > textMaxWidth;
+    };
+
+    const int textMaxHeight = textBoxHeight - 2 * textMargin;
+    auto overflowsHeightWithContent = [&](const std::string& content) {
+        return getSimulatedTextHeight(text, content) > textMaxHeight;
     };
 
     std::stringstream ss;
@@ -163,14 +173,33 @@ void updateTextCache(sf::Text& text, TextBox& textBox) {
             ++j;
         }
 
-        if (overflowsWithContent(ss.str() + wordEnd.str())) {
+        std::string wordEndStr = wordEnd.str();
+
+        if (overflowsWithContent(ss.str() + wordEndStr)) {
             ss << '\n';
+
+            if (overflowsHeightWithContent(ss.str() + wordEndStr)) {
+                ECHO("[OVERFLOW]");
+                XTRACE(ch);
+                XTRACE(ss.str());
+                XTRACE(ss.str() + wordEndStr);
+                XTRACE(textMaxHeight);
+                XTRACE(textBoxHeight);
+                XTRACE(textMargin);
+                ECHO("----------------");
+                textBox.overflow = true;
+                break;
+            }
         }
 
         ss << ch;
     }
 
     textBox.cachedParsedText = ss.str();
+
+    if (textBox.overflow) {
+        XTRACE(textBox.cachedParsedText);
+    }
 }
 
 void renderText(
@@ -183,8 +212,10 @@ void renderText(
     adjustTextPosition(text);
 
     if (
-        invalidateTextCacheOnResize(camera, textBox) ||
-        textBox.content.size() > textBox.cachedParsedText.size()
+        !textBox.overflow && (
+            invalidateTextCacheOnResize(camera, textBox) ||
+            textBox.content.size() != textBox.cachedParsedText.size()
+        )
     ) {
         updateTextCache(text, textBox);
     }

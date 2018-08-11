@@ -22,15 +22,25 @@ void TextEvent::onStartImpl() {
     enableInputContext("text-state", gameData);
     nextCharIndex = 0;
     timeAccumulator = 0;
-    addComponent(map, TextBox{"", content}, gameData);
+    addComponent(map, TextBox{"", content, false}, gameData);
     actionKeyPressed = false;
 }
 
 bool TextEvent::tickImpl() {
+    TextBox& textBox = data<TextBox>(map, gameData);
+
+    if (textBox.overflow) {
+        ECHO("[IMMEDIATE STOP]");
+        XTRACE(textBox.content);
+        ECHO("Restrict text to:");
+        ECHO(textBox.content.substr(0, textBox.content.size() - 1));
+        return true;
+    }
+
     if (nextCharIndex < content.size()) {
         timeAccumulator += *gameData.timeSinceLastFrame;
         if (timeAccumulator >= charDelayMs) {
-            data<TextBox>(map, gameData).content += content.at(nextCharIndex);
+            textBox.content += content.at(nextCharIndex);
             ++nextCharIndex;
             timeAccumulator = 0;
         }
