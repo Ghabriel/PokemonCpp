@@ -27,8 +27,8 @@ void updateTextBoxVariables(Camera& camera) {
     textBoxMargin = (camera.width - 16 * std::floor((camera.width - 2 * textBoxMinMargin) / 16)) / 2;
     textBoxWidth = 16 * std::floor((camera.width - 2 * textBoxMinMargin) / 16);
     textBoxHeight = camera.height / 5 - ((camera.height / 5) % 16);
-    textBoxX = textBoxMargin;
-    textBoxY = camera.height - textBoxHeight - textBoxMargin;
+    textBoxX = camera.x + textBoxMargin;
+    textBoxY = camera.y + camera.height - textBoxHeight - textBoxMargin;
 }
 
 TextBoxSkinGrid getTextBoxSkinSprites(

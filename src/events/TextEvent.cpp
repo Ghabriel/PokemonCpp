@@ -13,12 +13,13 @@ TextEvent::TextEvent(const std::string& content, Entity map, CoreStructures& gam
  : content(content), map(map), gameData(gameData) {
     InputContext context;
     context.actions = {{"Action", [&] { actionKeyPressed = true; }}};
-    context.priority = 1;
+    context.priority = 10;
     gameData.inputDispatcher->registerContext("text-state", context);
 }
 
 void TextEvent::onStartImpl() {
     sound("fx-select-option", gameData).play();
+    enableInputContext("disabled-controls", gameData);
     enableInputContext("text-state", gameData);
     nextCharIndex = 0;
     timeAccumulator = 0;
@@ -31,8 +32,7 @@ bool TextEvent::tickImpl() {
 
     if (textBox.overflow) {
         if (actionKeyPressed) {
-            disableInputContext("text-state", gameData);
-            removeComponent<TextBox>(map, gameData);
+            onClose();
             content = textBox.fullContent.substr(textBox.content.size() - 1);
             onStart();
             return tick();
@@ -55,11 +55,16 @@ bool TextEvent::tickImpl() {
 
     if (actionKeyPressed) {
         sound("fx-select-option", gameData).play();
-        disableInputContext("text-state", gameData);
-        removeComponent<TextBox>(map, gameData);
+        onClose();
         return true;
     }
 
     actionKeyPressed = false;
     return false;
+}
+
+void TextEvent::onClose() {
+    disableInputContext("text-state", gameData);
+    disableInputContext("disabled-controls", gameData);
+    removeComponent<TextBox>(map, gameData);
 }

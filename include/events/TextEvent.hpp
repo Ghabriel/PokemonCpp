@@ -22,6 +22,7 @@ class TextEvent : public Event {
 
     void onStartImpl() override;
     bool tickImpl() override;
+    void onClose();
 };
 
 
