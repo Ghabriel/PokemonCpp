@@ -2,6 +2,7 @@
 
 #include <array>
 #include <cmath>
+#include <sstream>
 #include "components/Camera.hpp"
 #include "components/TextBox.hpp"
 #include "engine/entity-system/include.hpp"
@@ -10,7 +11,25 @@
 
 #include "engine/utils/debug/xtrace.hpp"
 
+using engine::resourcesystem::ResourceStorage;
+
 using TextBoxSkinGrid = std::array<std::array<sf::Sprite, 3>, 3>;
+
+constexpr int textBoxMinMargin = 5;
+constexpr int textMargin = 16;
+int textBoxMargin;
+int textBoxWidth;
+int textBoxHeight;
+int textBoxX;
+int textBoxY;
+
+void updateTextBoxVariables(Camera& camera) {
+    textBoxMargin = (camera.width - 16 * std::floor((camera.width - 2 * textBoxMinMargin) / 16)) / 2;
+    textBoxWidth = 16 * std::floor((camera.width - 2 * textBoxMinMargin) / 16);
+    textBoxHeight = camera.height / 5 - ((camera.height / 5) % 16);
+    textBoxX = textBoxMargin;
+    textBoxY = camera.height - textBoxHeight - textBoxMargin;
+}
 
 TextBoxSkinGrid getTextBoxSkinSprites(
     engine::resourcesystem::ResourceStorage& storage
@@ -40,74 +59,117 @@ TextBoxSkinGrid getTextBoxSkinSprites(
     }};
 }
 
-void renderTextBoxes(
+void renderBox(
     sf::RenderWindow& window,
-    engine::entitysystem::ComponentManager& manager,
-    engine::resourcesystem::ResourceStorage& storage
+    ResourceStorage& storage,
+    TextBox& textBox
 ) {
-    using engine::entitysystem::Entity;
-    constexpr int textBoxMinMargin = 5;
-    constexpr int textMargin = 16;
-    Camera& camera = storage.get<Camera>("camera");
-    const int textBoxMargin = (camera.width - 16 * std::floor((camera.width - 2 * textBoxMinMargin) / 16)) / 2;
-    const int textBoxWidth = 16 * std::floor((camera.width - 2 * textBoxMinMargin) / 16);
-    const int textBoxHeight = camera.height / 5 - ((camera.height / 5) % 16);
-    const int textBoxX = textBoxMargin;
-    const int textBoxY = camera.height - textBoxHeight - textBoxMargin;
+    static TextBoxSkinGrid sprites = getTextBoxSkinSprites(storage);
+
+    sf::RectangleShape rect(sf::Vector2f(textBoxWidth - 10, textBoxHeight - 10));
+    rect.setPosition(textBoxX + 5, textBoxY + 5);
+    rect.setFillColor(sf::Color::White);
+    window.draw(rect);
+
+    sprites[0][0].setPosition(textBoxX, textBoxY);
+    window.draw(sprites[0][0]);
+    sprites[2][0].setPosition(textBoxX + textBoxWidth - 16, textBoxY);
+    window.draw(sprites[2][0]);
+    sprites[0][2].setPosition(textBoxX, textBoxY + textBoxHeight - 16);
+    window.draw(sprites[0][2]);
+    sprites[2][2].setPosition(textBoxX + textBoxWidth - 16, textBoxY + textBoxHeight - 16);
+    window.draw(sprites[2][2]);
+
+    int horizontalCentralTiles = (textBoxWidth - 32) / 16;
+    for (int i = 1; i <= horizontalCentralTiles; ++i) {
+        sprites[1][0].setPosition(textBoxX + i * 16, textBoxY);
+        window.draw(sprites[1][0]);
+        sprites[1][2].setPosition(textBoxX + i * 16, textBoxY + textBoxHeight - 16);
+        window.draw(sprites[1][2]);
+    }
+
+    int verticalCentralTiles = (textBoxHeight - 32) / 16;
+    for (int i = 1; i <= verticalCentralTiles; ++i) {
+        sprites[0][1].setPosition(textBoxX, textBoxY + i * 16);
+        window.draw(sprites[0][1]);
+        sprites[2][1].setPosition(textBoxX + textBoxWidth - 16, textBoxY + i * 16);
+        window.draw(sprites[2][1]);
+    }
+}
+
+float getSimulatedTextWidth(sf::Text& instance, const std::string& content) {
+    instance.setString(content);
+    return instance.getGlobalBounds().width;
+}
+
+void renderText(
+    sf::RenderWindow& window,
+    ResourceStorage& storage,
+    TextBox& textBox
+) {
     const int textX = textBoxX + textMargin;
     const int textY = textBoxY + textMargin;
     const int textMaxWidth = textBoxWidth - 2 * textMargin;
+
+    sf::Text text("", storage.get<sf::Font>("font-arial"));
+    text.setPosition(textX, textY);
+    text.setFillColor(sf::Color::Black);
+    text.setCharacterSize(30);
+
+    auto overflowsWithContent = [&](const std::string& content) {
+        return getSimulatedTextWidth(text, content) > textMaxWidth;
+    };
+
+    // char lastChar = textBox.content.at(textBox.content.size() - 1);
+    std::stringstream ss;
+    size_t contentSize = textBox.content.size();
+    size_t fullContentSize = textBox.fullContent.size();
+
+    for (size_t i = 0; i < contentSize; ++i) {
+        char ch = textBox.content.at(i);
+
+        if (ch == ' ') {
+            if (!overflowsWithContent(ss.str() + std::to_string(ch))) {
+                ss << ch;
+            }
+
+            continue;
+        }
+
+        std::stringstream wordEnd;
+        size_t j = i;
+        while (j < fullContentSize && textBox.fullContent.at(j) != ' ') {
+            wordEnd << textBox.fullContent.at(j);
+            ++j;
+        }
+
+        if (overflowsWithContent(ss.str() + wordEnd.str())) {
+            ss << '\n';
+        }
+
+        ss << ch;
+    }
+
+    text.setString(ss.str());
+    window.draw(text);
+}
+
+void renderTextBoxes(
+    sf::RenderWindow& window,
+    engine::entitysystem::ComponentManager& manager,
+    ResourceStorage& storage
+) {
+    using engine::entitysystem::Entity;
+    Camera& camera = storage.get<Camera>("camera");
+    updateTextBoxVariables(camera);
 
     manager.forEachEntity<TextBox>(
         [&](
             Entity entity,
             TextBox& textBox
         ) {
-            static TextBoxSkinGrid sprites = getTextBoxSkinSprites(storage);
-
-            sf::RectangleShape rect(sf::Vector2f(textBoxWidth - 10, textBoxHeight - 10));
-            rect.setPosition(textBoxX + 5, textBoxY + 5);
-            rect.setFillColor(sf::Color::White);
-            window.draw(rect);
-
-            sprites[0][0].setPosition(textBoxX, textBoxY);
-            window.draw(sprites[0][0]);
-            sprites[2][0].setPosition(textBoxX + textBoxWidth - 16, textBoxY);
-            window.draw(sprites[2][0]);
-            sprites[0][2].setPosition(textBoxX, textBoxY + textBoxHeight - 16);
-            window.draw(sprites[0][2]);
-            sprites[2][2].setPosition(textBoxX + textBoxWidth - 16, textBoxY + textBoxHeight - 16);
-            window.draw(sprites[2][2]);
-
-            int horizontalCentralTiles = (textBoxWidth - 32) / 16;
-            for (int i = 1; i <= horizontalCentralTiles; ++i) {
-                sprites[1][0].setPosition(textBoxX + i * 16, textBoxY);
-                window.draw(sprites[1][0]);
-                sprites[1][2].setPosition(textBoxX + i * 16, textBoxY + textBoxHeight - 16);
-                window.draw(sprites[1][2]);
-            }
-
-            int verticalCentralTiles = (textBoxHeight - 32) / 16;
-            for (int i = 1; i <= verticalCentralTiles; ++i) {
-                sprites[0][1].setPosition(textBoxX, textBoxY + i * 16);
-                window.draw(sprites[0][1]);
-                sprites[2][1].setPosition(textBoxX + textBoxWidth - 16, textBoxY + i * 16);
-                window.draw(sprites[2][1]);
-            }
-
-            sf::Text text(textBox.content, storage.get<sf::Font>("font-arial"));
-            text.setPosition(textX, textY);
-            text.setFillColor(sf::Color::Black);
-            text.setCharacterSize(30);
-
-            sf::FloatRect textBounds = text.getGlobalBounds();
-            if (textBounds.width > textMaxWidth) {
-                std::string& content = textBox.content;
-                content = content.substr(0, content.size() - 1) + '\n' + content.at(content.size() - 1);
-                text.setString(content);
-            }
-
-            window.draw(text);
+            renderBox(window, storage, textBox);
+            renderText(window, storage, textBox);
         }
     );
 }

@@ -5,6 +5,7 @@
 
 struct TextBox {
     std::string content;
+    std::string fullContent;
 };
 
 #endif

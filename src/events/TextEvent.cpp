@@ -22,7 +22,7 @@ void TextEvent::onStartImpl() {
     enableInputContext("text-state", gameData);
     nextCharIndex = 0;
     timeAccumulator = 0;
-    addComponent(map, TextBox{}, gameData);
+    addComponent(map, TextBox{"", content}, gameData);
     actionKeyPressed = false;
 }
 
