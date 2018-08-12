@@ -30,10 +30,11 @@ void BattleState::registerInputContext() {
 void BattleState::onEnterImpl() {
     enableInputContext("battle-state", gameData);
     sf::Music& bgm = music("bgm-wild-battle", gameData);
-    // bgm.setLoopPoints(4, bgm.getDuration() - sf::seconds(6));
     bgm.setLoop(true);
+    float loopStart = 16.8;
+    float loopEnd = 175;
+    bgm.setLoopPoints({sf::seconds(loopStart), sf::seconds(loopEnd - loopStart)});
     bgm.play();
-    // bgm.setPlayingOffset(sf::seconds(170));
 }
 
 void BattleState::onExitImpl() {
