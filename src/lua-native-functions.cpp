@@ -7,6 +7,7 @@
 #include "CoreStructures.hpp"
 #include "core-functions.hpp"
 #include "engine/scripting-system/include.hpp"
+#include "engine/state-system/include.hpp"
 #include "EventQueue.hpp"
 #include "events/ImmediateEvent.hpp"
 #include "events/PlayerMoveEvent.hpp"
@@ -144,8 +145,10 @@ void lua::turnPlayerSouth() {
 }
 
 // Battle-related events
-void possibleWildBattle() {
-    // TODO
+void lua::possibleWildBattle() {
+    // TODO: check if this will really happen
+    // TODO: fade animation
+    gameData->stateMachine->pushState("battle-state");
 }
 
 
@@ -153,6 +156,9 @@ void injectNativeFunctions(engine::scriptingsystem::Lua& script) {
     script.registerNative("write", lua::write);
     script.registerNative("disableControls", lua::disableControls);
     script.registerNative("enableControls", lua::enableControls);
+    script.registerNative("showText", lua::showText);
+    script.registerNative("wait", lua::wait);
+
     script.registerNative("movePlayerNorth", lua::movePlayerNorth);
     script.registerNative("movePlayerWest", lua::movePlayerWest);
     script.registerNative("movePlayerEast", lua::movePlayerEast);
@@ -161,10 +167,10 @@ void injectNativeFunctions(engine::scriptingsystem::Lua& script) {
     script.registerNative("moveSpinningPlayerWest", lua::moveSpinningPlayerWest);
     script.registerNative("moveSpinningPlayerEast", lua::moveSpinningPlayerEast);
     script.registerNative("moveSpinningPlayerSouth", lua::moveSpinningPlayerSouth);
-    script.registerNative("showText", lua::showText);
     script.registerNative("turnPlayerNorth", lua::turnPlayerNorth);
     script.registerNative("turnPlayerWest", lua::turnPlayerWest);
     script.registerNative("turnPlayerEast", lua::turnPlayerEast);
     script.registerNative("turnPlayerSouth", lua::turnPlayerSouth);
-    script.registerNative("wait", lua::wait);
+
+    script.registerNative("possibleWildBattle", lua::possibleWildBattle);
 }

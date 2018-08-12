@@ -159,7 +159,6 @@ void OverworldState::onNearTile() {
 
     if (distanceToLastTile >= 1 - tileProximityThreshold) {
         onTileChange();
-        return;
     }
 
     if (isMovingTowardsBlockedTile()) {

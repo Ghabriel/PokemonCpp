@@ -14,8 +14,7 @@ end
 
 function onTileStep(x, y)
     if x == 1 and y >= 4 and y <= 6 then
-        -- possibleWildBattle()
-        showText("Welcome to this tile.")
+        possibleWildBattle()
         return true
     end
 
