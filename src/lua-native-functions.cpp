@@ -12,6 +12,7 @@
 #include "events/ImmediateEvent.hpp"
 #include "events/PlayerMoveEvent.hpp"
 #include "events/PlayerSpinningMoveEvent.hpp"
+#include "events/ScreenFadeEvent.hpp"
 #include "events/TextEvent.hpp"
 #include "events/WaitEvent.hpp"
 #include "overworld/overworld-utils.hpp"
@@ -148,7 +149,9 @@ void lua::turnPlayerSouth() {
 void lua::possibleWildBattle() {
     // TODO: check if this will really happen
     // TODO: fade animation
-    gameData->stateMachine->pushState("battle-state");
+    // gameData->stateMachine->pushState("battle-state");
+    disableControls();
+    enqueueEvent<ScreenFadeEvent>(map, *gameData);
 }
 
 

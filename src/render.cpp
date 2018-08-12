@@ -1,6 +1,7 @@
 #include "render.hpp"
 
 #include <SFML/Graphics.hpp>
+#include "components/DrawableVector.hpp"
 #include "engine/entity-system/include.hpp"
 #include "engine/resource-system/include.hpp"
 #include "engine/sfml/sprite-system/include.hpp"
@@ -61,6 +62,23 @@ void renderLoopingAnimations(
     );
 }
 
+void renderDrawableVectors(
+    sf::RenderWindow& window,
+    engine::entitysystem::ComponentManager& manager,
+    engine::resourcesystem::ResourceStorage& storage
+) {
+    manager.forEachEntity<DrawableVector>(
+        [&](
+            Entity entity,
+            DrawableVector& vector
+        ) {
+            for (const auto& shape : vector.shapes) {
+                window.draw(*shape);
+            }
+        }
+    );
+}
+
 void render(
     sf::RenderWindow& window,
     engine::entitysystem::ComponentManager& manager,
@@ -72,4 +90,5 @@ void render(
     renderLoopingAnimations(window, manager);
     renderMapLayer(MapLayer::Foreground, window, manager, storage);
     renderTextBoxes(window, manager, storage);
+    renderDrawableVectors(window, manager, storage);
 }
