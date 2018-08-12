@@ -34,6 +34,7 @@ void BattleState::onEnterImpl() {
     float loopStart = 16.8;
     float loopEnd = 175;
     bgm.setLoopPoints({sf::seconds(loopStart), sf::seconds(loopEnd - loopStart)});
+    bgm.setVolume(30);
     bgm.play();
 }
 

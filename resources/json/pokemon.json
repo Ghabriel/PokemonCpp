@@ -1,0 +1,37 @@
+{
+    "Bulbasaur": {
+        "display-name": "Bulbasaur",
+        "national-number": 1,
+        "types": ["Grass", "Poison"],
+        "base-stats": [45, 49, 49, 45, 65, 65],
+        "male-ratio": "87.5",
+        "growth-rate": "Parabolic",
+        "base-exp": 64,
+        "effort-points": [0, 0, 0, 0, 1, 0],
+        "capture-rate": 45,
+        "base-happiness": 70,
+        "abilities": ["Overgrow"],
+        "hidden-abilities": ["Chlorophyll"],
+        "moves": [
+            { "level": 1, "move": "Tackle" }
+        ],
+        "egg-moves": [
+            "Amnesia", "Charm"
+        ],
+        "egg-groups": ["Monster", "Grass"],
+        "egg-steps": 5120,
+        "height": "0.7",
+        "weight": "6.9",
+        "color": "Green",
+        "shape": 8,
+        "habitat": "Grassland",
+        "kind": "Seed",
+        "pokedex-description": "Bulbasaur can be seen napping in bright sunlight. There is a seed on its back. By soaking up the sun's rays, the seed grows progressively larger.",
+        "battle-player-y": 0,
+        "battle-enemy-y": 27,
+        "battle-altitude": 0,
+        "evolutions": [
+            { "pokemon": "Ivysaur", "method": ["level", 16] }
+        ]
+    }
+}
