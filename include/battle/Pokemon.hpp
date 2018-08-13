@@ -5,6 +5,35 @@
 #include <string>
 #include <vector>
 
+enum class Nature {
+    Hardy,
+    Lonely,
+    Adamant,
+    Naughty,
+    Brave,
+    Bold,
+    Docile,
+    Impish,
+    Lax,
+    Relaxed,
+    Modest,
+    Mild,
+    Bashful,
+    Rash,
+    Quiet,
+    Calm,
+    Gentle,
+    Careful,
+    Quirky,
+    Sassy,
+    Timid,
+    Hasty,
+    Jolly,
+    Naive,
+    Serious,
+    Count // for generation only
+};
+
 enum class Gender {
     Male,
     Female,
@@ -22,7 +51,7 @@ enum class StatusCondition {
 
 struct Pokemon {
     std::string species;
-    std::string nature;
+    Nature nature;
     std::string heldItem;
     int experiencePoints;
     std::string ability;

@@ -1,5 +1,6 @@
 #include "states/BattleState.hpp"
 
+#include "battle/battle-setup.hpp"
 #include "core-functions.hpp"
 #include "CoreStructures.hpp"
 
@@ -34,6 +35,7 @@ void BattleState::registerInputContext() {
 void BattleState::onEnterImpl() {
     ECHO("THE BATTLE SHALL BEGIN!");
     enableInputContext("battle-state", gameData);
+    setupWildEncounter("map-basic", battle, gameData);
 }
 
 void BattleState::onExitImpl() {

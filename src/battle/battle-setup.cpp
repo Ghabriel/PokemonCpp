@@ -1,18 +1,13 @@
 #include "battle/battle-setup.hpp"
 
-#include <random>
 #include "battle/EncounterData.hpp"
+#include "battle/generate-pokemon.hpp"
+#include "battle/Pokemon.hpp"
+#include "battle/random.hpp"
 #include "core-functions.hpp"
 #include "CoreStructures.hpp"
 
-int random(int min, int max) {
-    static std::random_device randomDevice;
-    static std::mt19937 generator(randomDevice());
-    std::uniform_int_distribution distribution(min, max);
-    return distribution(generator);
-}
-
-std::string findWildBattleOpponent(
+Pokemon findWildBattleOpponent(
     const std::string& mapId,
     engine::entitysystem::Entity battle,
     CoreStructures& gameData
@@ -31,12 +26,11 @@ std::string findWildBattleOpponent(
     // TODO: randomize the chosen index
     size_t chosenEncounterIndex = 0;
 
-    EncounterData& chosenEncounter = possibleEncounters.at(chosenEncounterIndex);
-    std::string chosenPokemon = chosenEncounter.pokemon;
+    const EncounterData& chosenEncounter = possibleEncounters.at(chosenEncounterIndex);
+    std::string chosenSpecies = chosenEncounter.pokemon;
     int chosenLevel = random(chosenEncounter.minLevel, chosenEncounter.maxLevel);
 
-    // TODO: continue this
-    return "";
+    return generatePokemon(chosenSpecies, chosenLevel);
 }
 
 void setupWildEncounter(
