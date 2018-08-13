@@ -22,14 +22,7 @@ void ScreenFadeEvent::onStartImpl() {
     addComponent(map, DrawableVector{{&topRect, &bottomRect}}, gameData);
 
     music("bgm-littleroot-town", gameData).stop();
-    sf::Music& bgm = music("bgm-wild-battle", gameData);
-    bgm.setLoop(true);
-    float loopStart = 16.8;
-    float loopEnd = 175;
-    bgm.setLoopPoints({sf::seconds(loopStart), sf::seconds(loopEnd - loopStart)});
-    bgm.setPlayingOffset(sf::seconds(0.8));
-    bgm.setVolume(30);
-    bgm.play();
+    music("bgm-wild-battle", gameData).play();
 }
 
 bool ScreenFadeEvent::tickImpl() {

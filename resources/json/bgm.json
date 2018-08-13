@@ -1,4 +1,12 @@
 {
-    "bgm-littleroot-town": "resources/bgm/littleroot-town.wav",
-    "bgm-wild-battle": "resources/bgm/wild-battle.wav"
+    "bgm-littleroot-town": {
+        "file": "resources/bgm/littleroot-town.wav"
+    },
+    "bgm-wild-battle": {
+        "file": "resources/bgm/wild-battle.wav",
+        "loop-start": "16.8",
+        "loop-end": "175",
+        "start-offset": "0.8",
+        "volume": "30"
+    }
 }

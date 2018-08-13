@@ -3,6 +3,8 @@
 #include "core-functions.hpp"
 #include "CoreStructures.hpp"
 
+#include "engine/utils/debug/xtrace.hpp"
+
 using engine::inputsystem::InputContext;
 
 BattleState::BattleState(CoreStructures& gameData) : gameData(gameData) {
@@ -28,6 +30,7 @@ void BattleState::registerInputContext() {
 }
 
 void BattleState::onEnterImpl() {
+    ECHO("THE BATTLE SHALL BEGIN!");
     enableInputContext("battle-state", gameData);
 }
 

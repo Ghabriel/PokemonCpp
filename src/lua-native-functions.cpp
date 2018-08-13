@@ -148,10 +148,12 @@ void lua::turnPlayerSouth() {
 // Battle-related events
 void lua::possibleWildBattle() {
     // TODO: check if this will really happen
-    // TODO: fade animation
     // gameData->stateMachine->pushState("battle-state");
     disableControls();
     enqueueEvent<ScreenFadeEvent>(map, *gameData);
+    enqueueEvent<ImmediateEvent>([&] {
+        gameData->stateMachine->pushState("battle-state");
+    });
 }
 
 

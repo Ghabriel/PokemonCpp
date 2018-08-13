@@ -4,6 +4,8 @@
 #include <fstream>
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
+#include "battle/EncounterData.hpp"
+#include "battle/PokemonData.hpp"
 #include "components/Map.hpp"
 #include "engine/resource-system/include.hpp"
 #include "engine/resource-system/json/include.hpp"
@@ -94,10 +96,36 @@ void loadBGM(ResourceStorage& storage) {
     std::ifstream bgmFile(ResourceFiles::BGM);
     JsonValue data = parseJSON(bgmFile);
 
-    for (const auto& [id, path] : data.asIterableMap()) {
-        engine::soundsystem::Music bgm;
-        assert(bgm.get().openFromFile(path.asString()));
-        storage.store(id, std::move(bgm));
+    for (const auto& [id, bgmData] : data.asIterableMap()) {
+        engine::soundsystem::Music bgmWrapper;
+        sf::Music& bgm = bgmWrapper.get();
+        auto bgmSettings = bgmData.get<std::unordered_map<std::string, JsonValue>>();
+        assert(bgm.openFromFile(bgmSettings["file"].asString()));
+
+        float loopStart = 0;
+        if (bgmSettings.count("loop-start")) {
+            loopStart = std::stof(bgmSettings["loop-start"].asString());
+        }
+
+        float loopEnd = bgm.getDuration().asSeconds();
+        if (bgmSettings.count("loop-end")) {
+            loopEnd = std::stof(bgmSettings["loop-end"].asString());
+        }
+
+        bgm.setLoopPoints({sf::seconds(loopStart), sf::seconds(loopEnd - loopStart)});
+
+        if (bgmSettings.count("start-offset")) {
+            float startOffset = std::stof(bgmSettings["start-offset"].asString());
+            bgm.setPlayingOffset(sf::seconds(startOffset));
+        }
+
+        if (bgmSettings.count("volume")) {
+            float volume = std::stof(bgmSettings["volume"].asString());
+            bgm.setVolume(volume);
+        }
+
+        bgm.setLoop(true);
+        storage.store(id, std::move(bgmWrapper));
     }
 
     ECHO("[RESOURCE] BGM: OK");
@@ -187,6 +215,126 @@ void loadMaps(ResourceStorage& storage) {
     ECHO("[RESOURCE] Maps: OK");
 }
 
+void loadEncounters(ResourceStorage& storage) {
+    std::ifstream encountersFile(ResourceFiles::ENCOUNTERS);
+    JsonValue data = parseJSON(encountersFile);
+
+    for (const auto& [mapId, mapEncounterData] : data.asIterableMap()) {
+        MapEncounterData mapEncounters;
+
+        for (const auto& [environment, encounterDataArray] : mapEncounterData.asIterableMap()) {
+            std::vector<EncounterData> encounterList;
+
+            for (const auto& encounterData : encounterDataArray.asIterableArray()) {
+                EncounterData encounter;
+                encounter.pokemon = encounterData["pokemon"].asString();
+                encounter.minLevel = encounterData["min-level"].asInt();
+                encounter.maxLevel = encounterData["max-level"].asInt();
+                encounter.rate = encounterData["rate"].asInt();
+                encounterList.push_back(encounter);
+            }
+
+            mapEncounters.encounterData[environment] = encounterList;
+        }
+
+        storage.store("encounters-" + mapId, mapEncounters);
+    }
+
+    ECHO("[RESOURCE] Encounters: OK");
+}
+
+std::vector<std::string> asStringVector(const JsonValue& value) {
+    std::vector<std::string> result;
+
+    for (const auto& member : value.asIterableArray()) {
+        result.push_back(member.asString());
+    }
+
+    return result;
+}
+
+std::array<int, 6> asStatArray(const JsonValue& value) {
+    std::array<int, 6> result;
+    size_t i = 0;
+
+    for (const auto& member : value.asIterableArray()) {
+        result[i] = member.asInt();
+        ++i;
+    }
+
+    return result;
+}
+
+float asFloat(const JsonValue& value) {
+    return std::stof(value.asString());
+}
+
+std::vector<std::pair<int, std::string>> asMoveList(const JsonValue& value) {
+    std::vector<std::pair<int, std::string>> result;
+
+    for (const auto& entry : value.asIterableArray()) {
+        result.push_back({
+            entry["level"].asInt(),
+            entry["move"].asString()
+        });
+    }
+
+    return result;
+}
+
+std::vector<EvolutionData> asEvolutionData(const JsonValue& value) {
+    std::vector<EvolutionData> result;
+
+    for (const auto& entry : value.asIterableArray()) {
+        result.push_back({
+            entry["pokemon"].asString(),
+            entry["method"]
+        });
+    }
+
+    return result;
+}
+
+void loadPokemon(ResourceStorage& storage) {
+    std::ifstream pokemonFile(ResourceFiles::POKEMON);
+    JsonValue data = parseJSON(pokemonFile);
+
+    for (const auto& [id, pokemonData] : data.asIterableMap()) {
+        PokemonData data;
+        data.displayName = pokemonData["display-name"].asString();
+        data.nationalNumber = pokemonData["national-number"].asInt();
+        data.types = asStringVector(pokemonData["types"]);
+        data.baseStats = asStatArray(pokemonData["base-stats"]);
+        data.maleRatio = asFloat(pokemonData["male-ratio"]);
+        data.growthRate = pokemonData["growth-rate"].asString();
+        data.baseExp = pokemonData["base-exp"].asInt();
+        data.effortPoints = asStatArray(pokemonData["effort-points"]);
+        data.captureRate = pokemonData["capture-rate"].asInt();
+        data.baseHappiness = pokemonData["base-happiness"].asInt();
+        data.abilities = asStringVector(pokemonData["abilities"]);
+        data.hiddenAbilities = asStringVector(pokemonData["hidden-abilities"]);
+        data.moves = asMoveList(pokemonData["moves"]);
+        data.eggMoves = asStringVector(pokemonData["egg-moves"]);
+        data.eggGroups = asStringVector(pokemonData["egg-groups"]);
+        data.eggSteps = pokemonData["egg-steps"].asInt();
+        data.height = asFloat(pokemonData["height"]);
+        data.weight = asFloat(pokemonData["weight"]);
+        data.color = pokemonData["color"].asString();
+        data.shape = pokemonData["shape"].asInt();
+        data.habitat = pokemonData["habitat"].asString();
+        data.kind = pokemonData["kind"].asString();
+        data.pokedexDescription = pokemonData["pokedex-description"].asString();
+        data.battlePlayerY = pokemonData["battle-player-y"].asInt();
+        data.battleEnemyY = pokemonData["battle-enemy-y"].asInt();
+        data.battleAltitude = pokemonData["battle-altitude"].asInt();
+        data.evolutions = asEvolutionData(pokemonData["evolutions"]);
+
+        storage.store("pokemon-" + id, data);
+    }
+
+    ECHO("[RESOURCE] Pokemon: OK");
+}
+
 void loadResources(ResourceStorage& storage) {
     loadFonts(storage);
     loadTextures(storage);
@@ -195,4 +343,6 @@ void loadResources(ResourceStorage& storage) {
     loadBGM(storage);
     loadTiles(storage);
     loadMaps(storage);
+    loadEncounters(storage);
+    loadPokemon(storage);
 }
