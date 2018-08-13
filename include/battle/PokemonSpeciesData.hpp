@@ -1,5 +1,5 @@
-#ifndef POKEMON_DATA_HPP
-#define POKEMON_DATA_HPP
+#ifndef POKEMON_SPECIES_DATA_HPP
+#define POKEMON_SPECIES_DATA_HPP
 
 #include <array>
 #include <string>
@@ -12,7 +12,7 @@ struct EvolutionData {
     JsonValue method;
 };
 
-struct PokemonData {
+struct PokemonSpeciesData {
     std::string displayName;
     int nationalNumber;
     std::vector<std::string> types;

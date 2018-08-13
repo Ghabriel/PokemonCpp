@@ -5,7 +5,7 @@
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
 #include "battle/EncounterData.hpp"
-#include "battle/PokemonData.hpp"
+#include "battle/PokemonSpeciesData.hpp"
 #include "components/Map.hpp"
 #include "engine/resource-system/include.hpp"
 #include "engine/resource-system/json/include.hpp"
@@ -300,7 +300,7 @@ void loadPokemon(ResourceStorage& storage) {
     JsonValue data = parseJSON(pokemonFile);
 
     for (const auto& [id, pokemonData] : data.asIterableMap()) {
-        PokemonData data;
+        PokemonSpeciesData data;
         data.displayName = pokemonData["display-name"].asString();
         data.nationalNumber = pokemonData["national-number"].asInt();
         data.types = asStringVector(pokemonData["types"]);
