@@ -13,6 +13,7 @@ class BattleState : public engine::statesystem::State {
 
  private:
     CoreStructures& gameData;
+    Entity battle;
 
     void registerInputContext();
     void onEnterImpl() override;

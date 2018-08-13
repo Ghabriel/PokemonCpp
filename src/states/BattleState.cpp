@@ -7,7 +7,9 @@
 
 using engine::inputsystem::InputContext;
 
-BattleState::BattleState(CoreStructures& gameData) : gameData(gameData) {
+BattleState::BattleState(CoreStructures& gameData)
+ : gameData(gameData),
+   battle(createEntity(gameData)) {
     registerInputContext();
 }
 
