@@ -300,36 +300,36 @@ void loadPokemon(ResourceStorage& storage) {
     JsonValue data = parseJSON(pokemonFile);
 
     for (const auto& [id, pokemonData] : data.asIterableMap()) {
-        PokemonSpeciesData data;
-        data.displayName = pokemonData["display-name"].asString();
-        data.nationalNumber = pokemonData["national-number"].asInt();
-        data.types = asStringVector(pokemonData["types"]);
-        data.baseStats = asStatArray(pokemonData["base-stats"]);
-        data.maleRatio = asFloat(pokemonData["male-ratio"]);
-        data.growthRate = pokemonData["growth-rate"].asString();
-        data.baseExp = pokemonData["base-exp"].asInt();
-        data.effortPoints = asStatArray(pokemonData["effort-points"]);
-        data.captureRate = pokemonData["capture-rate"].asInt();
-        data.baseHappiness = pokemonData["base-happiness"].asInt();
-        data.abilities = asStringVector(pokemonData["abilities"]);
-        data.hiddenAbilities = asStringVector(pokemonData["hidden-abilities"]);
-        data.moves = asMoveList(pokemonData["moves"]);
-        data.eggMoves = asStringVector(pokemonData["egg-moves"]);
-        data.eggGroups = asStringVector(pokemonData["egg-groups"]);
-        data.eggSteps = pokemonData["egg-steps"].asInt();
-        data.height = asFloat(pokemonData["height"]);
-        data.weight = asFloat(pokemonData["weight"]);
-        data.color = pokemonData["color"].asString();
-        data.shape = pokemonData["shape"].asInt();
-        data.habitat = pokemonData["habitat"].asString();
-        data.kind = pokemonData["kind"].asString();
-        data.pokedexDescription = pokemonData["pokedex-description"].asString();
-        data.battlePlayerY = pokemonData["battle-player-y"].asInt();
-        data.battleEnemyY = pokemonData["battle-enemy-y"].asInt();
-        data.battleAltitude = pokemonData["battle-altitude"].asInt();
-        data.evolutions = asEvolutionData(pokemonData["evolutions"]);
+        PokemonSpeciesData species;
+        species.displayName = pokemonData["display-name"].asString();
+        species.nationalNumber = pokemonData["national-number"].asInt();
+        species.types = asStringVector(pokemonData["types"]);
+        species.baseStats = asStatArray(pokemonData["base-stats"]);
+        species.maleRatio = asFloat(pokemonData["male-ratio"]);
+        species.growthRate = pokemonData["growth-rate"].asString();
+        species.baseExp = pokemonData["base-exp"].asInt();
+        species.effortPoints = asStatArray(pokemonData["effort-points"]);
+        species.captureRate = pokemonData["capture-rate"].asInt();
+        species.baseHappiness = pokemonData["base-happiness"].asInt();
+        species.abilities = asStringVector(pokemonData["abilities"]);
+        species.hiddenAbilities = asStringVector(pokemonData["hidden-abilities"]);
+        species.moves = asMoveList(pokemonData["moves"]);
+        species.eggMoves = asStringVector(pokemonData["egg-moves"]);
+        species.eggGroups = asStringVector(pokemonData["egg-groups"]);
+        species.eggSteps = pokemonData["egg-steps"].asInt();
+        species.height = asFloat(pokemonData["height"]);
+        species.weight = asFloat(pokemonData["weight"]);
+        species.color = pokemonData["color"].asString();
+        species.shape = pokemonData["shape"].asInt();
+        species.habitat = pokemonData["habitat"].asString();
+        species.kind = pokemonData["kind"].asString();
+        species.pokedexDescription = pokemonData["pokedex-description"].asString();
+        species.battlePlayerY = pokemonData["battle-player-y"].asInt();
+        species.battleEnemyY = pokemonData["battle-enemy-y"].asInt();
+        species.battleAltitude = pokemonData["battle-altitude"].asInt();
+        species.evolutions = asEvolutionData(pokemonData["evolutions"]);
 
-        storage.store("pokemon-" + id, data);
+        storage.store("pokemon-" + id, species);
     }
 
     ECHO("[RESOURCE] Pokemon: OK");

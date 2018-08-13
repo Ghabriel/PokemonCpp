@@ -30,7 +30,7 @@ Pokemon findWildBattleOpponent(
     std::string chosenSpecies = chosenEncounter.pokemon;
     int chosenLevel = random(chosenEncounter.minLevel, chosenEncounter.maxLevel);
 
-    return generatePokemon(chosenSpecies, chosenLevel);
+    return generatePokemon(*gameData.resourceStorage, chosenSpecies, chosenLevel);
 }
 
 void setupWildEncounter(
