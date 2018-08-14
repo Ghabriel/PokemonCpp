@@ -353,11 +353,11 @@ void loadPokemonSprites(
         std::transform(id.begin(), id.end(), lowercaseId.begin(), tolower);
 
         sf::Texture backTexture;
-        assert(backTexture.loadFromFile(backSprites + lowercaseId + ".jpg"));
+        assert(backTexture.loadFromFile(backSprites + lowercaseId + ".png"));
         storage.store("pokemon-back-" + id, backTexture);
 
         sf::Texture frontTexture;
-        assert(frontTexture.loadFromFile(frontSprites + lowercaseId + ".jpg"));
+        assert(frontTexture.loadFromFile(frontSprites + lowercaseId + ".png"));
         storage.store("pokemon-front-" + id, frontTexture);
     }
 

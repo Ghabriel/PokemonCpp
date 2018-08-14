@@ -9,23 +9,47 @@
 
 using engine::resourcesystem::ResourceStorage;
 
+void renderAllyPokemon(
+    sf::RenderWindow& window,
+    Camera& camera,
+    ResourceStorage& storage,
+    Pokemon& pokemon
+) {
+    sf::Sprite sprite(storage.get<sf::Texture>("pokemon-back-" + pokemon.species));
+    float scaledHeight = camera.height / 5;
+    sprite.scale(scaledHeight / 64, scaledHeight / 64);
+    sprite.setPosition(camera.width / 10, 4 * camera.height / 5);
+    window.draw(sprite);
+}
+
+void renderFoePokemon(
+    sf::RenderWindow& window,
+    Camera& camera,
+    ResourceStorage& storage,
+    Pokemon& pokemon
+) {
+    sf::Sprite sprite(storage.get<sf::Texture>("pokemon-front-" + pokemon.species));
+    float scaledHeight = camera.height / 5;
+    sprite.scale(scaledHeight / 64, scaledHeight / 64);
+    sprite.setPosition(4 * camera.width / 5, 0);
+    window.draw(sprite);
+}
+
 void renderBattle(
     sf::RenderWindow& window,
     engine::entitysystem::ComponentManager& manager,
     ResourceStorage& storage
 ) {
     using engine::entitysystem::Entity;
-    // Camera& camera = storage.get<Camera>("camera");
 
     manager.forEachEntity<Battle>(
         [&](
             Entity entity,
             Battle& battle
         ) {
-            // Pokemon& player = battle.playerPokemon;
-            Pokemon& opponent = battle.opponentPokemon;
-            sf::Sprite opponentSprite(storage.get<sf::Texture>("pokemon-front-" + opponent.species));
-            window.draw(opponentSprite);
+            Camera& camera = storage.get<Camera>("camera");
+            renderAllyPokemon(window, camera, storage, battle.playerPokemon);
+            renderFoePokemon(window, camera, storage, battle.opponentPokemon);
         }
     );
 }

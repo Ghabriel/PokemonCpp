@@ -1,6 +1,7 @@
 #include "states/BattleState.hpp"
 
 #include "battle/battle-setup.hpp"
+#include "components/TextBox.hpp"
 #include "core-functions.hpp"
 #include "CoreStructures.hpp"
 #include "EventQueue.hpp"
@@ -52,4 +53,5 @@ void BattleState::onExitImpl() {
 
 void BattleState::executeImpl() {
     // TODO
+    // addComponent(battle, TextBox{"Lorem ipsum", "Lorem ipsum", false}, gameData);
 }

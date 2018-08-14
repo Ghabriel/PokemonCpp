@@ -119,6 +119,8 @@ void OverworldState::onExitImpl() {
     disableInputContext("overworld-state", gameData);
     music("bgm-littleroot-town", gameData).pause();
     removeComponent<AnimationPlaybackData>(player, gameData);
+    deleteEntity(player, gameData);
+    // deleteEntity(map, gameData);
 }
 
 void OverworldState::executeImpl() {

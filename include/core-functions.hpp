@@ -18,6 +18,10 @@ inline engine::entitysystem::Entity createEntity(CoreStructures& gameData) {
     return gameData.componentManager->createEntity();
 }
 
+inline void deleteEntity(engine::entitysystem::Entity entity, CoreStructures& gameData) {
+    gameData.componentManager->deleteEntity(entity);
+}
+
 template<typename TComponent>
 inline void addComponent(
     engine::entitysystem::Entity entity,
