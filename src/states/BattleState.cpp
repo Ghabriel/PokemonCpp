@@ -3,10 +3,17 @@
 #include "battle/battle-setup.hpp"
 #include "core-functions.hpp"
 #include "CoreStructures.hpp"
+#include "EventQueue.hpp"
 
 #include "engine/utils/debug/xtrace.hpp"
 
 using engine::inputsystem::InputContext;
+
+template<typename TEvent, typename... Args>
+void enqueueEvent(CoreStructures& gameData, Args&&... args) {
+    EventQueue& queue = resource<EventQueue>("battle-event-queue", gameData);
+    queue.addEvent(std::make_unique<TEvent>(std::forward<Args>(args)...));
+}
 
 BattleState::BattleState(CoreStructures& gameData)
  : gameData(gameData),
@@ -33,9 +40,9 @@ void BattleState::registerInputContext() {
 }
 
 void BattleState::onEnterImpl() {
-    ECHO("THE BATTLE SHALL BEGIN!");
     enableInputContext("battle-state", gameData);
     setupWildEncounter("map-basic", battle, gameData);
+    gameData.resourceStorage->store("battle-event-queue", EventQueue());
 }
 
 void BattleState::onExitImpl() {

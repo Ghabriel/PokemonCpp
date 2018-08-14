@@ -1,10 +1,10 @@
 #ifndef PLAYER_MOVE_EVENT_HPP
 #define PLAYER_MOVE_EVENT_HPP
 
-#include "../components/Direction.hpp"
-#include "../components/Position.hpp"
-#include "../engine/entity-system/types.hpp"
-#include "Event.hpp"
+#include "../../components/Direction.hpp"
+#include "../../components/Position.hpp"
+#include "../../engine/entity-system/types.hpp"
+#include "../../events/Event.hpp"
 
 struct CoreStructures;
 

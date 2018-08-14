@@ -10,11 +10,11 @@
 #include "engine/state-system/include.hpp"
 #include "EventQueue.hpp"
 #include "events/ImmediateEvent.hpp"
-#include "events/PlayerMoveEvent.hpp"
-#include "events/PlayerSpinningMoveEvent.hpp"
 #include "events/ScreenFadeEvent.hpp"
 #include "events/TextEvent.hpp"
 #include "events/WaitEvent.hpp"
+#include "overworld/events/PlayerMoveEvent.hpp"
+#include "overworld/events/PlayerSpinningMoveEvent.hpp"
 #include "overworld/overworld-utils.hpp"
 
 #include "engine/utils/debug/xtrace.hpp"

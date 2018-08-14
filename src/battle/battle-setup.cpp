@@ -4,6 +4,7 @@
 #include "battle/generate-pokemon.hpp"
 #include "battle/Pokemon.hpp"
 #include "battle/random.hpp"
+#include "components/Battle.hpp"
 #include "core-functions.hpp"
 #include "CoreStructures.hpp"
 
@@ -38,6 +39,7 @@ void setupWildEncounter(
     engine::entitysystem::Entity battle,
     CoreStructures& gameData
 ) {
-    // TODO
+    Pokemon player = generatePokemon(*gameData.resourceStorage, "Rattata", 3);
     Pokemon opponent = findWildBattleOpponent(mapId, battle, gameData);
+    addComponent(battle, Battle{player, opponent}, gameData);
 }
