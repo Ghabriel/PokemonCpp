@@ -305,7 +305,7 @@ void loadPokemon(ResourceStorage& storage) {
         species.nationalNumber = pokemonData["national-number"].asInt();
         species.types = asStringVector(pokemonData["types"]);
         species.baseStats = asStatArray(pokemonData["base-stats"]);
-        species.maleRatio = asFloat(pokemonData["male-ratio"]);
+        species.maleRatio = pokemonData["male-ratio"].asString();
         species.growthRate = pokemonData["growth-rate"].asString();
         species.baseExp = pokemonData["base-exp"].asInt();
         species.effortPoints = asStatArray(pokemonData["effort-points"]);

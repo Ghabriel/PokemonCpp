@@ -5,6 +5,8 @@
 #include "battle/random.hpp"
 #include "engine/resource-system/include.hpp"
 
+#include "engine/utils/debug/xtrace.hpp"
+
 using engine::resourcesystem::ResourceStorage;
 
 Nature pickNature() {
@@ -41,14 +43,34 @@ std::vector<std::string> pickMoves(const PokemonSpeciesData& speciesData, int le
 }
 
 Gender pickGender(const PokemonSpeciesData& speciesData) {
-    int maleRatio = static_cast<int>(10 * speciesData.maleRatio);
+    if (speciesData.maleRatio == "-") {
+        return Gender::Genderless;
+    }
 
-    // TODO: handle genderless Pokémon
+    int maleRatio = static_cast<int>(10 * std::stof(speciesData.maleRatio));
     return random(1, 1000) <= maleRatio ? Gender::Male : Gender::Female;
 }
 
-void pickStats(Pokemon& pokemon) {
-    // TODO
+void pickStats(const PokemonSpeciesData& speciesData, Pokemon& pokemon) {
+    const auto& baseStats = speciesData.baseStats;
+    const auto& ev = pokemon.ev;
+    const auto& iv = pokemon.iv;
+    int level = pokemon.level;
+
+    for (size_t i = 0; i < 6; ++i) {
+        pokemon.stats[i] = ((2 * baseStats[i] + iv[i] + (ev[i] / 4)) * level) / 100 + 5;
+    }
+
+    pokemon.stats[0] += level + 5;
+
+    int nature = static_cast<int>(pokemon.nature);
+    size_t natureIncreasingStat = nature / 5 + 1;
+    size_t natureDecreasingStat = nature % 5 + 1;
+
+    if (natureIncreasingStat != natureDecreasingStat) {
+        pokemon.stats[natureIncreasingStat] *= 1.1;
+        pokemon.stats[natureDecreasingStat] *= 0.9;
+    }
 }
 
 Pokemon generatePokemon(
@@ -81,8 +103,8 @@ Pokemon generatePokemon(
     pokemon.status = StatusCondition::Normal;
     pokemon.asleepRounds = 0;
     pokemon.level = level;
-    pokemon.stats = {};
-    pickStats(pokemon);
+    pokemon.stats = {0, 0, 0, 0, 0, 0};
+    pickStats(speciesData, pokemon);
     pokemon.currentHP = pokemon.stats[0];
 
     return pokemon;

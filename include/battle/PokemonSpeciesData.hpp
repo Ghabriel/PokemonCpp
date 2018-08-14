@@ -17,7 +17,7 @@ struct PokemonSpeciesData {
     int nationalNumber;
     std::vector<std::string> types;
     std::array<int, 6> baseStats;
-    float maleRatio;
+    std::string maleRatio;
     std::string growthRate;
     int baseExp;
     std::array<int, 6> effortPoints;

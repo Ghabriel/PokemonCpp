@@ -39,4 +39,5 @@ void setupWildEncounter(
     CoreStructures& gameData
 ) {
     // TODO
+    Pokemon opponent = findWildBattleOpponent(mapId, battle, gameData);
 }
