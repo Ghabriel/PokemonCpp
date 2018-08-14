@@ -1,6 +1,7 @@
 #include "render.hpp"
 
 #include <SFML/Graphics.hpp>
+#include "battle/render-battle.hpp"
 #include "components/DrawableVector.hpp"
 #include "engine/entity-system/include.hpp"
 #include "engine/resource-system/include.hpp"
@@ -91,4 +92,5 @@ void render(
     renderMapLayer(MapLayer::Foreground, window, manager, storage);
     renderTextBoxes(window, manager, storage);
     renderDrawableVectors(window, manager, storage);
+    renderBattle(window, manager, storage);
 }

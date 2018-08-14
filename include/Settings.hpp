@@ -15,6 +15,8 @@ class Settings {
     int getMinWindowHeight() const;
     float getPlayerWalkingSpeed() const;
     int getTileSize() const;
+    std::string getPokemonBackSpritesFolder() const;
+    std::string getPokemonFrontSpritesFolder() const;
 
  private:
     JsonValue data;

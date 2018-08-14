@@ -1,5 +1,6 @@
 #include "init/load-resources.hpp"
 
+#include <algorithm>
 #include <cassert>
 #include <fstream>
 #include <SFML/Audio.hpp>
@@ -14,6 +15,7 @@
 #include "engine/sfml/sprite-system/include.hpp"
 #include "lua-native-functions.hpp"
 #include "ResourceFiles.hpp"
+#include "Settings.hpp"
 #include "TileData.hpp"
 
 #include "engine/utils/debug/xtrace.hpp"
@@ -295,9 +297,10 @@ std::vector<EvolutionData> asEvolutionData(const JsonValue& value) {
     return result;
 }
 
-void loadPokemon(ResourceStorage& storage) {
+std::vector<std::string> loadPokemonSpecies(ResourceStorage& storage) {
     std::ifstream pokemonFile(ResourceFiles::POKEMON);
     JsonValue data = parseJSON(pokemonFile);
+    std::vector<std::string> pokemonList;
 
     for (const auto& [id, pokemonData] : data.asIterableMap()) {
         PokemonSpeciesData species;
@@ -330,9 +333,35 @@ void loadPokemon(ResourceStorage& storage) {
         species.evolutions = asEvolutionData(pokemonData["evolutions"]);
 
         storage.store("pokemon-" + id, species);
+        pokemonList.push_back(id);
     }
 
     ECHO("[RESOURCE] Pokemon: OK");
+    return pokemonList;
+}
+
+void loadPokemonSprites(
+    ResourceStorage& storage,
+    const std::vector<std::string>& pokemonList
+) {
+    Settings& settings = storage.get<Settings>("settings");
+    std::string backSprites = settings.getPokemonBackSpritesFolder();
+    std::string frontSprites = settings.getPokemonFrontSpritesFolder();
+
+    for (const std::string& id : pokemonList) {
+        std::string lowercaseId = id;
+        std::transform(id.begin(), id.end(), lowercaseId.begin(), tolower);
+
+        sf::Texture backTexture;
+        assert(backTexture.loadFromFile(backSprites + lowercaseId + ".jpg"));
+        storage.store("pokemon-back-" + id, backTexture);
+
+        sf::Texture frontTexture;
+        assert(frontTexture.loadFromFile(frontSprites + lowercaseId + ".jpg"));
+        storage.store("pokemon-front-" + id, frontTexture);
+    }
+
+    ECHO("[RESOURCE] Pokemon sprites: OK");
 }
 
 void loadResources(ResourceStorage& storage) {
@@ -344,5 +373,6 @@ void loadResources(ResourceStorage& storage) {
     loadTiles(storage);
     loadMaps(storage);
     loadEncounters(storage);
-    loadPokemon(storage);
+    std::vector<std::string> pokemonList = loadPokemonSpecies(storage);
+    loadPokemonSprites(storage, pokemonList);
 }

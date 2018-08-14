@@ -39,3 +39,11 @@ float Settings::getPlayerWalkingSpeed() const {
 int Settings::getTileSize() const {
     return data["tile-size"].asInt();
 }
+
+std::string Settings::getPokemonBackSpritesFolder() const {
+    return data["pokemon-back-sprites"].asString();
+}
+
+std::string Settings::getPokemonFrontSpritesFolder() const {
+    return data["pokemon-front-sprites"].asString();
+}
