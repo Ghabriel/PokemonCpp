@@ -63,7 +63,8 @@ struct Pokemon {
     int eggStepsToHatch; // < 0 if not an egg
     Gender gender;
     int form;
-    std::string nickname;
+    bool isNicknamed;
+    std::string displayName;
     int metAtDate;
     std::string metAtLocation;
     int metAtLevel;

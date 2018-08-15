@@ -94,7 +94,8 @@ Pokemon generatePokemon(
     pokemon.eggStepsToHatch = -1;
     pokemon.gender = pickGender(speciesData);
     pokemon.form = 0; // TODO
-    pokemon.nickname = "";
+    pokemon.isNicknamed = false;
+    pokemon.displayName = speciesData.displayName;
     pokemon.metAtDate = 0; // TODO
     pokemon.metAtLocation = "map-basic"; // TODO
     pokemon.metAtLevel = level;

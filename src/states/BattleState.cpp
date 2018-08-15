@@ -2,9 +2,11 @@
 
 #include "battle/battle-setup.hpp"
 #include "components/Battle.hpp"
+#include "components/BattleActionSelection.hpp"
 #include "components/TextBox.hpp"
 #include "core-functions.hpp"
 #include "CoreStructures.hpp"
+#include "events/ImmediateEvent.hpp"
 #include "events/TextEvent.hpp"
 #include "EventQueue.hpp"
 
@@ -47,7 +49,20 @@ void BattleState::onEnterImpl() {
     setupWildEncounter("map-basic", battleEntity, gameData);
     gameData.resourceStorage->store("battle-event-queue", EventQueue());
     battle = &data<Battle>(battleEntity, gameData);
-    showText("Wild " + battle->opponentPokemon.species + " appeared!");
+    showText("Wild " + battle->opponentPokemon.displayName + " appeared!");
+    // TODO: only show the player's pokémon now
+    showText("What will " + battle->playerPokemon.displayName + " do?");
+    // enqueueEvent<ImmediateEvent>(gameData, [&] {
+    //     addComponent(
+    //         battleEntity,
+    //         BattleActionSelection{
+    //             "What will " + battle->playerPokemon.displayName + " do?",
+    //             {"FIGHT", "BAG", "POKEMON", "RUN"},
+    //             0
+    //         },
+    //         gameData
+    //     );
+    // });
 }
 
 void BattleState::onExitImpl() {
