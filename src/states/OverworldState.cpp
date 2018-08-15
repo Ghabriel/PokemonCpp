@@ -38,7 +38,8 @@ bool isPositionNearInt(const Position& position, float threshold = tileProximity
 
 OverworldState::OverworldState(CoreStructures& gameData)
  : gameData(gameData),
-   player(createEntity(gameData)) {
+   player(createEntity(gameData)),
+   map(createEntity(gameData)) {
     addComponent(player, Direction::South, gameData);
     addComponent(player, Position{5, 5}, gameData);
     addComponent(player, Velocity{0, 0}, gameData);
@@ -106,12 +107,8 @@ void OverworldState::registerInputContext() {
 
 void OverworldState::onEnterImpl() {
     enableInputContext("overworld-state", gameData);
-    sf::Music& bgm = music("bgm-littleroot-town", gameData);
-    bgm.setLoop(true);
-    bgm.play();
-
+    music("bgm-littleroot-town", gameData).play();
     addComponent(player, AnimationPlaybackData{}, gameData);
-
     addComponent(map, resource<Map>("map-basic", gameData), gameData);
 }
 
@@ -120,7 +117,7 @@ void OverworldState::onExitImpl() {
     music("bgm-littleroot-town", gameData).pause();
     removeComponent<AnimationPlaybackData>(player, gameData);
     deleteEntity(player, gameData);
-    // deleteEntity(map, gameData);
+    deleteEntity(map, gameData);
 }
 
 void OverworldState::executeImpl() {

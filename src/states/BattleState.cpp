@@ -1,9 +1,11 @@
 #include "states/BattleState.hpp"
 
 #include "battle/battle-setup.hpp"
+#include "components/Battle.hpp"
 #include "components/TextBox.hpp"
 #include "core-functions.hpp"
 #include "CoreStructures.hpp"
+#include "events/TextEvent.hpp"
 #include "EventQueue.hpp"
 
 #include "engine/utils/debug/xtrace.hpp"
@@ -18,7 +20,7 @@ void enqueueEvent(CoreStructures& gameData, Args&&... args) {
 
 BattleState::BattleState(CoreStructures& gameData)
  : gameData(gameData),
-   battle(createEntity(gameData)) {
+   battleEntity(createEntity(gameData)) {
     registerInputContext();
 }
 
@@ -42,8 +44,10 @@ void BattleState::registerInputContext() {
 
 void BattleState::onEnterImpl() {
     enableInputContext("battle-state", gameData);
-    setupWildEncounter("map-basic", battle, gameData);
+    setupWildEncounter("map-basic", battleEntity, gameData);
     gameData.resourceStorage->store("battle-event-queue", EventQueue());
+    battle = &data<Battle>(battleEntity, gameData);
+    showText("Wild " + battle->opponentPokemon.species + " appeared!");
 }
 
 void BattleState::onExitImpl() {
@@ -54,4 +58,9 @@ void BattleState::onExitImpl() {
 void BattleState::executeImpl() {
     // TODO
     // addComponent(battle, TextBox{"Lorem ipsum", "Lorem ipsum", false}, gameData);
+    resource<EventQueue>("battle-event-queue", gameData).tick();
+}
+
+void BattleState::showText(const std::string& content) {
+    enqueueEvent<TextEvent>(gameData, content, battleEntity, gameData);
 }

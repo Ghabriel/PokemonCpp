@@ -88,9 +88,9 @@ void render(
     renderMapLayer(MapLayer::Terrain, window, manager, storage);
     renderMapLayer(MapLayer::Objects, window, manager, storage);
     renderMenus(window, manager, storage);
+    renderBattle(window, manager, storage);
     renderLoopingAnimations(window, manager);
     renderMapLayer(MapLayer::Foreground, window, manager, storage);
     renderTextBoxes(window, manager, storage);
     renderDrawableVectors(window, manager, storage);
-    renderBattle(window, manager, storage);
 }
