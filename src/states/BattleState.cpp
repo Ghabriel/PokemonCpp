@@ -1,6 +1,7 @@
 #include "states/BattleState.hpp"
 
 #include "battle/battle-setup.hpp"
+#include "battle/events/ActionSelectionEvent.hpp"
 #include "components/Battle.hpp"
 #include "components/BattleActionSelection.hpp"
 #include "components/TextBox.hpp"
@@ -51,19 +52,12 @@ void BattleState::onEnterImpl() {
     battle = &data<Battle>(battleEntity, gameData);
     showText("Wild " + battle->opponentPokemon.displayName + " appeared!");
     // TODO: only show the player's pokémon now
-    // showText("What will " + battle->playerPokemon.displayName + " do?");
-    enqueueEvent<ImmediateEvent>(gameData, [&] {
-        addComponent(
-            battleEntity,
-            BattleActionSelection{
-                "What will " + battle->playerPokemon.displayName + " do?",
-                300,
-                {"Fight", "Bag", "Pokemon", "Run"},
-                0
-            },
-            gameData
-        );
-    });
+    enqueueEvent<ActionSelectionEvent>(
+        gameData,
+        battle->playerPokemon,
+        battleEntity,
+        gameData
+    );
 }
 
 void BattleState::onExitImpl() {
