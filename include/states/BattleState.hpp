@@ -23,6 +23,8 @@ class BattleState : public engine::statesystem::State {
     void onExitImpl() override;
     void executeImpl() override;
 
+    void actionSelectionScreen();
+
     void showText(const std::string&);
 };
 

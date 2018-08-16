@@ -60,6 +60,19 @@ void BattleState::onEnterImpl() {
 
     showText("Wild " + battle->opponentPokemon.displayName + " appeared!");
     // TODO: only show the player's pokémon now
+    actionSelectionScreen();
+}
+
+void BattleState::onExitImpl() {
+    disableInputContext("battle-state", gameData);
+    music("bgm-wild-battle", gameData).stop();
+}
+
+void BattleState::executeImpl() {
+    resource<EventQueue>("battle-event-queue", gameData).tick();
+}
+
+void BattleState::actionSelectionScreen() {
     enqueueEvent<ActionSelectionEvent>(
         gameData,
         selectedAction,
@@ -72,29 +85,22 @@ void BattleState::onEnterImpl() {
         switch (static_cast<BattleAction>(selectedAction)) {
             case BattleAction::Fight:
                 showText("TODO: fight");
+                actionSelectionScreen();
                 break;
             case BattleAction::Bag:
                 showText("TODO: bag");
+                actionSelectionScreen();
                 break;
             case BattleAction::Pokemon:
                 showText("TODO: pokemon");
+                actionSelectionScreen();
                 break;
             case BattleAction::Run:
                 showText("TODO: run");
+                actionSelectionScreen();
                 break;
         }
     });
-}
-
-void BattleState::onExitImpl() {
-    disableInputContext("battle-state", gameData);
-    music("bgm-wild-battle", gameData).stop();
-}
-
-void BattleState::executeImpl() {
-    // TODO
-    // addComponent(battle, TextBox{"Lorem ipsum", "Lorem ipsum", false}, gameData);
-    resource<EventQueue>("battle-event-queue", gameData).tick();
 }
 
 void BattleState::showText(const std::string& content) {
