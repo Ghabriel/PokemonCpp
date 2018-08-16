@@ -1,6 +1,7 @@
 #include "render-textboxes.hpp"
 
 #include "components/Battle.hpp"
+#include "components/BattleActionSelection.hpp"
 #include "components/Camera.hpp"
 #include "engine/entity-system/include.hpp"
 #include "engine/resource-system/include.hpp"
@@ -82,4 +83,13 @@ void renderBattle(
             );
         }
     );
+
+    // manager.forEachEntity<BattleActionSelection>(
+    //     [&](
+    //         Entity entity,
+    //         BattleActionSelection& selection
+    //     ) {
+    //         // TODO
+    //     }
+    // );
 }

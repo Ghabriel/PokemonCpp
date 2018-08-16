@@ -5,6 +5,7 @@
 #include <sstream>
 #include "components/Camera.hpp"
 #include "components/TextBox.hpp"
+#include "components/TextBoxFrame.hpp"
 #include "engine/entity-system/include.hpp"
 #include "engine/resource-system/include.hpp"
 #include "engine/sfml/sprite-system/include.hpp"
@@ -23,12 +24,16 @@ int textBoxHeight;
 int textBoxX;
 int textBoxY;
 
-void updateTextBoxVariables(Camera& camera) {
-    textBoxMargin = (camera.width - 16 * std::floor((camera.width - 2 * textBoxMinMargin) / 16)) / 2;
-    textBoxWidth = 16 * std::floor((camera.width - 2 * textBoxMinMargin) / 16);
+void updateTextBoxVariables(Camera& camera, int boxWidth, int offsetX) {
+    textBoxMargin = (boxWidth - 16 * std::floor((boxWidth - 2 * textBoxMinMargin) / 16)) / 2;
+    textBoxWidth = 16 * std::floor((boxWidth - 2 * textBoxMinMargin) / 16);
     textBoxHeight = camera.height / 5 - ((camera.height / 5) % 16);
-    textBoxX = camera.x + textBoxMargin;
+    textBoxX = offsetX + textBoxMargin;
     textBoxY = camera.y + camera.height - textBoxHeight - textBoxMargin;
+}
+
+void updateTextBoxVariables(Camera& camera) {
+    updateTextBoxVariables(camera, camera.width, camera.x);
 }
 
 TextBoxSkinGrid getTextBoxSkinSprites(
@@ -61,8 +66,7 @@ TextBoxSkinGrid getTextBoxSkinSprites(
 
 void renderBox(
     sf::RenderWindow& window,
-    ResourceStorage& storage,
-    TextBox& textBox
+    ResourceStorage& storage
 ) {
     static TextBoxSkinGrid sprites = getTextBoxSkinSprites(storage);
 
@@ -228,8 +232,29 @@ void renderTextBoxes(
             Entity entity,
             TextBox& textBox
         ) {
-            renderBox(window, storage, textBox);
+            renderBox(window, storage);
             renderText(window, camera, storage, textBox);
+        }
+    );
+
+    manager.forEachEntity<TextBoxFrame>(
+        [&](
+            Entity entity,
+            TextBoxFrame& textBoxFrame
+        ) {
+            if (textBoxFrame.fixedWidth) {
+                int boxWidth = *textBoxFrame.fixedWidth < 0
+                    ? camera.width + *textBoxFrame.fixedWidth
+                    : *textBoxFrame.fixedWidth;
+
+                int offsetX = textBoxFrame.offsetX < 0
+                    ? camera.width + textBoxFrame.offsetX
+                    : textBoxFrame.offsetX;
+
+                updateTextBoxVariables(camera, boxWidth, offsetX);
+            }
+
+            renderBox(window, storage);
         }
     );
 }

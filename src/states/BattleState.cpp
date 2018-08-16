@@ -4,6 +4,7 @@
 #include "components/Battle.hpp"
 #include "components/BattleActionSelection.hpp"
 #include "components/TextBox.hpp"
+#include "components/TextBoxFrame.hpp"
 #include "core-functions.hpp"
 #include "CoreStructures.hpp"
 #include "events/ImmediateEvent.hpp"
@@ -51,18 +52,22 @@ void BattleState::onEnterImpl() {
     battle = &data<Battle>(battleEntity, gameData);
     showText("Wild " + battle->opponentPokemon.displayName + " appeared!");
     // TODO: only show the player's pokémon now
-    showText("What will " + battle->playerPokemon.displayName + " do?");
-    // enqueueEvent<ImmediateEvent>(gameData, [&] {
-    //     addComponent(
-    //         battleEntity,
-    //         BattleActionSelection{
-    //             "What will " + battle->playerPokemon.displayName + " do?",
-    //             {"FIGHT", "BAG", "POKEMON", "RUN"},
-    //             0
-    //         },
-    //         gameData
-    //     );
-    // });
+    // showText("What will " + battle->playerPokemon.displayName + " do?");
+    enqueueEvent<ImmediateEvent>(gameData, [&] {
+        addComponent(
+            battleEntity,
+            BattleActionSelection{
+                "What will " + battle->playerPokemon.displayName + " do?",
+                {"FIGHT", "BAG", "POKEMON", "RUN"},
+                0
+            },
+            gameData
+        );
+
+        constexpr int size = 304;
+        addComponent(battleEntity, TextBoxFrame{-size}, gameData);
+        addComponent(createEntity(gameData), TextBoxFrame{size, -size}, gameData);
+    });
 }
 
 void BattleState::onExitImpl() {
