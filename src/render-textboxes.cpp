@@ -229,6 +229,26 @@ void renderText(
     window.draw(text);
 }
 
+void renderFocusBox(
+    sf::RenderWindow& window,
+    const BattleActionSelection& selection,
+    int firstRowY
+) {
+    sf::RectangleShape focusBox({textBoxWidth / 2 - 10, 35});
+    focusBox.setOutlineColor(sf::Color::Red);
+    focusBox.setOutlineThickness(1);
+    focusBox.setFillColor(sf::Color::Transparent);
+
+    int focusBoxX = (selection.focusedOption % 2 == 0)
+        ? textBoxX
+        : textBoxX + textBoxWidth / 2;
+    int focusBoxY = (selection.focusedOption <= 1)
+        ? firstRowY
+        : textBoxY;
+    focusBox.setPosition({focusBoxX + textMargin - 1, focusBoxY + textMargin + 5});
+    window.draw(focusBox);
+}
+
 void renderTextBoxes(
     sf::RenderWindow& window,
     engine::entitysystem::ComponentManager& manager,
@@ -261,7 +281,19 @@ void renderTextBoxes(
             textBoxWidth = 16 * std::floor((selection.optionBoxWidth - 2 * textBoxMinMargin) / 16);
             textBoxX += firstBoxWidth - textBoxMargin;
             renderBox(window, storage);
-            // renderText(window, storage, selection.options[0]);
+            renderText(window, storage, selection.options[0]);
+
+            textBoxX += textBoxWidth / 2;
+            renderText(window, storage, selection.options[1]);
+
+            int firstRowY = textBoxY;
+            textBoxY = camera.y + camera.height - 25 - textBoxMargin - 3 * textMargin;
+            renderText(window, storage, selection.options[3]);
+
+            textBoxX -= textBoxWidth / 2;
+            renderText(window, storage, selection.options[2]);
+
+            renderFocusBox(window, selection, firstRowY);
         }
     );
 }
