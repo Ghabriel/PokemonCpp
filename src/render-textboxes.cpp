@@ -3,9 +3,9 @@
 #include <array>
 #include <cmath>
 #include <sstream>
+#include "components/BattleActionSelection.hpp"
 #include "components/Camera.hpp"
 #include "components/TextBox.hpp"
-#include "components/TextBoxFrame.hpp"
 #include "engine/entity-system/include.hpp"
 #include "engine/resource-system/include.hpp"
 #include "engine/sfml/sprite-system/include.hpp"
@@ -24,16 +24,16 @@ int textBoxHeight;
 int textBoxX;
 int textBoxY;
 
-void updateTextBoxVariables(Camera& camera, int boxWidth, int offsetX) {
+void updateTextBoxVariables(Camera& camera, int boxWidth) {
     textBoxMargin = (boxWidth - 16 * std::floor((boxWidth - 2 * textBoxMinMargin) / 16)) / 2;
     textBoxWidth = 16 * std::floor((boxWidth - 2 * textBoxMinMargin) / 16);
     textBoxHeight = camera.height / 5 - ((camera.height / 5) % 16);
-    textBoxX = offsetX + textBoxMargin;
+    textBoxX = camera.x + textBoxMargin;
     textBoxY = camera.y + camera.height - textBoxHeight - textBoxMargin;
 }
 
 void updateTextBoxVariables(Camera& camera) {
-    updateTextBoxVariables(camera, camera.width, camera.x);
+    updateTextBoxVariables(camera, camera.width);
 }
 
 TextBoxSkinGrid getTextBoxSkinSprites(
@@ -218,6 +218,17 @@ void renderText(
     window.draw(text);
 }
 
+void renderText(
+    sf::RenderWindow& window,
+    ResourceStorage& storage,
+    const std::string& content
+) {
+    static sf::Text text = buildTextInstance(storage);
+    adjustTextPosition(text);
+    text.setString(content);
+    window.draw(text);
+}
+
 void renderTextBoxes(
     sf::RenderWindow& window,
     engine::entitysystem::ComponentManager& manager,
@@ -237,24 +248,20 @@ void renderTextBoxes(
         }
     );
 
-    manager.forEachEntity<TextBoxFrame>(
+    manager.forEachEntity<BattleActionSelection>(
         [&](
             Entity entity,
-            TextBoxFrame& textBoxFrame
+            BattleActionSelection& selection
         ) {
-            if (textBoxFrame.fixedWidth) {
-                int boxWidth = *textBoxFrame.fixedWidth < 0
-                    ? camera.width + *textBoxFrame.fixedWidth
-                    : *textBoxFrame.fixedWidth;
-
-                int offsetX = textBoxFrame.offsetX < 0
-                    ? camera.width + textBoxFrame.offsetX
-                    : textBoxFrame.offsetX;
-
-                updateTextBoxVariables(camera, boxWidth, offsetX);
-            }
-
+            int firstBoxWidth = camera.width - selection.optionBoxWidth;
+            updateTextBoxVariables(camera, firstBoxWidth);
             renderBox(window, storage);
+            renderText(window, storage, selection.text);
+
+            textBoxWidth = 16 * std::floor((selection.optionBoxWidth - 2 * textBoxMinMargin) / 16);
+            textBoxX += firstBoxWidth - textBoxMargin;
+            renderBox(window, storage);
+            // renderText(window, storage, selection.options[0]);
         }
     );
 }

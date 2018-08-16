@@ -4,7 +4,6 @@
 #include "components/Battle.hpp"
 #include "components/BattleActionSelection.hpp"
 #include "components/TextBox.hpp"
-#include "components/TextBoxFrame.hpp"
 #include "core-functions.hpp"
 #include "CoreStructures.hpp"
 #include "events/ImmediateEvent.hpp"
@@ -58,15 +57,12 @@ void BattleState::onEnterImpl() {
             battleEntity,
             BattleActionSelection{
                 "What will " + battle->playerPokemon.displayName + " do?",
-                {"FIGHT", "BAG", "POKEMON", "RUN"},
+                300,
+                {"Fight", "Bag", "Pokemon", "Run"},
                 0
             },
             gameData
         );
-
-        constexpr int size = 304;
-        addComponent(battleEntity, TextBoxFrame{-size}, gameData);
-        addComponent(createEntity(gameData), TextBoxFrame{size, -size}, gameData);
     });
 }
 

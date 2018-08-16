@@ -83,13 +83,4 @@ void renderBattle(
             );
         }
     );
-
-    // manager.forEachEntity<BattleActionSelection>(
-    //     [&](
-    //         Entity entity,
-    //         BattleActionSelection& selection
-    //     ) {
-    //         // TODO
-    //     }
-    // );
 }
