@@ -15,6 +15,13 @@
 
 using engine::inputsystem::InputContext;
 
+enum class BattleAction {
+    Fight,
+    Bag,
+    Pokemon,
+    Run
+};
+
 template<typename TEvent, typename... Args>
 void enqueueEvent(CoreStructures& gameData, Args&&... args) {
     EventQueue& queue = resource<EventQueue>("battle-event-queue", gameData);
@@ -50,14 +57,33 @@ void BattleState::onEnterImpl() {
     setupWildEncounter("map-basic", battleEntity, gameData);
     gameData.resourceStorage->store("battle-event-queue", EventQueue());
     battle = &data<Battle>(battleEntity, gameData);
+
     showText("Wild " + battle->opponentPokemon.displayName + " appeared!");
     // TODO: only show the player's pokémon now
     enqueueEvent<ActionSelectionEvent>(
         gameData,
+        selectedAction,
         battle->playerPokemon,
         battleEntity,
         gameData
     );
+
+    enqueueEvent<ImmediateEvent>(gameData, [&] {
+        switch (static_cast<BattleAction>(selectedAction)) {
+            case BattleAction::Fight:
+                showText("TODO: fight");
+                break;
+            case BattleAction::Bag:
+                showText("TODO: bag");
+                break;
+            case BattleAction::Pokemon:
+                showText("TODO: pokemon");
+                break;
+            case BattleAction::Run:
+                showText("TODO: run");
+                break;
+        }
+    });
 }
 
 void BattleState::onExitImpl() {

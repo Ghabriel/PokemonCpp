@@ -7,19 +7,20 @@ void EventQueue::addEvent(std::unique_ptr<Event> event) {
 }
 
 void EventQueue::tick() {
-    if (!currentEvent) {
-        if (eventQueue.empty()) {
+    if (currentEvent) {
+        bool finished = currentEvent->tick();
+
+        if (!finished) {
             return;
         }
-
-        currentEvent = std::move(eventQueue.front());
-        eventQueue.pop();
-        currentEvent->onStart();
     }
 
-    bool finished = currentEvent->tick();
-
-    if (finished) {
+    if (eventQueue.empty()) {
         currentEvent = nullptr;
+        return;
     }
+
+    currentEvent = std::move(eventQueue.front());
+    eventQueue.pop();
+    currentEvent->onStart();
 }

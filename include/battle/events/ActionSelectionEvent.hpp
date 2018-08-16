@@ -11,6 +11,7 @@ class ActionSelectionEvent : public Event {
     using Entity = engine::entitysystem::Entity;
  public:
     ActionSelectionEvent(
+        size_t& selectedOption,
         const Pokemon& currentPokemon,
         Entity battle,
         CoreStructures& gameData
@@ -21,6 +22,7 @@ class ActionSelectionEvent : public Event {
     Entity battle;
     CoreStructures& gameData;
     size_t* focusedOption;
+    size_t* selectedOption;
     bool selected;
 
     void registerInputContext();

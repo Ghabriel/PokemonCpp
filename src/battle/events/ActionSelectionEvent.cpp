@@ -8,10 +8,14 @@
 using engine::inputsystem::InputContext;
 
 ActionSelectionEvent::ActionSelectionEvent(
+    size_t& selectedOption,
     const Pokemon& currentPokemon,
     Entity battle,
     CoreStructures& gameData
-) : currentPokemon(currentPokemon), battle(battle), gameData(gameData) {
+) : currentPokemon(currentPokemon),
+    battle(battle),
+    gameData(gameData),
+    selectedOption(&selectedOption) {
     registerInputContext();
 }
 
@@ -50,5 +54,13 @@ void ActionSelectionEvent::onStartImpl() {
 }
 
 bool ActionSelectionEvent::tickImpl() {
-    return selected;
+    if (selected) {
+        *selectedOption = *focusedOption;
+        disableInputContext("battle-action-selection", gameData);
+        removeComponent<BattleActionSelection>(battle, gameData);
+        focusedOption = nullptr;
+        return true;
+    }
+
+    return false;
 }

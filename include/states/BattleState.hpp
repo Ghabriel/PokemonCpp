@@ -16,6 +16,7 @@ class BattleState : public engine::statesystem::State {
     CoreStructures& gameData;
     Entity battleEntity;
     Battle* battle;
+    size_t selectedAction;
 
     void registerInputContext();
     void onEnterImpl() override;
