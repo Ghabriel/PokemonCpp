@@ -35,6 +35,7 @@ bool ScreenFadeEvent::tickImpl() {
     bottomRect.setPosition(0, camera.height - rectSize.y);
 
     if (rectSize.y >= camera.height / 2) {
+        removeComponent<DrawableVector>(map, gameData);
         lua::enableControls();
         return true;
     }

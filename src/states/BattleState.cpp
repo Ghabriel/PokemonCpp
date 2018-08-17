@@ -53,6 +53,7 @@ void BattleState::registerInputContext() {
 }
 
 void BattleState::onEnterImpl() {
+    restoreEntity(battleEntity, gameData);
     enableInputContext("battle-state", gameData);
     setupWildEncounter("map-basic", battleEntity, gameData);
     gameData.resourceStorage->store("battle-event-queue", EventQueue());

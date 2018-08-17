@@ -111,7 +111,7 @@ void OverworldState::onEnterImpl() {
     addComponent(player, AnimationPlaybackData{}, gameData);
     addComponent(map, resource<Map>("map-basic", gameData), gameData);
     restoreEntity(player, gameData);
-    // restoreEntity(map, gameData);
+    restoreEntity(map, gameData);
 }
 
 void OverworldState::onExitImpl() {
