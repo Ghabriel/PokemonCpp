@@ -110,6 +110,8 @@ void OverworldState::onEnterImpl() {
     music("bgm-littleroot-town", gameData).play();
     addComponent(player, AnimationPlaybackData{}, gameData);
     addComponent(map, resource<Map>("map-basic", gameData), gameData);
+    restoreEntity(player, gameData);
+    // restoreEntity(map, gameData);
 }
 
 void OverworldState::onExitImpl() {

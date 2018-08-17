@@ -66,6 +66,7 @@ void BattleState::onEnterImpl() {
 void BattleState::onExitImpl() {
     disableInputContext("battle-state", gameData);
     music("bgm-wild-battle", gameData).stop();
+    deleteEntity(battleEntity, gameData);
 }
 
 void BattleState::executeImpl() {
@@ -96,8 +97,12 @@ void BattleState::actionSelectionScreen() {
                 actionSelectionScreen();
                 break;
             case BattleAction::Run:
-                showText("TODO: run");
-                actionSelectionScreen();
+                // TODO: check if the escape succeeds
+                sound("fx-battle-run", gameData).play();
+                showText("Got away safely!");
+                enqueueEvent<ImmediateEvent>(gameData, [&] {
+                    gameData.stateMachine->pushState("overworld-state");
+                });
                 break;
         }
     });

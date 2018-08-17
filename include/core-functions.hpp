@@ -22,6 +22,10 @@ inline void deleteEntity(engine::entitysystem::Entity entity, CoreStructures& ga
     gameData.componentManager->deleteEntity(entity);
 }
 
+inline void restoreEntity(engine::entitysystem::Entity entity, CoreStructures& gameData) {
+    gameData.componentManager->restoreEntity(entity);
+}
+
 template<typename TComponent>
 inline void addComponent(
     engine::entitysystem::Entity entity,

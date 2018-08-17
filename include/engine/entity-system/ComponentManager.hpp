@@ -50,6 +50,13 @@ namespace engine::entitysystem {
          */
         void deleteEntity(Entity);
         /**
+         * \brief Restores a deleted entity, restoring its visibility to
+         * forEachEntity(). Note that if the entity was already cleaned by
+         * cleanup(), this method effectively does nothing since the component
+         * bindings cannot be restored.
+         */
+        void restoreEntity(Entity);
+        /**
          * \brief Removes the bindings between all deleted entities and their
          * components, effectively removing them from the system. Note that
          * deleted entities can be "brought back to life" by having components
@@ -135,6 +142,14 @@ namespace engine::entitysystem {
     inline void ComponentManager::deleteEntity(Entity entity) {
         addComponent<Deleted>(entity);
         ++numDeletedEntities;
+    }
+
+    inline void ComponentManager::restoreEntity(Entity entity) {
+        if (hasComponent<Deleted>(entity)) {
+            --numDeletedEntities;
+        }
+
+        removeComponent<Deleted>(entity);
     }
 
     template<typename T, typename... Ts>
