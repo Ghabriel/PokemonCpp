@@ -37,7 +37,6 @@ void GameRenderer::operator()(SingleThreadGameLoop& game) {
     sf::Event event;
     while (window.pollEvent(event)) {
         if (event.type == sf::Event::Closed) {
-            window.close();
             game.stop();
         } else if (event.type == sf::Event::Resized) {
             sf::Vector2u windowSize = window.getSize();
