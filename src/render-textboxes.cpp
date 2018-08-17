@@ -234,17 +234,20 @@ void renderFocusBox(
     const BattleActionSelection& selection,
     int firstRowY
 ) {
-    sf::RectangleShape focusBox({textBoxWidth / 2 - 10, 35});
-    focusBox.setOutlineColor(sf::Color::Red);
-    focusBox.setOutlineThickness(1);
-    focusBox.setFillColor(sf::Color::Transparent);
-
+    int focusBoxWidth = (selection.focusedOption % 2 == 0)
+        ? textBoxWidth / 2 - 10
+        : textBoxWidth / 2 - 30;
     int focusBoxX = (selection.focusedOption % 2 == 0)
         ? textBoxX
         : textBoxX + textBoxWidth / 2;
     int focusBoxY = (selection.focusedOption <= 1)
         ? firstRowY
         : textBoxY;
+
+    sf::RectangleShape focusBox({focusBoxWidth, 35});
+    focusBox.setOutlineColor(sf::Color::Red);
+    focusBox.setOutlineThickness(1);
+    focusBox.setFillColor(sf::Color::Transparent);
     focusBox.setPosition({focusBoxX + textMargin - 1, focusBoxY + textMargin + 5});
     window.draw(focusBox);
 }
