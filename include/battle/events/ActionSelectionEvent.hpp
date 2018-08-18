@@ -21,7 +21,6 @@ class ActionSelectionEvent : public Event {
     const Pokemon& currentPokemon;
     Entity battle;
     CoreStructures& gameData;
-    size_t* focusedOption;
     size_t* selectedOption;
     bool selected;
 

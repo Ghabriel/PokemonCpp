@@ -5,7 +5,12 @@
 #include "core-functions.hpp"
 #include "CoreStructures.hpp"
 
+using engine::entitysystem::Entity;
 using engine::inputsystem::InputContext;
+
+size_t& getFocusedOption(Entity battle, CoreStructures& gameData) {
+    return data<BattleActionSelection>(battle, gameData).focusedOption;
+}
 
 ActionSelectionEvent::ActionSelectionEvent(
     size_t& selectedOption,
@@ -25,10 +30,30 @@ void ActionSelectionEvent::registerInputContext() {
     context.actions = {
         {"Action", [&] { selected = true; }},
         {"Cancel", [&] { std::cout << "Cancel\n"; }},
-        {"Left", [&] { if (*focusedOption % 2 == 1) --*focusedOption; }},
-        {"Right", [&] { if (*focusedOption % 2 == 0) ++*focusedOption; }},
-        {"Up", [&] { if (*focusedOption >= 2) *focusedOption -= 2; }},
-        {"Down", [&] { if (*focusedOption <= 1) *focusedOption += 2; }}
+        {"Left", [&] {
+            size_t& focusedOption = getFocusedOption(battle, gameData);
+            if (focusedOption % 2 == 1) {
+                --focusedOption;
+            }
+        }},
+        {"Right", [&] {
+            size_t& focusedOption = getFocusedOption(battle, gameData);
+            if (focusedOption % 2 == 0) {
+                ++focusedOption;
+            }
+        }},
+        {"Up", [&] {
+            size_t& focusedOption = getFocusedOption(battle, gameData);
+            if (focusedOption >= 2) {
+                focusedOption -= 2;
+            }
+        }},
+        {"Down", [&] {
+            size_t& focusedOption = getFocusedOption(battle, gameData);
+            if (focusedOption <= 1) {
+                focusedOption += 2;
+            }
+        }}
     };
 
     context.priority = 1;
@@ -49,16 +74,14 @@ void ActionSelectionEvent::onStartImpl() {
         gameData
     );
 
-    focusedOption = &data<BattleActionSelection>(battle, gameData).focusedOption;
     selected = false;
 }
 
 bool ActionSelectionEvent::tickImpl() {
     if (selected) {
-        *selectedOption = *focusedOption;
+        *selectedOption = getFocusedOption(battle, gameData);
         disableInputContext("battle-action-selection", gameData);
         removeComponent<BattleActionSelection>(battle, gameData);
-        focusedOption = nullptr;
         return true;
     }
 

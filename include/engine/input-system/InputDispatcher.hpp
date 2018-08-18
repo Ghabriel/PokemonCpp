@@ -42,7 +42,8 @@ namespace engine::inputsystem {
         void tick();
 
         /**
-         * \brief Registers a context, mapping it to a given name.
+         * \brief Registers a context, mapping it to a given name. If the given
+         * name is already registered, its corresponding context is replaced.
          */
         void registerContext(const std::string& name, const InputContext&);
         /**
@@ -63,7 +64,7 @@ namespace engine::inputsystem {
      private:
         InputTracker& inputTracker;
         std::set<const InputContext*, InputContextPointerCompare> activeContexts;
-        std::unordered_map<std::string, const InputContext> registeredContexts;
+        std::unordered_map<std::string, InputContext> registeredContexts;
     };
 
     inline InputDispatcher::InputDispatcher(InputTracker& tracker) : inputTracker(tracker) {}
@@ -99,7 +100,7 @@ namespace engine::inputsystem {
         const std::string& name,
         const InputContext& context
     ) {
-        registeredContexts.insert({name, context});
+        registeredContexts.insert_or_assign(name, context);
     }
 
     inline void InputDispatcher::enableContext(const std::string& contextName) {
