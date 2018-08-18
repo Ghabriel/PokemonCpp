@@ -1,6 +1,7 @@
 #include "states/BattleState.hpp"
 
 #include "battle/battle-setup.hpp"
+#include "battle/Move.hpp"
 #include "battle/events/ActionSelectionEvent.hpp"
 #include "components/Battle.hpp"
 #include "components/BattleActionSelection.hpp"
@@ -129,28 +130,32 @@ void BattleState::actionSelectionScreen() {
 
 void BattleState::moveSelectionScreen() {
     enqueueEvent<ImmediateEvent>(gameData, [&] {
-        MoveDisplayInfo tackle{"Tackle", "Normal", 35, 35};
-        MoveDisplayInfo tailWhip{"Tail Whip", "Normal", 20, 20};
-        addComponent(
-            battleEntity,
-            BattleMoveSelection{
-                {{tackle, tailWhip}},
-                300,
-                0
-            },
-            gameData
-        );
+        BattleMoveSelection moveSelection;
+        for (size_t i = 0; i < battle->playerPokemon.moves.size(); ++i) {
+            const auto& moveId = battle->playerPokemon.moves[i];
+            Move& move = resource<Move>("move-" + moveId, gameData);
+            moveSelection.moves[i] = {{
+                move.displayName,
+                move.type,
+                battle->playerPokemon.pp[i],
+                move.pp // TODO: handle PP Ups
+            }};
+        }
+
+        moveSelection.optionBoxWidth = 300;
+        moveSelection.focusedOption = 0;
+        addComponent(battleEntity, moveSelection, gameData);
     });
 
-    // enqueueEvent<ActionSelectionEvent>(
-    //     gameData,
-    //     selectedAction,
-    //     false,
-    //     [&]() -> size_t& {
-    //         return data<BattleActionSelection>(battleEntity, gameData).focusedOption;
-    //     },
-    //     gameData
-    // );
+    enqueueEvent<ActionSelectionEvent>(
+        gameData,
+        selectedAction,
+        false,
+        [&]() -> size_t& {
+            return data<BattleMoveSelection>(battleEntity, gameData).focusedOption;
+        },
+        gameData
+    );
 }
 
 void BattleState::showText(const std::string& content) {

@@ -258,13 +258,12 @@ void renderMoveFocusBox(
     const BattleMoveSelection& selection,
     int firstRowY
 ) {
-    // float focusBoxWidth = (selection.focusedOption % 2 == 0)
-    //     ? textBoxWidth / 2 - 10
-    //     : textBoxWidth / 2 - 30;
-    float focusBoxWidth = textBoxWidth / 2 - 13;
+    float focusBoxWidth = (selection.focusedOption % 2 == 0)
+        ? textBoxWidth / 2 - 13
+        : textBoxWidth / 2 - 40;
     float focusBoxX = (selection.focusedOption % 2 == 0)
         ? textBoxX
-        : textBoxX + textBoxWidth / 2;
+        : textBoxX + textBoxWidth / 2 - 10;
     float focusBoxY = (selection.focusedOption <= 1)
         ? firstRowY
         : textBoxY;

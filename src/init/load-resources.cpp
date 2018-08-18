@@ -6,6 +6,7 @@
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
 #include "battle/EncounterData.hpp"
+#include "battle/Move.hpp"
 #include "battle/PokemonSpeciesData.hpp"
 #include "components/Map.hpp"
 #include "engine/resource-system/include.hpp"
@@ -364,6 +365,30 @@ void loadPokemonSprites(
     ECHO("[RESOURCE] Pokemon sprites: OK");
 }
 
+void loadMoves(ResourceStorage& storage) {
+    std::ifstream movesFile(ResourceFiles::MOVES);
+    JsonValue data = parseJSON(movesFile);
+
+    for (const auto& [id, moveData] : data.asIterableMap()) {
+        Move move;
+        move.displayName = moveData["display-name"].asString();
+        move.type = moveData["type"].asString();
+        move.kind = moveData["kind"].asString();
+        move.power = moveData["power"].asInt();
+        move.accuracy = moveData["accuracy"].asInt();
+        move.pp = moveData["pp"].asInt();
+        move.effectRate = moveData["effect-rate"].asInt();
+        move.targetType = moveData["target-type"].asString();
+        move.priority = moveData["priority"].asInt();
+        move.flags = moveData["flags"].asString();
+        move.description = moveData["description"].asString();
+
+        storage.store("move-" + id, move);
+    }
+
+    ECHO("[RESOURCE] Moves: OK");
+}
+
 void loadResources(ResourceStorage& storage) {
     loadFonts(storage);
     loadTextures(storage);
@@ -375,4 +400,5 @@ void loadResources(ResourceStorage& storage) {
     loadEncounters(storage);
     std::vector<std::string> pokemonList = loadPokemonSpecies(storage);
     loadPokemonSprites(storage, pokemonList);
+    loadMoves(storage);
 }

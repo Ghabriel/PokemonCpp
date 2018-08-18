@@ -1,5 +1,6 @@
 #include "battle/generate-pokemon.hpp"
 
+#include "battle/Move.hpp"
 #include "battle/Pokemon.hpp"
 #include "battle/PokemonSpeciesData.hpp"
 #include "battle/random.hpp"
@@ -37,6 +38,20 @@ std::vector<std::string> pickMoves(const PokemonSpeciesData& speciesData, int le
         if (result.size() == 4) {
             break;
         }
+    }
+
+    return result;
+}
+
+std::vector<int> pickPPs(
+    ResourceStorage& storage,
+    const std::vector<std::string>& moves
+) {
+    std::vector<int> result;
+
+    for (const auto& moveId : moves) {
+        Move& move = storage.get<Move>("move-" + moveId);
+        result.push_back(move.pp);
     }
 
     return result;
@@ -89,7 +104,7 @@ Pokemon generatePokemon(
     pokemon.ev = {0, 0, 0, 0, 0, 0};
     pokemon.iv = pickIVs();
     pokemon.moves = pickMoves(speciesData, level);
-    pokemon.pp = {}; // TODO
+    pokemon.pp = pickPPs(storage, pokemon.moves); // TODO
     pokemon.ppUps = {0, 0, 0, 0};
     pokemon.eggStepsToHatch = -1;
     pokemon.gender = pickGender(speciesData);

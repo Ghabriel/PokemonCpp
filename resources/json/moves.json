@@ -1,0 +1,44 @@
+{
+    "Megahorn": {
+        "display-name": "Megahorn",
+        "type": "Bug",
+        "kind": "Physical",
+        "power": 120,
+        "accuracy": 85,
+        "pp": 10,
+        "effect-rate": 0,
+        "target-type": "single-target",
+        "priority": 0,
+        "flags": "abef",
+        "description": "Using its tough and impressive horn, the user rams into the target with no letup.",
+        "script": "Megahorn"
+    },
+    "Tackle": {
+        "display-name": "Tackle",
+        "type": "Normal",
+        "kind": "Physical",
+        "power": 40,
+        "accuracy": 100,
+        "pp": 35,
+        "effect-rate": 0,
+        "target-type": "single-target",
+        "priority": 0,
+        "flags": "abef",
+        "description": "A physical attack in which the user charges and slams into the target with its whole body.",
+        "script": "Tackle"
+    },
+    "TailWhip": {
+        "display-name": "Tail Whip",
+        "type": "Normal",
+        "kind": "Physical",
+        "power": 0,
+        "accuracy": 100,
+        "pp": 30,
+        "effect-rate": 0,
+        "target-type": "single-target",
+        "priority": 0,
+        "flags": "bce",
+        "description": "The user wags its tail cutely, making opposing Pokémon less wary and lowering their Defense stat.",
+        "script": "TailWhip"
+    }
+}
