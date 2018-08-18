@@ -78,6 +78,7 @@ void BattleState::actionSelectionScreen() {
     enqueueEvent<ActionSelectionEvent>(
         gameData,
         selectedAction,
+        false,
         battle->playerPokemon,
         battleEntity,
         gameData
@@ -86,8 +87,8 @@ void BattleState::actionSelectionScreen() {
     enqueueEvent<ImmediateEvent>(gameData, [&] {
         switch (static_cast<BattleAction>(selectedAction)) {
             case BattleAction::Fight:
-                showText("TODO: fight");
-                actionSelectionScreen();
+                // TODO: use Struggle if no moves can be used
+                moveSelectionScreen();
                 break;
             case BattleAction::Bag:
                 showText("TODO: bag");
@@ -107,6 +108,10 @@ void BattleState::actionSelectionScreen() {
                 break;
         }
     });
+}
+
+void BattleState::moveSelectionScreen() {
+    // TODO
 }
 
 void BattleState::showText(const std::string& content) {

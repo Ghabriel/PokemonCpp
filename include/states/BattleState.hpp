@@ -16,7 +16,7 @@ class BattleState : public engine::statesystem::State {
     CoreStructures& gameData;
     Entity battleEntity;
     Battle* battle;
-    size_t selectedAction;
+    int selectedAction;
 
     void registerInputContext();
     void onEnterImpl() override;
@@ -24,6 +24,7 @@ class BattleState : public engine::statesystem::State {
     void executeImpl() override;
 
     void actionSelectionScreen();
+    void moveSelectionScreen();
 
     void showText(const std::string&);
 };

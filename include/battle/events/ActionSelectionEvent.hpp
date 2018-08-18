@@ -7,22 +7,30 @@
 struct CoreStructures;
 struct Pokemon;
 
+enum class SelectionState {
+    Selected,
+    Canceled,
+    Pending
+};
+
 class ActionSelectionEvent : public Event {
     using Entity = engine::entitysystem::Entity;
  public:
     ActionSelectionEvent(
-        size_t& selectedOption,
+        int& selectedOption,
+        bool cancelable,
         const Pokemon& currentPokemon,
         Entity battle,
         CoreStructures& gameData
     );
 
  private:
+    int* selectedOption;
+    bool cancelable;
     const Pokemon& currentPokemon;
     Entity battle;
     CoreStructures& gameData;
-    size_t* selectedOption;
-    bool selected;
+    SelectionState state;
 
     void registerInputContext();
     void onStartImpl() override;

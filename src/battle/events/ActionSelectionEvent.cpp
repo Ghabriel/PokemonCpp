@@ -13,14 +13,16 @@ size_t& getFocusedOption(Entity battle, CoreStructures& gameData) {
 }
 
 ActionSelectionEvent::ActionSelectionEvent(
-    size_t& selectedOption,
+    int& selectedOption,
+    bool cancelable,
     const Pokemon& currentPokemon,
     Entity battle,
     CoreStructures& gameData
-) : currentPokemon(currentPokemon),
+) : selectedOption(&selectedOption),
+    cancelable(cancelable),
+    currentPokemon(currentPokemon),
     battle(battle),
-    gameData(gameData),
-    selectedOption(&selectedOption) {
+    gameData(gameData) {
     registerInputContext();
 }
 
@@ -28,29 +30,37 @@ void ActionSelectionEvent::registerInputContext() {
     InputContext context;
 
     context.actions = {
-        {"Action", [&] { selected = true; }},
-        {"Cancel", [&] { std::cout << "Cancel\n"; }},
+        {"Action", [&] { state = SelectionState::Selected; }},
+        {"Cancel", [&] {
+            if (cancelable) {
+                state = SelectionState::Canceled;
+            }
+        }},
         {"Left", [&] {
             size_t& focusedOption = getFocusedOption(battle, gameData);
             if (focusedOption % 2 == 1) {
+                sound("fx-select-option", gameData).play();
                 --focusedOption;
             }
         }},
         {"Right", [&] {
             size_t& focusedOption = getFocusedOption(battle, gameData);
             if (focusedOption % 2 == 0) {
+                sound("fx-select-option", gameData).play();
                 ++focusedOption;
             }
         }},
         {"Up", [&] {
             size_t& focusedOption = getFocusedOption(battle, gameData);
             if (focusedOption >= 2) {
+                sound("fx-select-option", gameData).play();
                 focusedOption -= 2;
             }
         }},
         {"Down", [&] {
             size_t& focusedOption = getFocusedOption(battle, gameData);
             if (focusedOption <= 1) {
+                sound("fx-select-option", gameData).play();
                 focusedOption += 2;
             }
         }}
@@ -74,16 +84,18 @@ void ActionSelectionEvent::onStartImpl() {
         gameData
     );
 
-    selected = false;
+    state = SelectionState::Pending;
 }
 
 bool ActionSelectionEvent::tickImpl() {
-    if (selected) {
-        *selectedOption = getFocusedOption(battle, gameData);
-        disableInputContext("battle-action-selection", gameData);
-        removeComponent<BattleActionSelection>(battle, gameData);
-        return true;
+    if (state == SelectionState::Pending) {
+        return false;
     }
 
-    return false;
+    *selectedOption = (state == SelectionState::Selected)
+        ? getFocusedOption(battle, gameData)
+        : -1;
+    disableInputContext("battle-action-selection", gameData);
+    removeComponent<BattleActionSelection>(battle, gameData);
+    return true;
 }
