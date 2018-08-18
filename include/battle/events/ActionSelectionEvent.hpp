@@ -6,7 +6,6 @@
 #include "../../events/Event.hpp"
 
 struct CoreStructures;
-struct Pokemon;
 
 enum class SelectionState {
     Selected,

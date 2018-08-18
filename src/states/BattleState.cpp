@@ -4,6 +4,7 @@
 #include "battle/events/ActionSelectionEvent.hpp"
 #include "components/Battle.hpp"
 #include "components/BattleActionSelection.hpp"
+#include "components/BattleMoveSelection.hpp"
 #include "components/TextBox.hpp"
 #include "core-functions.hpp"
 #include "CoreStructures.hpp"
@@ -80,8 +81,8 @@ void BattleState::actionSelectionScreen() {
             battleEntity,
             BattleActionSelection{
                 "What will " + battle->playerPokemon.displayName + " do?",
-                300,
                 {"Fight", "Bag", "Pokemon", "Run"},
+                300,
                 0
             },
             gameData
@@ -127,7 +128,29 @@ void BattleState::actionSelectionScreen() {
 }
 
 void BattleState::moveSelectionScreen() {
-    // TODO
+    enqueueEvent<ImmediateEvent>(gameData, [&] {
+        MoveDisplayInfo tackle{"Tackle", "Normal", 35, 35};
+        MoveDisplayInfo tailWhip{"Tail Whip", "Normal", 20, 20};
+        addComponent(
+            battleEntity,
+            BattleMoveSelection{
+                {{tackle, tailWhip}},
+                300,
+                0
+            },
+            gameData
+        );
+    });
+
+    // enqueueEvent<ActionSelectionEvent>(
+    //     gameData,
+    //     selectedAction,
+    //     false,
+    //     [&]() -> size_t& {
+    //         return data<BattleActionSelection>(battleEntity, gameData).focusedOption;
+    //     },
+    //     gameData
+    // );
 }
 
 void BattleState::showText(const std::string& content) {

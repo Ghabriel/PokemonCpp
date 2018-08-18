@@ -4,6 +4,7 @@
 #include <cmath>
 #include <sstream>
 #include "components/BattleActionSelection.hpp"
+#include "components/BattleMoveSelection.hpp"
 #include "components/Camera.hpp"
 #include "components/TextBox.hpp"
 #include "engine/entity-system/include.hpp"
@@ -229,18 +230,18 @@ void renderText(
     window.draw(text);
 }
 
-void renderFocusBox(
+void renderActionFocusBox(
     sf::RenderWindow& window,
     const BattleActionSelection& selection,
     int firstRowY
 ) {
-    int focusBoxWidth = (selection.focusedOption % 2 == 0)
+    float focusBoxWidth = (selection.focusedOption % 2 == 0)
         ? textBoxWidth / 2 - 10
         : textBoxWidth / 2 - 30;
-    int focusBoxX = (selection.focusedOption % 2 == 0)
+    float focusBoxX = (selection.focusedOption % 2 == 0)
         ? textBoxX
         : textBoxX + textBoxWidth / 2;
-    int focusBoxY = (selection.focusedOption <= 1)
+    float focusBoxY = (selection.focusedOption <= 1)
         ? firstRowY
         : textBoxY;
 
@@ -250,6 +251,34 @@ void renderFocusBox(
     focusBox.setFillColor(sf::Color::Transparent);
     focusBox.setPosition({focusBoxX + textMargin - 1, focusBoxY + textMargin + 5});
     window.draw(focusBox);
+}
+
+void renderMoveFocusBox(
+    sf::RenderWindow& window,
+    const BattleMoveSelection& selection,
+    int firstRowY
+) {
+    // float focusBoxWidth = (selection.focusedOption % 2 == 0)
+    //     ? textBoxWidth / 2 - 10
+    //     : textBoxWidth / 2 - 30;
+    float focusBoxWidth = textBoxWidth / 2 - 13;
+    float focusBoxX = (selection.focusedOption % 2 == 0)
+        ? textBoxX
+        : textBoxX + textBoxWidth / 2;
+    float focusBoxY = (selection.focusedOption <= 1)
+        ? firstRowY
+        : textBoxY;
+
+    sf::RectangleShape focusBox({focusBoxWidth, 35});
+    focusBox.setOutlineColor(sf::Color::Red);
+    focusBox.setOutlineThickness(1);
+    focusBox.setFillColor(sf::Color::Transparent);
+    focusBox.setPosition({focusBoxX + textMargin, focusBoxY + textMargin + 3});
+    window.draw(focusBox);
+}
+
+std::string displayMove(const std::optional<MoveDisplayInfo>& move) {
+    return move ? move->displayName : "-";
 }
 
 void renderTextBoxes(
@@ -276,14 +305,18 @@ void renderTextBoxes(
             Entity entity,
             BattleActionSelection& selection
         ) {
+            // Text box
             int firstBoxWidth = camera.width - selection.optionBoxWidth;
             updateTextBoxVariables(camera, firstBoxWidth);
             renderBox(window, storage);
             renderText(window, storage, selection.text);
 
+            // Options box
             textBoxWidth = 16 * std::floor((selection.optionBoxWidth - 2 * textBoxMinMargin) / 16);
             textBoxX += firstBoxWidth - textBoxMargin;
             renderBox(window, storage);
+
+            // Options
             renderText(window, storage, selection.options[0]);
 
             textBoxX += textBoxWidth / 2;
@@ -296,7 +329,46 @@ void renderTextBoxes(
             textBoxX -= textBoxWidth / 2;
             renderText(window, storage, selection.options[2]);
 
-            renderFocusBox(window, selection, firstRowY);
+            renderActionFocusBox(window, selection, firstRowY);
+        }
+    );
+
+    manager.forEachEntity<BattleMoveSelection>(
+        [&](
+            Entity entity,
+            BattleMoveSelection& selection
+        ) {
+            // Move box
+            int firstBoxWidth = camera.width - selection.optionBoxWidth;
+            int firstBoxX = textBoxX;
+            updateTextBoxVariables(camera, firstBoxWidth);
+            renderBox(window, storage);
+
+            // Moves
+            renderText(window, storage, displayMove(selection.moves[0]));
+            textBoxX += textBoxWidth / 2;
+            renderText(window, storage, displayMove(selection.moves[1]));
+            int firstRowY = textBoxY;
+            textBoxY = camera.y + camera.height - 25 - textBoxMargin - 3 * textMargin;
+            renderText(window, storage, displayMove(selection.moves[3]));
+            textBoxX -= textBoxWidth / 2;
+            renderText(window, storage, displayMove(selection.moves[2]));
+
+            // Move info box
+            textBoxY = firstRowY;
+            textBoxWidth = 16 * std::floor((selection.optionBoxWidth - 2 * textBoxMinMargin) / 16);
+            textBoxX = firstBoxX + firstBoxWidth - textBoxMargin;
+            renderBox(window, storage);
+
+            // Move info
+            MoveDisplayInfo& focusedMove = *selection.moves[selection.focusedOption];
+            renderText(window, storage, "PP " + std::to_string(focusedMove.pp) + "/" + std::to_string(focusedMove.maxPP));
+            textBoxY = camera.y + camera.height - 25 - textBoxMargin - 3 * textMargin;
+            renderText(window, storage, focusedMove.type);
+
+            textBoxX = firstBoxX;
+            textBoxWidth = firstBoxWidth;
+            renderMoveFocusBox(window, selection, firstRowY);
         }
     );
 }

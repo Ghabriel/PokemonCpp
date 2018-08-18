@@ -6,8 +6,8 @@
 
 struct BattleActionSelection {
     std::string text;
-    int optionBoxWidth;
     std::array<std::string, 4> options;
+    int optionBoxWidth;
     size_t focusedOption;
 };
 

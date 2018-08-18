@@ -1,7 +1,5 @@
 #include "battle/events/ActionSelectionEvent.hpp"
 
-#include "battle/Pokemon.hpp"
-#include "components/BattleActionSelection.hpp"
 #include "core-functions.hpp"
 #include "CoreStructures.hpp"
 
