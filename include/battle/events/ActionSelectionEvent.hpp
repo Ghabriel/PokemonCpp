@@ -1,6 +1,7 @@
 #ifndef ACTION_SELECTION_EVENT_HPP
 #define ACTION_SELECTION_EVENT_HPP
 
+#include <functional>
 #include "../../engine/entity-system/types.hpp"
 #include "../../events/Event.hpp"
 
@@ -19,16 +20,14 @@ class ActionSelectionEvent : public Event {
     ActionSelectionEvent(
         int& selectedOption,
         bool cancelable,
-        const Pokemon& currentPokemon,
-        Entity battle,
+        std::function<size_t&()> getFocusedOption,
         CoreStructures& gameData
     );
 
  private:
     int* selectedOption;
     bool cancelable;
-    const Pokemon& currentPokemon;
-    Entity battle;
+    std::function<size_t&()> getFocusedOption;
     CoreStructures& gameData;
     SelectionState state;
 

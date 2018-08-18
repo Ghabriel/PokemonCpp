@@ -75,16 +75,32 @@ void BattleState::executeImpl() {
 }
 
 void BattleState::actionSelectionScreen() {
+    enqueueEvent<ImmediateEvent>(gameData, [&] {
+        addComponent(
+            battleEntity,
+            BattleActionSelection{
+                "What will " + battle->playerPokemon.displayName + " do?",
+                300,
+                {"Fight", "Bag", "Pokemon", "Run"},
+                0
+            },
+            gameData
+        );
+    });
+
     enqueueEvent<ActionSelectionEvent>(
         gameData,
         selectedAction,
         false,
-        battle->playerPokemon,
-        battleEntity,
+        [&]() -> size_t& {
+            return data<BattleActionSelection>(battleEntity, gameData).focusedOption;
+        },
         gameData
     );
 
     enqueueEvent<ImmediateEvent>(gameData, [&] {
+        removeComponent<BattleActionSelection>(battleEntity, gameData);
+
         switch (static_cast<BattleAction>(selectedAction)) {
             case BattleAction::Fight:
                 // TODO: use Struggle if no moves can be used
