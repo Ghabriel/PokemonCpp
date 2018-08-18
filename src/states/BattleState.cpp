@@ -132,13 +132,15 @@ void BattleState::moveSelectionScreen() {
     enqueueEvent<ImmediateEvent>(gameData, [&] {
         BattleMoveSelection moveSelection;
         for (size_t i = 0; i < battle->playerPokemon.moves.size(); ++i) {
-            const auto& moveId = battle->playerPokemon.moves[i];
-            Move& move = resource<Move>("move-" + moveId, gameData);
+            const auto& pokemon = battle->playerPokemon;
+            const auto& move = resource<Move>("move-" + pokemon.moves[i], gameData);
+            int maxPP = move.pp * (1 + 0.2 * pokemon.ppUps[i]);
+
             moveSelection.moves[i] = {{
                 move.displayName,
-                move.type,
-                battle->playerPokemon.pp[i],
-                move.pp // TODO: handle PP Ups
+                move.type, // TODO: display name of type?
+                pokemon.pp[i],
+                maxPP
             }};
         }
 

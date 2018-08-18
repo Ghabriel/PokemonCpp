@@ -348,7 +348,8 @@ void renderTextBoxes(
             textBoxX += textBoxWidth / 2;
             renderText(window, storage, displayMove(selection.moves[1]));
             int firstRowY = textBoxY;
-            textBoxY = camera.y + camera.height - 25 - textBoxMargin - 3 * textMargin;
+            int secondRowY = camera.y + camera.height - 25 - textBoxMargin - 3 * textMargin;
+            textBoxY = secondRowY;
             renderText(window, storage, displayMove(selection.moves[3]));
             textBoxX -= textBoxWidth / 2;
             renderText(window, storage, displayMove(selection.moves[2]));
@@ -359,13 +360,16 @@ void renderTextBoxes(
             textBoxX = firstBoxX + firstBoxWidth - textBoxMargin;
             renderBox(window, storage);
 
-            // Move info
-            MoveDisplayInfo& focusedMove = *selection.moves[selection.focusedOption];
-            renderText(window, storage, "PP " + std::to_string(focusedMove.pp) + "/" + std::to_string(focusedMove.maxPP));
-            textBoxY = camera.y + camera.height - 25 - textBoxMargin - 3 * textMargin;
-            renderText(window, storage, focusedMove.type);
+            if (selection.moves[selection.focusedOption]) {
+                // Move info
+                MoveDisplayInfo& focusedMove = *selection.moves[selection.focusedOption];
+                renderText(window, storage, "PP " + std::to_string(focusedMove.pp) + "/" + std::to_string(focusedMove.maxPP));
+                textBoxY = secondRowY;
+                renderText(window, storage, focusedMove.type);
+            }
 
             textBoxX = firstBoxX;
+            textBoxY = secondRowY;
             textBoxWidth = firstBoxWidth;
             renderMoveFocusBox(window, selection, firstRowY);
         }
