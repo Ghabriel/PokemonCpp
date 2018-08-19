@@ -69,6 +69,7 @@ namespace engine::scriptingsystem {
         template <typename Ret, typename... Args>
         void pushFunction(CFunction<Ret, Args...>);
         void setGlobal(const std::string& globalName);
+        void setField(const std::string& fieldName);
         void call(size_t paramCount, size_t returnCount);
 
         bool isNil() const;
@@ -115,11 +116,9 @@ namespace engine::scriptingsystem {
 
     template<typename Ret, typename... Args>
     void LuaWrapper::pushFunction(CFunction<Ret, Args...> fn) {
-        static auto& localL = L;
-
         struct Container {
             static int luaWrapper(lua_State* rawState) {
-                void* voidFn = lua_touserdata(localL.get(), lua_upvalueindex(1));
+                void* voidFn = lua_touserdata(rawState, lua_upvalueindex(1));
                 auto retrievedFn = reinterpret_cast<CFunction<Ret, Args...>>(voidFn);
                 __detail::callWithArguments(
                     retrievedFn,
@@ -146,6 +145,10 @@ namespace engine::scriptingsystem {
 
     inline void LuaWrapper::setGlobal(const std::string& globalName) {
         lua_setglobal(L.get(), globalName.c_str());
+    }
+
+    inline void LuaWrapper::setField(const std::string& fieldName) {
+        lua_setfield(L.get(), -2, fieldName.c_str());
     }
 
     inline void LuaWrapper::call(size_t paramCount, size_t returnCount) {

@@ -389,6 +389,10 @@ void loadMoves(ResourceStorage& storage) {
     ECHO("[RESOURCE] Moves: OK");
 }
 
+void loadAI(ResourceStorage& storage) {
+    loadScript(storage, "ai");
+}
+
 void loadResources(ResourceStorage& storage) {
     loadFonts(storage);
     loadTextures(storage);
@@ -401,4 +405,5 @@ void loadResources(ResourceStorage& storage) {
     std::vector<std::string> pokemonList = loadPokemonSpecies(storage);
     loadPokemonSprites(storage, pokemonList);
     loadMoves(storage);
+    loadAI(storage);
 }

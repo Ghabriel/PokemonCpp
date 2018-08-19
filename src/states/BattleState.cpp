@@ -16,6 +16,7 @@
 #include "events/ImmediateEvent.hpp"
 #include "events/TextEvent.hpp"
 #include "EventQueue.hpp"
+#include "lua-native-functions.hpp"
 
 #include "engine/utils/debug/xtrace.hpp"
 
@@ -42,6 +43,7 @@ BattleState::BattleState(CoreStructures& gameData)
  : gameData(gameData),
    battleEntity(createEntity(gameData)) {
     registerInputContext();
+    lua::internal::setBattle(battleEntity);
 }
 
 void BattleState::registerInputContext() {
@@ -211,9 +213,39 @@ void BattleState::processTurn() {
     });
 }
 
+void BattleState::updateAIVariables() {
+    std::unordered_map<std::string, Pokemon*> pokemonList = {
+        {"user", &battle->opponentPokemon},
+        {"foe", &battle->playerPokemon},
+    };
+
+    auto& ai = script("ai", gameData);
+
+    for (const auto& [varName, pokemonPtr] : pokemonList) {
+        const auto& pokemon = *pokemonPtr;
+        ai.set(varName + ".species", pokemon.species);
+        ai.set(varName + ".nature", static_cast<int>(pokemon.nature));
+        ai.set(varName + ".heldItem", pokemon.heldItem);
+        ai.set(varName + ".ability", pokemon.ability);
+        ai.set(varName + ".gender", static_cast<int>(pokemon.gender));
+        ai.set(varName + ".form", pokemon.form);
+        ai.set(varName + ".displayName", pokemon.displayName);
+        ai.set(varName + ".status", static_cast<int>(pokemon.status));
+        ai.set(varName + ".asleepRounds", pokemon.asleepRounds);
+        ai.set(varName + ".level", pokemon.level);
+        ai.set(varName + ".hp", pokemon.stats[0]);
+        ai.set(varName + ".attack", pokemon.stats[1]);
+        ai.set(varName + ".defense", pokemon.stats[2]);
+        ai.set(varName + ".specialAttack", pokemon.stats[3]);
+        ai.set(varName + ".specialDefense", pokemon.stats[4]);
+        ai.set(varName + ".speed", pokemon.stats[5]);
+        ai.set(varName + ".currentHP", pokemon.currentHP);
+    }
+}
+
 size_t BattleState::chooseMoveAI(const Pokemon& pokemon) {
-    // TODO: handle proper AIs
-    return random(0, pokemon.moves.size() - 1);
+    updateAIVariables();
+    return script("ai", gameData).call<int>("chooseMoveWildBattle");
 }
 
 void BattleState::processPlayerMove(size_t moveIndex) {

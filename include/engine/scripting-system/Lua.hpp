@@ -15,6 +15,13 @@ namespace engine::scriptingsystem {
         Lua(const std::string& filename);
 
         /**
+         * \brief Sets the value of a variable. The syntax "a.b.c" is
+         * supported to set specific fields of a structure.
+         */
+        template<typename T>
+        void set(const std::string& variableName, const T& value);
+
+        /**
          * \brief Retrieves the value of a variable. The syntax "a.b.c" is
          * supported to retrieve specific fields of a structure.
          */
@@ -40,9 +47,23 @@ namespace engine::scriptingsystem {
 
         size_t pushVariableValue(const std::string& variableName);
         void pushGlobalOrField(const std::string& value, size_t level);
+        std::vector<std::string> getVariableComponents(const std::string& variableName) const;
     };
 
     inline Lua::Lua(const std::string& filename) : luaState(filename) { }
+
+    template<typename T>
+    void Lua::set(const std::string& variableName, const T& value) {
+        std::vector<std::string> components = getVariableComponents(variableName);
+
+        for (size_t i = 0; i < components.size() - 1; ++i) {
+            pushGlobalOrField(components[i], i);
+        }
+
+        luaState.pushValue(value);
+        luaState.setField(components[components.size() - 1]);
+        luaState.pop(components.size() - 1);
+    }
 
     template<typename T>
     inline T Lua::get(const std::string& variableName) {
@@ -74,22 +95,13 @@ namespace engine::scriptingsystem {
     }
 
     inline size_t Lua::pushVariableValue(const std::string& variableName) {
-        size_t level = 0;
-        std::string var;
+        std::vector<std::string> components = getVariableComponents(variableName);
 
-        for (char ch : variableName) {
-            if (ch != '.') {
-                var += ch;
-                continue;
-            }
-
-            pushGlobalOrField(var, level);
-            var = "";
-            ++level;
+        for (size_t i = 0; i < components.size(); ++i) {
+            pushGlobalOrField(components[i], i);
         }
 
-        pushGlobalOrField(var, level);
-        return level;
+        return components.size();
     }
 
     inline void Lua::pushGlobalOrField(const std::string& value, size_t level) {
@@ -101,6 +113,27 @@ namespace engine::scriptingsystem {
 
         assert(!luaState.isNil());
     }
+
+    inline std::vector<std::string> Lua::getVariableComponents(
+        const std::string& variableName
+    ) const {
+        std::vector<std::string> result;
+        std::string var;
+
+        for (char ch : variableName) {
+            if (ch != '.') {
+                var += ch;
+                continue;
+            }
+
+            result.push_back(var);
+            var = "";
+        }
+
+        result.push_back(var);
+        return result;
+    }
+
 }
 
 #endif

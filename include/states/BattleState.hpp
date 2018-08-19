@@ -29,6 +29,7 @@ class BattleState : public engine::statesystem::State {
     void actionSelectionScreen();
     void moveSelectionScreen();
     void processTurn();
+    void updateAIVariables();
     size_t chooseMoveAI(const Pokemon&);
     void processPlayerMove(size_t moveIndex);
     void processOpponentMove(size_t moveIndex);

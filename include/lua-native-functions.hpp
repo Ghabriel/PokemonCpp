@@ -10,12 +10,13 @@ struct CoreStructures;
 namespace lua {
     namespace internal {
         void setCoreStructures(CoreStructures&);
+        void setBattle(engine::entitysystem::Entity);
         void setMap(engine::entitysystem::Entity);
         void setPlayer(engine::entitysystem::Entity);
     }
 
     // Generic events
-    void write(const std::string& str);
+    void log(const std::string& str);
     void disableControls();
     void enableControls();
     void showText(const std::string& content);
@@ -37,6 +38,7 @@ namespace lua {
 
     // Battle-related events
     void possibleWildBattle();
+    void showBattleText(const std::string& content);
 }
 
 void injectNativeFunctions(engine::scriptingsystem::Lua& script);

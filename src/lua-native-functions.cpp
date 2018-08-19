@@ -20,12 +20,19 @@
 #include "engine/utils/debug/xtrace.hpp"
 
 CoreStructures* gameData;
+engine::entitysystem::Entity battle;
 engine::entitysystem::Entity map;
 engine::entitysystem::Entity player;
 
 template<typename TEvent, typename... Args>
 void enqueueEvent(Args&&... args) {
     EventQueue& queue = resource<EventQueue>("player-event-queue", *gameData);
+    queue.addEvent(std::make_unique<TEvent>(std::forward<Args>(args)...));
+}
+
+template<typename TEvent, typename... Args>
+void enqueueBattleEvent(Args&&... args) {
+    EventQueue& queue = resource<EventQueue>("battle-event-queue", *gameData);
     queue.addEvent(std::make_unique<TEvent>(std::forward<Args>(args)...));
 }
 
@@ -61,6 +68,10 @@ void lua::internal::setCoreStructures(CoreStructures& _gameData) {
     gameData = &_gameData;
 }
 
+void lua::internal::setBattle(engine::entitysystem::Entity _battle) {
+    battle = _battle;
+}
+
 void lua::internal::setMap(engine::entitysystem::Entity _map) {
     map = _map;
 }
@@ -69,7 +80,7 @@ void lua::internal::setPlayer(engine::entitysystem::Entity _player) {
     player = _player;
 }
 
-void lua::write(const std::string& str) {
+void lua::log(const std::string& str) {
     std::cout << str << std::endl;
 }
 
@@ -155,9 +166,16 @@ void lua::possibleWildBattle() {
     });
 }
 
+void lua::showBattleText(const std::string& content) {
+    ECHO("showBattleText");
+    XTRACE(content);
+    XTRACE(battle);
+    enqueueBattleEvent<TextEvent>(content, battle, *gameData);
+}
+
 
 void injectNativeFunctions(engine::scriptingsystem::Lua& script) {
-    script.registerNative("write", lua::write);
+    script.registerNative("log", lua::log);
     script.registerNative("disableControls", lua::disableControls);
     script.registerNative("enableControls", lua::enableControls);
     script.registerNative("showText", lua::showText);
@@ -177,4 +195,5 @@ void injectNativeFunctions(engine::scriptingsystem::Lua& script) {
     script.registerNative("turnPlayerSouth", lua::turnPlayerSouth);
 
     script.registerNative("possibleWildBattle", lua::possibleWildBattle);
+    script.registerNative("showBattleText", lua::showBattleText);
 }
