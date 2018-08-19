@@ -6,7 +6,9 @@
 
 struct Battle;
 struct CoreStructures;
+struct Move;
 struct Pokemon;
+struct PokemonSpeciesData;
 
 class BattleState : public engine::statesystem::State {
     using Entity = engine::entitysystem::Entity;
@@ -28,8 +30,9 @@ class BattleState : public engine::statesystem::State {
     void moveSelectionScreen();
     void processTurn();
     size_t chooseMoveAI(const Pokemon&);
-    void processPlayerMove();
-    void processOpponentMove();
+    void processPlayerMove(size_t moveIndex);
+    void processOpponentMove(size_t moveIndex);
+    void processMove(Pokemon* user, Pokemon* target, Move* move);
 
     void showText(const std::string&);
 };

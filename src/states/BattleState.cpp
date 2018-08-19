@@ -1,9 +1,11 @@
 #include "states/BattleState.hpp"
 
 #include "battle/battle-setup.hpp"
+#include "battle/battle-utils.hpp"
 #include "battle/events/ActionSelectionEvent.hpp"
 #include "battle/Move.hpp"
 #include "battle/Pokemon.hpp"
+#include "battle/PokemonSpeciesData.hpp"
 #include "battle/random.hpp"
 #include "components/Battle.hpp"
 #include "components/BattleActionSelection.hpp"
@@ -30,6 +32,10 @@ template<typename TEvent, typename... Args>
 void enqueueEvent(CoreStructures& gameData, Args&&... args) {
     EventQueue& queue = resource<EventQueue>("battle-event-queue", gameData);
     queue.addEvent(std::make_unique<TEvent>(std::forward<Args>(args)...));
+}
+
+PokemonSpeciesData& getSpecies(const Pokemon& pokemon, CoreStructures& gameData) {
+    return resource<PokemonSpeciesData>("pokemon-" + pokemon.species, gameData);
 }
 
 BattleState::BattleState(CoreStructures& gameData)
@@ -163,6 +169,7 @@ void BattleState::moveSelectionScreen() {
 
     enqueueEvent<ImmediateEvent>(gameData, [&] {
         removeComponent<BattleMoveSelection>(battleEntity, gameData);
+        // TODO: handle lack of PP
         processTurn();
     });
 }
@@ -181,24 +188,26 @@ void BattleState::processTurn() {
         int opponentSpeed = opponentPokemon.stats[5];
 
         if (playerMove.priority > opponentMove.priority) {
-            processPlayerMove();
-            processOpponentMove();
+            processPlayerMove(selectedAction);
+            processOpponentMove(opponentMoveIndex);
         } else if (playerMove.priority < opponentMove.priority) {
-            processOpponentMove();
-            processPlayerMove();
+            processOpponentMove(opponentMoveIndex);
+            processPlayerMove(selectedAction);
         } else if (playerSpeed > opponentSpeed) {
-            processPlayerMove();
-            processOpponentMove();
+            processPlayerMove(selectedAction);
+            processOpponentMove(opponentMoveIndex);
         } else if (playerSpeed < opponentSpeed) {
-            processOpponentMove();
-            processPlayerMove();
+            processOpponentMove(opponentMoveIndex);
+            processPlayerMove(selectedAction);
         } else if (random(1, 2) == 1) {
-            processPlayerMove();
-            processOpponentMove();
+            processPlayerMove(selectedAction);
+            processOpponentMove(opponentMoveIndex);
         } else {
-            processOpponentMove();
-            processPlayerMove();
+            processOpponentMove(opponentMoveIndex);
+            processPlayerMove(selectedAction);
         }
+
+        // actionSelectionScreen();
     });
 }
 
@@ -207,12 +216,63 @@ size_t BattleState::chooseMoveAI(const Pokemon& pokemon) {
     return random(0, pokemon.moves.size() - 1);
 }
 
-void BattleState::processPlayerMove() {
-    ECHO("processPlayerMove()");
+void BattleState::processPlayerMove(size_t moveIndex) {
+    enqueueEvent<ImmediateEvent>(gameData, [&, moveIndex] {
+        Pokemon& user = battle->playerPokemon;
+        const auto& moveId = user.moves[moveIndex];
+        Move& move = resource<Move>("move-" + moveId, gameData);
+        showText(user.displayName + " used " + move.displayName + "!");
+        // TODO: move animation?
+        // TODO: handle non-single-target moves
+        processMove(&user, &battle->opponentPokemon, &move);
+    });
 }
 
-void BattleState::processOpponentMove() {
-    ECHO("processOpponentMove()");
+void BattleState::processOpponentMove(size_t moveIndex) {
+    enqueueEvent<ImmediateEvent>(gameData, [&, moveIndex] {
+        Pokemon& user = battle->opponentPokemon;
+        const auto& moveId = user.moves[moveIndex];
+        Move& move = resource<Move>("move-" + moveId, gameData);
+        showText("Foe " + user.displayName + " used " + move.displayName + "!");
+        // TODO: move animation?
+        // TODO: handle non-single-target moves
+        processMove(&user, &battle->playerPokemon, &move);
+    });
+}
+
+void BattleState::processMove(Pokemon* user, Pokemon* target, Move* move) {
+    enqueueEvent<ImmediateEvent>(gameData, [&, user, target, move] {
+        // TODO: handle non-damage moves
+        PokemonSpeciesData& targetSpecies = getSpecies(*target, gameData);
+        float type = getTypeEffectiveness(targetSpecies, *move);
+
+        if (type < 0.1) {
+            showText("It doesn't affect " + target->displayName + "...");
+            return;
+        }
+
+        PokemonSpeciesData& userSpecies = getSpecies(*user, gameData);
+        int attack = getAttackStatForMove(*user, *move);
+        int defense = getDefenseStatForMove(*target, *move);
+        int baseDamage = (((2 * user->level) / 5 + 2) * move->power * (attack / defense)) / 50 + 2;
+        float targets = 1; // TODO: handle multi-target moves
+        float weather = 1; // TODO
+        float critical = 1; // TODO
+        float rand = random(217, 255) / 255.0;
+        float stab = (move->type == userSpecies.types[0] || move->type == userSpecies.types[1])
+            ? 1.5
+            : 1; // TODO: handle Adaptability
+        float burn = 1; // TODO
+        float others = 1; // TODO
+        float modifier = targets * weather * critical * rand * stab * type * burn * others;
+        int damage = baseDamage * modifier;
+
+        if (damage == 0) {
+            damage = 1;
+        }
+
+        target->currentHP -= damage;
+    });
 }
 
 void BattleState::showText(const std::string& content) {
