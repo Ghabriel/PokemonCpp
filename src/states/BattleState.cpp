@@ -1,8 +1,10 @@
 #include "states/BattleState.hpp"
 
 #include "battle/battle-setup.hpp"
-#include "battle/Move.hpp"
 #include "battle/events/ActionSelectionEvent.hpp"
+#include "battle/Move.hpp"
+#include "battle/Pokemon.hpp"
+#include "battle/random.hpp"
 #include "components/Battle.hpp"
 #include "components/BattleActionSelection.hpp"
 #include "components/BattleMoveSelection.hpp"
@@ -158,6 +160,59 @@ void BattleState::moveSelectionScreen() {
         },
         gameData
     );
+
+    enqueueEvent<ImmediateEvent>(gameData, [&] {
+        removeComponent<BattleMoveSelection>(battleEntity, gameData);
+        processTurn();
+    });
+}
+
+void BattleState::processTurn() {
+    enqueueEvent<ImmediateEvent>(gameData, [&] {
+        Pokemon& playerPokemon = battle->playerPokemon;
+        const auto& playerMoveId = playerPokemon.moves[selectedAction];
+        const Move& playerMove = resource<Move>("move-" + playerMoveId, gameData);
+        int playerSpeed = playerPokemon.stats[5];
+
+        size_t opponentMoveIndex = chooseMoveAI(battle->opponentPokemon);
+        Pokemon& opponentPokemon = battle->opponentPokemon;
+        const auto& opponentMoveId = opponentPokemon.moves[opponentMoveIndex];
+        const Move& opponentMove = resource<Move>("move-" + opponentMoveId, gameData);
+        int opponentSpeed = opponentPokemon.stats[5];
+
+        if (playerMove.priority > opponentMove.priority) {
+            processPlayerMove();
+            processOpponentMove();
+        } else if (playerMove.priority < opponentMove.priority) {
+            processOpponentMove();
+            processPlayerMove();
+        } else if (playerSpeed > opponentSpeed) {
+            processPlayerMove();
+            processOpponentMove();
+        } else if (playerSpeed < opponentSpeed) {
+            processOpponentMove();
+            processPlayerMove();
+        } else if (random(1, 2) == 1) {
+            processPlayerMove();
+            processOpponentMove();
+        } else {
+            processOpponentMove();
+            processPlayerMove();
+        }
+    });
+}
+
+size_t BattleState::chooseMoveAI(const Pokemon& pokemon) {
+    // TODO: handle proper AIs
+    return random(0, pokemon.moves.size() - 1);
+}
+
+void BattleState::processPlayerMove() {
+    ECHO("processPlayerMove()");
+}
+
+void BattleState::processOpponentMove() {
+    ECHO("processOpponentMove()");
 }
 
 void BattleState::showText(const std::string& content) {

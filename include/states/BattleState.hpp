@@ -4,8 +4,9 @@
 #include "../engine/entity-system/types.hpp"
 #include "../engine/state-system/include.hpp"
 
-struct CoreStructures;
 struct Battle;
+struct CoreStructures;
+struct Pokemon;
 
 class BattleState : public engine::statesystem::State {
     using Entity = engine::entitysystem::Entity;
@@ -25,6 +26,10 @@ class BattleState : public engine::statesystem::State {
 
     void actionSelectionScreen();
     void moveSelectionScreen();
+    void processTurn();
+    size_t chooseMoveAI(const Pokemon&);
+    void processPlayerMove();
+    void processOpponentMove();
 
     void showText(const std::string&);
 };

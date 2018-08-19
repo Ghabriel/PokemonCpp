@@ -72,6 +72,7 @@ bool ActionSelectionEvent::tickImpl() {
         return false;
     }
 
+    sound("fx-select-option", gameData).play();
     *selectedOption = (state == SelectionState::Selected)
         ? getFocusedOption()
         : -1;
