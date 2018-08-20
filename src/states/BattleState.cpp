@@ -11,6 +11,7 @@
 #include "components/BattleActionSelection.hpp"
 #include "components/BattleMoveSelection.hpp"
 #include "components/TextBox.hpp"
+#include "constants.hpp"
 #include "core-functions.hpp"
 #include "CoreStructures.hpp"
 #include "events/ImmediateEvent.hpp"
@@ -209,7 +210,7 @@ void BattleState::processTurn() {
             processPlayerMove(selectedAction);
         }
 
-        // actionSelectionScreen();
+        actionSelectionScreen();
     });
 }
 
@@ -227,6 +228,19 @@ void BattleState::updateAIVariables() {
         ai.set(varName + ".nature", static_cast<int>(pokemon.nature));
         ai.set(varName + ".heldItem", pokemon.heldItem);
         ai.set(varName + ".ability", pokemon.ability);
+
+        for (size_t i = 0; i < constants::MOVE_LIMIT; ++i) {
+            if (i < pokemon.moves.size()) {
+                ai.set(varName + ".move" + std::to_string(i), pokemon.moves[i]);
+                ai.set(varName + ".pp" + std::to_string(i), pokemon.pp[i]);
+            } else {
+                ai.set(varName + ".move" + std::to_string(i), std::string{});
+                ai.set(varName + ".pp" + std::to_string(i), std::string{});
+            }
+        }
+
+        ai.set<int>(varName + ".moveCount", pokemon.moves.size());
+
         ai.set(varName + ".gender", static_cast<int>(pokemon.gender));
         ai.set(varName + ".form", pokemon.form);
         ai.set(varName + ".displayName", pokemon.displayName);
@@ -249,60 +263,56 @@ size_t BattleState::chooseMoveAI(const Pokemon& pokemon) {
 }
 
 void BattleState::processPlayerMove(size_t moveIndex) {
-    enqueueEvent<ImmediateEvent>(gameData, [&, moveIndex] {
-        Pokemon& user = battle->playerPokemon;
-        const auto& moveId = user.moves[moveIndex];
-        Move& move = resource<Move>("move-" + moveId, gameData);
-        showText(user.displayName + " used " + move.displayName + "!");
-        // TODO: move animation?
-        // TODO: handle non-single-target moves
-        processMove(&user, &battle->opponentPokemon, &move);
-    });
+    Pokemon& user = battle->playerPokemon;
+    const auto& moveId = user.moves[moveIndex];
+    Move& move = resource<Move>("move-" + moveId, gameData);
+    showText(user.displayName + " used " + move.displayName + "!");
+    // TODO: move animation?
+    // TODO: handle non-single-target moves
+    processMove(&user, &battle->opponentPokemon, &move);
 }
 
 void BattleState::processOpponentMove(size_t moveIndex) {
-    enqueueEvent<ImmediateEvent>(gameData, [&, moveIndex] {
-        Pokemon& user = battle->opponentPokemon;
-        const auto& moveId = user.moves[moveIndex];
-        Move& move = resource<Move>("move-" + moveId, gameData);
-        showText("Foe " + user.displayName + " used " + move.displayName + "!");
-        // TODO: move animation?
-        // TODO: handle non-single-target moves
-        processMove(&user, &battle->playerPokemon, &move);
-    });
+    Pokemon& user = battle->opponentPokemon;
+    const auto& moveId = user.moves[moveIndex];
+    Move& move = resource<Move>("move-" + moveId, gameData);
+    showText("Foe " + user.displayName + " used " + move.displayName + "!");
+    // TODO: move animation?
+    // TODO: handle non-single-target moves
+    processMove(&user, &battle->playerPokemon, &move);
 }
 
 void BattleState::processMove(Pokemon* user, Pokemon* target, Move* move) {
-    enqueueEvent<ImmediateEvent>(gameData, [&, user, target, move] {
-        // TODO: handle non-damage moves
-        PokemonSpeciesData& targetSpecies = getSpecies(*target, gameData);
-        float type = getTypeEffectiveness(targetSpecies, *move);
+    // TODO: handle non-damage moves
+    PokemonSpeciesData& targetSpecies = getSpecies(*target, gameData);
+    float type = getTypeEffectiveness(targetSpecies, *move);
 
-        if (type < 0.1) {
-            showText("It doesn't affect " + target->displayName + "...");
-            return;
-        }
+    if (type < 0.1) {
+        showText("It doesn't affect " + target->displayName + "...");
+        return;
+    }
 
-        PokemonSpeciesData& userSpecies = getSpecies(*user, gameData);
-        int attack = getAttackStatForMove(*user, *move);
-        int defense = getDefenseStatForMove(*target, *move);
-        int baseDamage = (((2 * user->level) / 5 + 2) * move->power * (attack / defense)) / 50 + 2;
-        float targets = 1; // TODO: handle multi-target moves
-        float weather = 1; // TODO
-        float critical = 1; // TODO
-        float rand = random(217, 255) / 255.0;
-        float stab = (move->type == userSpecies.types[0] || move->type == userSpecies.types[1])
-            ? 1.5
-            : 1; // TODO: handle Adaptability
-        float burn = 1; // TODO
-        float others = 1; // TODO
-        float modifier = targets * weather * critical * rand * stab * type * burn * others;
-        int damage = baseDamage * modifier;
+    PokemonSpeciesData& userSpecies = getSpecies(*user, gameData);
+    int attack = getAttackStatForMove(*user, *move);
+    int defense = getDefenseStatForMove(*target, *move);
+    int baseDamage = (((2 * user->level) / 5 + 2) * move->power * (attack / defense)) / 50 + 2;
+    float targets = 1; // TODO: handle multi-target moves
+    float weather = 1; // TODO
+    float critical = 1; // TODO
+    float rand = random(217, 255) / 255.0;
+    float stab = (move->type == userSpecies.types[0] || move->type == userSpecies.types[1])
+        ? 1.5
+        : 1; // TODO: handle Adaptability
+    float burn = 1; // TODO
+    float others = 1; // TODO
+    float modifier = targets * weather * critical * rand * stab * type * burn * others;
+    int damage = baseDamage * modifier;
 
-        if (damage == 0) {
-            damage = 1;
-        }
+    if (damage == 0) {
+        damage = 1;
+    }
 
+    enqueueEvent<ImmediateEvent>(gameData, [target, damage] {
         target->currentHP -= damage;
     });
 }

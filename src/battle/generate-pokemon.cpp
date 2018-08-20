@@ -4,6 +4,7 @@
 #include "battle/Pokemon.hpp"
 #include "battle/PokemonSpeciesData.hpp"
 #include "battle/random.hpp"
+#include "constants.hpp"
 #include "engine/resource-system/include.hpp"
 
 #include "engine/utils/debug/xtrace.hpp"
@@ -35,7 +36,7 @@ std::vector<std::string> pickMoves(const PokemonSpeciesData& speciesData, int le
             result.push_back(move.second);
         }
 
-        if (result.size() == 4) {
+        if (result.size() == constants::MOVE_LIMIT) {
             break;
         }
     }
