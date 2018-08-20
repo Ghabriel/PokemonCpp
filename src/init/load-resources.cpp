@@ -374,6 +374,7 @@ void loadMoves(ResourceStorage& storage) {
         move.displayName = moveData["display-name"].asString();
         move.type = moveData["type"].asString();
         move.kind = moveData["kind"].asString();
+        move.functionCode = moveData["function-code"].asInt();
         move.power = moveData["power"].asInt();
         move.accuracy = moveData["accuracy"].asInt();
         move.pp = moveData["pp"].asInt();

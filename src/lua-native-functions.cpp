@@ -19,48 +19,50 @@
 
 #include "engine/utils/debug/xtrace.hpp"
 
-CoreStructures* gameData;
-engine::entitysystem::Entity battle;
-engine::entitysystem::Entity map;
-engine::entitysystem::Entity player;
+namespace {
+    CoreStructures* gameData;
+    engine::entitysystem::Entity battle;
+    engine::entitysystem::Entity map;
+    engine::entitysystem::Entity player;
 
-template<typename TEvent, typename... Args>
-void enqueueEvent(Args&&... args) {
-    EventQueue& queue = resource<EventQueue>("player-event-queue", *gameData);
-    queue.addEvent(std::make_unique<TEvent>(std::forward<Args>(args)...));
-}
+    template<typename TEvent, typename... Args>
+    void enqueueEvent(Args&&... args) {
+        EventQueue& queue = resource<EventQueue>("player-event-queue", *gameData);
+        queue.addEvent(std::make_unique<TEvent>(std::forward<Args>(args)...));
+    }
 
-template<typename TEvent, typename... Args>
-void enqueueBattleEvent(Args&&... args) {
-    EventQueue& queue = resource<EventQueue>("battle-event-queue", *gameData);
-    queue.addEvent(std::make_unique<TEvent>(std::forward<Args>(args)...));
-}
+    template<typename TEvent, typename... Args>
+    void enqueueBattleEvent(Args&&... args) {
+        EventQueue& queue = resource<EventQueue>("battle-event-queue", *gameData);
+        queue.addEvent(std::make_unique<TEvent>(std::forward<Args>(args)...));
+    }
 
-void movePlayer(Direction direction, int numTiles) {
-    enqueueEvent<PlayerMoveEvent>(direction, numTiles, player, *gameData);
-}
+    void movePlayer(Direction direction, int numTiles) {
+        enqueueEvent<PlayerMoveEvent>(direction, numTiles, player, *gameData);
+    }
 
-void moveSpinningPlayer(
-    Direction direction,
-    int numTiles,
-    int spinDelayMs,
-    bool clockwise
-) {
-    enqueueEvent<PlayerSpinningMoveEvent>(
-        direction,
-        numTiles,
-        spinDelayMs,
-        clockwise,
-        player,
-        *gameData
-    );
-}
+    void moveSpinningPlayer(
+        Direction direction,
+        int numTiles,
+        int spinDelayMs,
+        bool clockwise
+    ) {
+        enqueueEvent<PlayerSpinningMoveEvent>(
+            direction,
+            numTiles,
+            spinDelayMs,
+            clockwise,
+            player,
+            *gameData
+        );
+    }
 
-void turnPlayer(Direction direction) {
-    enqueueEvent<ImmediateEvent>([&, direction] {
-        data<Direction>(player, *gameData) = direction;
-        updatePlayerAnimation(player, *gameData);
-    });
+    void turnPlayer(Direction direction) {
+        enqueueEvent<ImmediateEvent>([&, direction] {
+            data<Direction>(player, *gameData) = direction;
+            updatePlayerAnimation(player, *gameData);
+        });
+    }
 }
 
 

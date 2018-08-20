@@ -4,6 +4,7 @@
 #include "battle/battle-utils.hpp"
 #include "battle/events/ActionSelectionEvent.hpp"
 #include "battle/Move.hpp"
+#include "battle/move-effects.hpp"
 #include "battle/Pokemon.hpp"
 #include "battle/PokemonSpeciesData.hpp"
 #include "battle/random.hpp"
@@ -45,6 +46,7 @@ BattleState::BattleState(CoreStructures& gameData)
    battleEntity(createEntity(gameData)) {
     registerInputContext();
     lua::internal::setBattle(battleEntity);
+    effects::internal::setGameData(gameData);
 }
 
 void BattleState::registerInputContext() {
@@ -283,38 +285,16 @@ void BattleState::processOpponentMove(size_t moveIndex) {
 }
 
 void BattleState::processMove(Pokemon* user, Pokemon* target, Move* move) {
+    effects::internal::setMoveUser(*user);
+    effects::internal::setMoveTarget(*target);
+    effects::internal::setMove(*move);
+
     // TODO: handle non-damage moves
-    PokemonSpeciesData& targetSpecies = getSpecies(*target, gameData);
-    float type = getTypeEffectiveness(targetSpecies, *move);
-
-    if (type < 0.1) {
-        showText("It doesn't affect " + target->displayName + "...");
-        return;
+    switch (move->functionCode) {
+        case 0:
+            effects::damage();
+            break;
     }
-
-    PokemonSpeciesData& userSpecies = getSpecies(*user, gameData);
-    int attack = getAttackStatForMove(*user, *move);
-    int defense = getDefenseStatForMove(*target, *move);
-    int baseDamage = (((2 * user->level) / 5 + 2) * move->power * (attack / defense)) / 50 + 2;
-    float targets = 1; // TODO: handle multi-target moves
-    float weather = 1; // TODO
-    float critical = 1; // TODO
-    float rand = random(217, 255) / 255.0;
-    float stab = (move->type == userSpecies.types[0] || move->type == userSpecies.types[1])
-        ? 1.5
-        : 1; // TODO: handle Adaptability
-    float burn = 1; // TODO
-    float others = 1; // TODO
-    float modifier = targets * weather * critical * rand * stab * type * burn * others;
-    int damage = baseDamage * modifier;
-
-    if (damage == 0) {
-        damage = 1;
-    }
-
-    enqueueEvent<ImmediateEvent>(gameData, [target, damage] {
-        target->currentHP -= damage;
-    });
 }
 
 void BattleState::showText(const std::string& content) {
