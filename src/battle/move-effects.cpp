@@ -20,7 +20,7 @@ namespace {
 
     template<typename TEvent, typename... Args>
     void enqueueEvent(Args&&... args) {
-        EventQueue& queue = resource<EventQueue>("battle-event-queue", *gameData);
+        EventQueue& queue = resource<EventQueue>("move-event-queue", *gameData);
         queue.addEvent(std::make_unique<TEvent>(std::forward<Args>(args)...));
     }
 }

@@ -9,6 +9,7 @@
 class EventQueue {
  public:
     void addEvent(std::unique_ptr<Event>);
+    bool empty() const;
     void tick();
 
  private:

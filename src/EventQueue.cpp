@@ -6,6 +6,10 @@ void EventQueue::addEvent(std::unique_ptr<Event> event) {
     eventQueue.push(std::move(event));
 }
 
+bool EventQueue::empty() const {
+    return !currentEvent && eventQueue.empty();
+}
+
 void EventQueue::tick() {
     if (currentEvent) {
         bool finished = currentEvent->tick();

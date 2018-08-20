@@ -36,6 +36,7 @@ class BattleState : public engine::statesystem::State {
     void processMove(Pokemon* user, Pokemon* target, Move* move);
 
     void showText(const std::string&);
+    void showMoveText(const std::string&);
 };
 
 #endif

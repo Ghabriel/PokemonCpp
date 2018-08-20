@@ -1,5 +1,6 @@
 #include "states/BattleState.hpp"
 
+#include <queue>
 #include "battle/battle-setup.hpp"
 #include "battle/battle-utils.hpp"
 #include "battle/events/ActionSelectionEvent.hpp"
@@ -34,6 +35,12 @@ enum class BattleAction {
 template<typename TEvent, typename... Args>
 void enqueueEvent(CoreStructures& gameData, Args&&... args) {
     EventQueue& queue = resource<EventQueue>("battle-event-queue", gameData);
+    queue.addEvent(std::make_unique<TEvent>(std::forward<Args>(args)...));
+}
+
+template<typename TEvent, typename... Args>
+void enqueueMoveEvent(CoreStructures& gameData, Args&&... args) {
+    EventQueue& queue = resource<EventQueue>("move-event-queue", gameData);
     queue.addEvent(std::make_unique<TEvent>(std::forward<Args>(args)...));
 }
 
@@ -72,6 +79,7 @@ void BattleState::onEnterImpl() {
     enableInputContext("battle-state", gameData);
     setupWildEncounter("map-basic", battleEntity, gameData);
     gameData.resourceStorage->store("battle-event-queue", EventQueue());
+    gameData.resourceStorage->store("move-event-queue", EventQueue());
     battle = &data<Battle>(battleEntity, gameData);
 
     showText("Wild " + battle->opponentPokemon.displayName + " appeared!");
@@ -86,6 +94,13 @@ void BattleState::onExitImpl() {
 }
 
 void BattleState::executeImpl() {
+    auto& moveQueue = resource<EventQueue>("move-event-queue", gameData);
+
+    if (!moveQueue.empty()) {
+        moveQueue.tick();
+        return;
+    }
+
     resource<EventQueue>("battle-event-queue", gameData).tick();
 }
 
@@ -265,23 +280,29 @@ size_t BattleState::chooseMoveAI(const Pokemon& pokemon) {
 }
 
 void BattleState::processPlayerMove(size_t moveIndex) {
-    Pokemon& user = battle->playerPokemon;
-    const auto& moveId = user.moves[moveIndex];
-    Move& move = resource<Move>("move-" + moveId, gameData);
-    showText(user.displayName + " used " + move.displayName + "!");
-    // TODO: move animation?
-    // TODO: handle non-single-target moves
-    processMove(&user, &battle->opponentPokemon, &move);
+    enqueueEvent<ImmediateEvent>(gameData, [&, moveIndex] {
+        resource<EventQueue>("move-event-queue", gameData) = {};
+        Pokemon& user = battle->playerPokemon;
+        const auto& moveId = user.moves[moveIndex];
+        Move& move = resource<Move>("move-" + moveId, gameData);
+        showMoveText(user.displayName + " used " + move.displayName + "!");
+        // TODO: move animation?
+        // TODO: handle non-single-target moves
+        processMove(&user, &battle->opponentPokemon, &move);
+    });
 }
 
 void BattleState::processOpponentMove(size_t moveIndex) {
-    Pokemon& user = battle->opponentPokemon;
-    const auto& moveId = user.moves[moveIndex];
-    Move& move = resource<Move>("move-" + moveId, gameData);
-    showText("Foe " + user.displayName + " used " + move.displayName + "!");
-    // TODO: move animation?
-    // TODO: handle non-single-target moves
-    processMove(&user, &battle->playerPokemon, &move);
+    enqueueEvent<ImmediateEvent>(gameData, [&, moveIndex] {
+        resource<EventQueue>("move-event-queue", gameData) = {};
+        Pokemon& user = battle->opponentPokemon;
+        const auto& moveId = user.moves[moveIndex];
+        Move& move = resource<Move>("move-" + moveId, gameData);
+        showMoveText("Foe " + user.displayName + " used " + move.displayName + "!");
+        // TODO: move animation?
+        // TODO: handle non-single-target moves
+        processMove(&user, &battle->playerPokemon, &move);
+    });
 }
 
 void BattleState::processMove(Pokemon* user, Pokemon* target, Move* move) {
@@ -299,4 +320,8 @@ void BattleState::processMove(Pokemon* user, Pokemon* target, Move* move) {
 
 void BattleState::showText(const std::string& content) {
     enqueueEvent<TextEvent>(gameData, content, battleEntity, gameData);
+}
+
+void BattleState::showMoveText(const std::string& content) {
+    enqueueMoveEvent<TextEvent>(gameData, content, battleEntity, gameData);
 }
