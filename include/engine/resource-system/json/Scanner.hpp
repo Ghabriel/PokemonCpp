@@ -60,6 +60,7 @@ inline Token JsonScanner::scan() {
         case '7':
         case '8':
         case '9':
+        case '-':
             return scanNumberLiteral(ch);
         case 't':
             return scanExactly("true", TokenKind::BooleanLiteral);

@@ -18,7 +18,7 @@ TextEvent::TextEvent(const std::string& content, Entity map, CoreStructures& gam
 }
 
 void TextEvent::onStartImpl() {
-    sound("fx-select-option", gameData).play();
+    // sound("fx-select-option", gameData).play();
     enableInputContext("disabled-controls", gameData);
     enableInputContext("text-state", gameData);
     nextCharIndex = 0;

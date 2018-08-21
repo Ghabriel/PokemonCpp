@@ -8,6 +8,7 @@ struct Move {
     std::string type;
     std::string kind;
     int functionCode;
+    int functionParameter;
     int power;
     int accuracy;
     int pp;

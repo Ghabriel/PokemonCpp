@@ -281,7 +281,6 @@ size_t BattleState::chooseMoveAI(const Pokemon& pokemon) {
 
 void BattleState::processPlayerMove(size_t moveIndex) {
     enqueueEvent<ImmediateEvent>(gameData, [&, moveIndex] {
-        resource<EventQueue>("move-event-queue", gameData) = {};
         Pokemon& user = battle->playerPokemon;
         const auto& moveId = user.moves[moveIndex];
         Move& move = resource<Move>("move-" + moveId, gameData);
@@ -294,7 +293,6 @@ void BattleState::processPlayerMove(size_t moveIndex) {
 
 void BattleState::processOpponentMove(size_t moveIndex) {
     enqueueEvent<ImmediateEvent>(gameData, [&, moveIndex] {
-        resource<EventQueue>("move-event-queue", gameData) = {};
         Pokemon& user = battle->opponentPokemon;
         const auto& moveId = user.moves[moveIndex];
         Move& move = resource<Move>("move-" + moveId, gameData);
@@ -310,10 +308,19 @@ void BattleState::processMove(Pokemon* user, Pokemon* target, Move* move) {
     effects::internal::setMoveTarget(*target);
     effects::internal::setMove(*move);
 
-    // TODO: handle non-damage moves
     switch (move->functionCode) {
         case 0:
             effects::damage();
+            break;
+        case -1:
+        case -2:
+        case -3:
+            effects::lowerStat(move->functionParameter, -move->functionCode);
+            break;
+        case 1:
+        case 2:
+        case 3:
+            effects::raiseStat(move->functionParameter, move->functionCode);
             break;
     }
 }

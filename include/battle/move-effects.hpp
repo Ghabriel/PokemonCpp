@@ -14,6 +14,8 @@ namespace effects {
     }
 
     void damage();
+    void lowerStat(int stat, int levels);
+    void raiseStat(int stat, int levels);
 }
 
 #endif

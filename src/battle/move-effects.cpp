@@ -74,3 +74,11 @@ void effects::damage() {
         target->currentHP -= damage;
     });
 }
+
+void lowerStat(int stat, int levels) {
+    // TODO
+}
+
+void raiseStat(int stat, int levels) {
+    // TODO
+}
