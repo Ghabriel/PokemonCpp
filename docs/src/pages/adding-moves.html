@@ -19,3 +19,127 @@
     }
 }
 </code>
+
+A move definition has the following fields:
+
+<table class="table">
+    <thead>
+        <tr>
+            <th class="unbreakable">Field Name</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>internal name</td>
+            <td>The string that precedes the move properties (in this case, "Tackle"). It's the name that the game should use internally to refer to this move, but it's <strong>never</strong> shown in the screen.</td>
+        </tr>
+        <tr>
+            <td>display-name</td>
+            <td>The name of the move that is actually shown in the screen.</td>
+        </tr>
+        <tr>
+            <td>type</td>
+            <td>
+                One of the following:
+                <ul>
+                    <li>Normal</li>
+                    <li>Fighting</li>
+                    <li>Flying</li>
+                    <li>Poison</li>
+                    <li>Ground</li>
+                    <li>Rock</li>
+                    <li>Bug</li>
+                    <li>Ghost</li>
+                    <li>Steel</li>
+                    <li>Fire</li>
+                    <li>Water</li>
+                    <li>Grass</li>
+                    <li>Electric</li>
+                    <li>Psychic</li>
+                    <li>Ice</li>
+                    <li>Dragon</li>
+                    <li>Dark</li>
+                    <li>Fairy</li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <td>kind</td>
+            <td>
+                One of the following:
+                <ul>
+                    <li>Physical</li>
+                    <li>Special</li>
+                    <li>Status</li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <td>function-code</td>
+            <td>An integer that specifies what this move does. The following section explains it in detail.</td>
+        </tr>
+        <tr>
+            <td>function-parameter</td>
+            <td>An integer whose purpose depends on the function-code. See the following section for details.</td>
+        </tr>
+        <tr>
+            <td>power</td>
+            <td>The power of the move. It is shown in-game in the move menu of a Pokémon.</td>
+        </tr>
+        <tr>
+            <td>accuracy</td>
+            <td>The accuracy of the move, from 0 to 100. The game displays zero accuracy as "-".</td>
+        </tr>
+        <tr>
+            <td>pp</td>
+            <td>The maximum PP of this move. Note that PP Ups can increase this value.</td>
+        </tr>
+        <tr>
+            <td>effect-rate</td>
+            <td>The chance that the move's additional effect (which depends on the function code) will be applied.</td>
+        </tr>
+        <tr>
+            <td>target-type</td>
+            <td>
+                One of the following:
+                <ul>
+                    <li>single-target (e.g Tackle)</li>
+                    <li>user (e.g Barrier)</li>
+                    <li>no-target</li>
+                </ul>
+                <strong>Note:</strong> more target types will be added when Double Battles are implemented.
+            </td>
+        </tr>
+        <tr>
+            <td>priority</td>
+            <td>The priority of the move, from -6 to 6.</td>
+        </tr>
+        <tr>
+            <td>flags</td>
+            <td>
+                A string with a combination of the following:
+                <ul>
+                    <li>a - the move makes contact</li>
+                    <li>b - the move is affected by Protect</li>
+                    <li>c - the move is affected by Magic Coat</li>
+                    <li>d - the move is affected by Snatch</li>
+                    <li>e - the move is affected by Mirror Move</li>
+                    <li>f - the move is affected by King's Rock</li>
+                    <li>g - thaws out if frozen</li>
+                    <li>h - high critical hit rate</li>
+                    <li>i - biting move (powered up by Strong Jaw)</li>
+                    <li>j - punching move (powered up by Iron Fist)</li>
+                    <li>k - sound-based move</li>
+                    <li>l - powder-based move (doesn't affect Grass-type Pokémon)</li>
+                    <li>m - pulse-based move (powered up by Mega Launcher)</li>
+                    <li>n - bomb-based move (resisted by Bulletproof)</li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <td>description</td>
+            <td>The description of the move. It is shown in-game.</td>
+        </tr>
+    </tbody>
+</table>
