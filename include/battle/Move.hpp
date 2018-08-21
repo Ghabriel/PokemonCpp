@@ -4,6 +4,7 @@
 #include <string>
 
 struct Move {
+    std::string id;
     std::string displayName;
     std::string type;
     std::string kind;

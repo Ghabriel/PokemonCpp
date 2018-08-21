@@ -6,14 +6,18 @@
 #include "battle/Pokemon.hpp"
 #include "battle/PokemonSpeciesData.hpp"
 #include "battle/random.hpp"
+#include "constants.hpp"
 #include "core-functions.hpp"
 #include "CoreStructures.hpp"
+#include "engine/scripting-system/include.hpp"
 #include "events/ImmediateEvent.hpp"
+#include "events/TextEvent.hpp"
 #include "EventQueue.hpp"
 #include "lua-native-functions.hpp"
 
 namespace {
     CoreStructures* gameData;
+    engine::entitysystem::Entity battle;
     Pokemon* user;
     Pokemon* target;
     Move* move;
@@ -27,6 +31,10 @@ namespace {
 
 void effects::internal::setGameData(CoreStructures& _gameData) {
     gameData = &_gameData;
+}
+
+void effects::internal::setBattle(engine::entitysystem::Entity _battle) {
+    battle = _battle;
 }
 
 void effects::internal::setMoveUser(Pokemon& pokemon) {
@@ -75,10 +83,52 @@ void effects::damage() {
     });
 }
 
-void lowerStat(int stat, int levels) {
+void effects::lowerStat(int stat, int levels) {
     // TODO
+    std::string text = target->displayName + "'s " + constants::DISPLAYNAME_STATS[stat] + " ";
+
+    switch (levels) {
+        case 1:
+            text += "fell!";
+            break;
+        case 2:
+            text += "harshly fell!";
+            break;
+        default:
+            text += "severely fell!";
+            break;
+    }
+
+    showText(text);
 }
 
-void raiseStat(int stat, int levels) {
+void effects::raiseStat(int stat, int levels) {
     // TODO
+    std::string text = target->displayName + "'s " + constants::DISPLAYNAME_STATS[stat] + " ";
+
+    switch (levels) {
+        case 1:
+            text += "rose!";
+            break;
+        case 2:
+            text += "rose sharply!";
+            break;
+        default:
+            text += "rose drastically!";
+            break;
+    }
+
+    showText(text);
+}
+
+
+void effects::showText(const std::string& content) {
+    enqueueEvent<TextEvent>(content, battle, *gameData);
+}
+
+void injectNativeBattleFunctions(engine::scriptingsystem::Lua& script) {
+    script.registerNative("damage", effects::damage);
+    script.registerNative("lowerStat", effects::lowerStat);
+    script.registerNative("raiseStat", effects::raiseStat);
+    script.registerNative("showText", effects::showText);
 }

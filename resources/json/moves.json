@@ -12,15 +12,14 @@
         "target-type": "single-target",
         "priority": 0,
         "flags": "abef",
-        "description": "A physical attack in which the user charges and slams into the target with its whole body.",
-        "script": "Tackle"
+        "description": "A physical attack in which the user charges and slams into the target with its whole body."
     },
     "TailWhip": {
         "display-name": "Tail Whip",
         "type": "Normal",
         "kind": "Physical",
-        "function-code": -1,
-        "function-parameter": 2,
+        "function-code": 99,
+        "function-parameter": 0,
         "power": 0,
         "accuracy": 100,
         "pp": 30,
@@ -28,7 +27,6 @@
         "target-type": "single-target",
         "priority": 0,
         "flags": "bce",
-        "description": "The user wags its tail cutely, making opposing Pokémon less wary and lowering their Defense stat.",
-        "script": "TailWhip"
+        "description": "The user wags its tail cutely, making opposing Pokémon less wary and lowering their Defense stat."
     }
 }

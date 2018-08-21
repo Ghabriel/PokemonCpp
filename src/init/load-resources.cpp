@@ -7,6 +7,7 @@
 #include <SFML/Graphics.hpp>
 #include "battle/EncounterData.hpp"
 #include "battle/Move.hpp"
+#include "battle/move-effects.hpp"
 #include "battle/PokemonSpeciesData.hpp"
 #include "components/Map.hpp"
 #include "engine/resource-system/include.hpp"
@@ -371,6 +372,7 @@ void loadMoves(ResourceStorage& storage) {
 
     for (const auto& [id, moveData] : data.asIterableMap()) {
         Move move;
+        move.id = id;
         move.displayName = moveData["display-name"].asString();
         move.type = moveData["type"].asString();
         move.kind = moveData["kind"].asString();
@@ -391,8 +393,12 @@ void loadMoves(ResourceStorage& storage) {
     ECHO("[RESOURCE] Moves: OK");
 }
 
-void loadAI(ResourceStorage& storage) {
+void loadBattleScripts(ResourceStorage& storage) {
+    using engine::scriptingsystem::Lua;
     loadScript(storage, "ai");
+    loadScript(storage, "moves");
+    injectNativeBattleFunctions(storage.get<Lua>("moves"));
+    ECHO("[RESOURCE] Battle scripts: OK");
 }
 
 void loadResources(ResourceStorage& storage) {
@@ -407,5 +413,5 @@ void loadResources(ResourceStorage& storage) {
     std::vector<std::string> pokemonList = loadPokemonSpecies(storage);
     loadPokemonSprites(storage, pokemonList);
     loadMoves(storage);
-    loadAI(storage);
+    loadBattleScripts(storage);
 }

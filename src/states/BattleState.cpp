@@ -54,6 +54,7 @@ BattleState::BattleState(CoreStructures& gameData)
     registerInputContext();
     lua::internal::setBattle(battleEntity);
     effects::internal::setGameData(gameData);
+    effects::internal::setBattle(battleEntity);
 }
 
 void BattleState::registerInputContext() {
@@ -321,6 +322,9 @@ void BattleState::processMove(Pokemon* user, Pokemon* target, Move* move) {
         case 2:
         case 3:
             effects::raiseStat(move->functionParameter, move->functionCode);
+            break;
+        case 99:
+            script("moves", gameData).call<void>(move->id + "_onUse");
             break;
     }
 }
