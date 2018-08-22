@@ -13,7 +13,7 @@
             <div class="col-2 d-none d-md-block" id="sidebar">
                 <div class="title">Documentation pages</div>
                 <ul class="page-list">
-                    <li><a href="adding-moves.html">Adding a move</a></li>
+                    <li><a href="adding-moves.html">Adding moves</a></li>
                 </ul>
             </div>
             <div class="col-12 col-md-10" id="content">
@@ -39,7 +39,7 @@
 }
 </code>
 
-A move definition has the following fields:
+<p id="move-fields">A move definition has the following fields:</p>
 
 <table class="table">
     <thead>
@@ -96,11 +96,11 @@ A move definition has the following fields:
         </tr>
         <tr>
             <td>function-code</td>
-            <td>An integer that specifies what this move does. The following section explains it in detail.</td>
+            <td>An integer that specifies what this move does. The <a href="#function-code">next section</a> explains it in detail.</td>
         </tr>
         <tr>
             <td>function-parameter</td>
-            <td>An integer whose purpose depends on the function-code. See the following section for details.</td>
+            <td>An integer whose purpose depends on the function-code. See the <a href="#function-code">next section</a> for details.</td>
         </tr>
         <tr>
             <td>power</td>
@@ -112,9 +112,9 @@ A move definition has the following fields:
         </tr>
         <tr>
             <td>pp</td>
-            <td>The maximum PP of this move. Note that PP Ups can increase this value.</td>
+            <td>The maximum PP of this move. Note that PP Ups can increase this value up to 60%.</td>
         </tr>
-        <tr>
+        <tr id="effect-rate">
             <td>effect-rate</td>
             <td>The chance that the move's additional effect (which depends on the function code) will be applied.</td>
         </tr>
@@ -125,7 +125,7 @@ A move definition has the following fields:
                 <ul>
                     <li>single-target (e.g Tackle)</li>
                     <li>user (e.g Barrier)</li>
-                    <li>no-target</li>
+                    <li>no-target (e.g Counter)</li>
                 </ul>
                 <strong>Note:</strong> more target types will be added when Double Battles are implemented.
             </td>
@@ -159,6 +159,301 @@ A move definition has the following fields:
         <tr>
             <td>description</td>
             <td>The description of the move. It is shown in-game.</td>
+        </tr>
+    </tbody>
+</table>
+
+<h3 id="function-code">Function Code</h3>
+
+The following table lists all possible function codes and the purpose of "function-parameter" in each case.
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Code</th>
+            <th>Primary Effect</th>
+            <th>Additional Effect*</th>
+            <th>function-parameter meaning</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>-13</td>
+            <td>damage</td>
+            <td>reduce stat, 3 levels</td>
+            <td>the reduced stat ID</td>
+        </tr>
+        <tr>
+            <td>-12</td>
+            <td>damage</td>
+            <td>reduce stat, 2 levels</td>
+            <td>the reduced stat ID</td>
+        </tr>
+        <tr>
+            <td>-11</td>
+            <td>damage</td>
+            <td>reduce stat, 1 level</td>
+            <td>the reduced stat ID</td>
+        </tr>
+        <tr>
+            <td>-3</td>
+            <td>reduce stat, 3 levels</td>
+            <td>-</td>
+            <td>the reduced stat ID</td>
+        </tr>
+        <tr>
+            <td>-2</td>
+            <td>reduce stat, 2 levels</td>
+            <td>-</td>
+            <td>the reduced stat ID</td>
+        </tr>
+        <tr>
+            <td>-1</td>
+            <td>reduce stat, 1 level</td>
+            <td>-</td>
+            <td>the reduced stat ID</td>
+        </tr>
+        <tr>
+            <td>0</td>
+            <td>damage</td>
+            <td>-</td>
+            <td>-</td>
+        </tr>
+        <tr>
+            <td>1</td>
+            <td>increase stat, 1 level</td>
+            <td>-</td>
+            <td>the increased stat ID</td>
+        </tr>
+        <tr>
+            <td>2</td>
+            <td>increase stat, 2 levels</td>
+            <td>-</td>
+            <td>the increased stat ID</td>
+        </tr>
+        <tr>
+            <td>3</td>
+            <td>increase stat, 3 levels</td>
+            <td>-</td>
+            <td>the increased stat ID</td>
+        </tr>
+        <tr>
+            <td>4</td>
+            <td>damage</td></td>
+            <td>status effect</td>
+            <td>the status condition ID</td>
+        </tr>
+        <tr>
+            <td>5</td>
+            <td>damage</td>
+            <td>flinch</td>
+            <td>-</td>
+        </tr>
+        <tr>
+            <td>6</td>
+            <td>damage + user faints</td>
+            <td>-</td>
+            <td>-</td>
+        </tr>
+        <tr>
+            <td>7</td>
+            <td>fixed damage</td>
+            <td>-</td>
+            <td>the amount of damage dealt</td>
+        </tr>
+        <tr>
+            <td>11</td>
+            <td>damage</td>
+            <td>increase stat, 1 level</td>
+            <td>the increased stat ID</td>
+        </tr>
+        <tr>
+            <td>12</td>
+            <td>damage</td>
+            <td>increase stat, 2 levels</td>
+            <td>the increased stat ID</td>
+        </tr>
+        <tr>
+            <td>13</td>
+            <td>damage</td>
+            <td>increase stat, 3 levels</td>
+            <td>the increased stat ID</td>
+        </tr>
+        <tr>
+            <td>99</td>
+            <td><a href="#scripting">use script</a></td>
+            <td>-</td>
+            <td>-</td>
+        </tr>
+    </tbody>
+</table>
+
+<p>* probabilistic, see <a href="#effect-rate">effect-rate</a>.</p>
+
+<p id="stat-id">The <i>stat ID</i> refers to one of these values:</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Stat</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>0</td>
+            <td>HP</td>
+        </tr>
+        <tr>
+            <td>1</td>
+            <td>Attack</td>
+        </tr>
+        <tr>
+            <td>2</td>
+            <td>Defense</td>
+        </tr>
+        <tr>
+            <td>3</td>
+            <td>Special Attack</td>
+        </tr>
+        <tr>
+            <td>4</td>
+            <td>Special Defense</td>
+        </tr>
+        <tr>
+            <td>5</td>
+            <td>Speed</td>
+        </tr>
+        <tr>
+            <td>6</td>
+            <td>Accuracy</td>
+        </tr>
+        <tr>
+            <td>7</td>
+            <td>Evasion</td>
+        </tr>
+    </tbody>
+</table>
+
+<p>Note that HP doesn't have stages and as such <strong>should not be used in the context of stat changing</strong>.</p>
+
+<p id="status-condition-id">The <i>Status Condition ID</i> refers to one of these values:</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Status Condition</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>0</td>
+            <td>Sleep</td>
+        </tr>
+        <tr>
+            <td>1</td>
+            <td>Poison</td>
+        </tr>
+        <tr>
+            <td>2</td>
+            <td>Freeze</td>
+        </tr>
+        <tr>
+            <td>3</td>
+            <td>Paralysis</td>
+        </tr>
+        <tr>
+            <td>4</td>
+            <td>Toxic</td>
+        </tr>
+        <tr>
+            <td>5</td>
+            <td>Confusion</td>
+        </tr>
+    </tbody>
+</table>
+
+<h3 id="scripting">Scripting a move</h3>
+
+<p>Most simple moves fit in one of the possible function codes, and thus don't need a script. There are, however, moves that combine several effects or introduce completely new ones, in which case the function code 99 should be used. A move that has function code 99 <strong>does nothing by itself</strong>, it simply makes the game look for the move's effect somewhere else: the <strong>moves.lua</strong> file.</p>
+
+The moves.lua file contains functions of the form:
+<code>function MoveName_eventType
+    -- script content here...
+end
+</code>
+
+For example, a possible implementation of the move Tail Whip is as follows:
+<code>function TailWhip_onUse()
+    lowerStat(stats.defense, 1)
+end
+</code>
+
+<p><strong>Note:</strong> Tail Whip is simple enough that the JSON file can fully represent its effect, but it's implemented here as a script for demonstration
+purposes.</p>
+
+<p>During battle, the game will call these functions according to the moves used and the current state of the battle. The following events are currently supported:</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Event</th>
+            <th>Description</th>
+            <th>Parameters</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>onUse</td>
+            <td>Called when the move is used.</td>
+            <td>-</td>
+        </tr>
+        <tr>
+            <td>onDamageReceived</td>
+            <td>Called when the user receives damage while the move is in effect.</td>
+            <td>
+                <strong>damage</strong> (int) - the damage received
+            </td>
+        </tr>
+        <tr>
+            <td>onTurnStart</td>
+            <td>Called at the start of the turn that the move is used or is in effect.</td>
+            <td>-</td>
+        </tr>
+        <tr>
+            <td>onTurnEnd</td>
+            <td>Called at the end of the turn that the move is used or is in effect.</td>
+            <td>-</td>
+        </tr>
+    </tbody>
+</table>
+
+The functions that are available inside the script's function body are:
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Function Signature</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>void damage()</td>
+            <td>Deals damage to the target according to the <a href="#move-fields">move properties</a>.</td>
+        </tr>
+        <tr>
+            <td>void lowerStat(int <a href="#stat-id">statID</a>, int levels)</td>
+            <td>Reduces the corresponding stat stages of the target by the specified number of levels.</td>
+        </tr>
+        <tr>
+            <td>void raiseStat(int <a href="#stat-id">statID</a>, int levels)</td>
+            <td>Raises the corresponding stat stages of the target by the specified number of levels.</td>
+        </tr>
+        <tr>
+            <td>void showText(string content)</td>
+            <td>Displays the specified text.</td>
         </tr>
     </tbody>
 </table>
