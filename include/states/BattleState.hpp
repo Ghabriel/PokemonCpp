@@ -34,6 +34,7 @@ class BattleState : public engine::statesystem::State {
     void processPlayerMove(size_t moveIndex);
     void processOpponentMove(size_t moveIndex);
     void processMove(Pokemon* user, Pokemon* target, Move* move);
+    void checkFaintedPokemon();
 
     void showText(const std::string&);
     void showMoveText(const std::string&);

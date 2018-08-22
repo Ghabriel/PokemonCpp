@@ -79,7 +79,7 @@ void effects::damage() {
     }
 
     enqueueEvent<ImmediateEvent>([damage] {
-        target->currentHP -= damage;
+        target->currentHP = std::max(0, target->currentHP - damage);
     });
 }
 

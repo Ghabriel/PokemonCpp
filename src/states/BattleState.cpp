@@ -283,6 +283,11 @@ size_t BattleState::chooseMoveAI(const Pokemon& pokemon) {
 void BattleState::processPlayerMove(size_t moveIndex) {
     enqueueEvent<ImmediateEvent>(gameData, [&, moveIndex] {
         Pokemon& user = battle->playerPokemon;
+
+        if (user.currentHP <= 0) {
+            return;
+        }
+
         const auto& moveId = user.moves[moveIndex];
         Move& move = resource<Move>("move-" + moveId, gameData);
         showMoveText(user.displayName + " used " + move.displayName + "!");
@@ -295,6 +300,11 @@ void BattleState::processPlayerMove(size_t moveIndex) {
 void BattleState::processOpponentMove(size_t moveIndex) {
     enqueueEvent<ImmediateEvent>(gameData, [&, moveIndex] {
         Pokemon& user = battle->opponentPokemon;
+
+        if (user.currentHP <= 0) {
+            return;
+        }
+
         const auto& moveId = user.moves[moveIndex];
         Move& move = resource<Move>("move-" + moveId, gameData);
         showMoveText("Foe " + user.displayName + " used " + move.displayName + "!");
@@ -327,6 +337,25 @@ void BattleState::processMove(Pokemon* user, Pokemon* target, Move* move) {
             script("moves", gameData).call<void>(move->id + "_onUse");
             break;
     }
+
+    checkFaintedPokemon();
+}
+
+void BattleState::checkFaintedPokemon() {
+    enqueueMoveEvent<ImmediateEvent>(gameData, [&] {
+        std::vector<Pokemon*> pokemonList = {
+            &battle->playerPokemon,
+            &battle->opponentPokemon
+        };
+
+        for (Pokemon* pokemon : pokemonList) {
+            if (pokemon->currentHP <= 0) {
+                showMoveText(pokemon->displayName + " fainted!");
+                // TODO: remove the pokémon's sprite and
+                // go to the battle end screen if applicable
+            }
+        }
+    });
 }
 
 void BattleState::showText(const std::string& content) {
