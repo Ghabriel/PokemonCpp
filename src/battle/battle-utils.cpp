@@ -3,6 +3,7 @@
 #include "battle/Move.hpp"
 #include "battle/Pokemon.hpp"
 #include "battle/PokemonSpeciesData.hpp"
+#include "core-functions.hpp"
 #include "CoreStructures.hpp"
 
 int getAttackStatForMove(const Pokemon& pokemon, const Move& move) {
@@ -27,6 +28,10 @@ int getDefenseStatForMove(const Pokemon& pokemon, const Move& move) {
     }
 
     return 0;
+}
+
+PokemonSpeciesData& getSpecies(const Pokemon& pokemon, CoreStructures& gameData) {
+    return resource<PokemonSpeciesData>("pokemon-" + pokemon.species, gameData);
 }
 
 float getTypeEffectiveness(const PokemonSpeciesData& species, const Move& move) {

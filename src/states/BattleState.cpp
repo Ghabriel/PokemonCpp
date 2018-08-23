@@ -12,6 +12,7 @@
 #include "components/battle/Battle.hpp"
 #include "components/battle/BattleActionSelection.hpp"
 #include "components/battle/BattleMoveSelection.hpp"
+#include "components/battle/Fainted.hpp"
 #include "components/TextBox.hpp"
 #include "constants.hpp"
 #include "core-functions.hpp"
@@ -26,27 +27,25 @@
 using engine::entitysystem::Entity;
 using engine::inputsystem::InputContext;
 
-enum class BattleAction {
-    Fight,
-    Bag,
-    Pokemon,
-    Run
-};
+namespace {
+    enum class BattleAction {
+        Fight,
+        Bag,
+        Pokemon,
+        Run
+    };
 
-template<typename TEvent, typename... Args>
-void enqueueEvent(CoreStructures& gameData, Args&&... args) {
-    EventQueue& queue = resource<EventQueue>("battle-event-queue", gameData);
-    queue.addEvent(std::make_unique<TEvent>(std::forward<Args>(args)...));
-}
+    template<typename TEvent, typename... Args>
+    void enqueueEvent(CoreStructures& gameData, Args&&... args) {
+        EventQueue& queue = resource<EventQueue>("battle-event-queue", gameData);
+        queue.addEvent(std::make_unique<TEvent>(std::forward<Args>(args)...));
+    }
 
-template<typename TEvent, typename... Args>
-void enqueueMoveEvent(CoreStructures& gameData, Args&&... args) {
-    EventQueue& queue = resource<EventQueue>("move-event-queue", gameData);
-    queue.addEvent(std::make_unique<TEvent>(std::forward<Args>(args)...));
-}
-
-PokemonSpeciesData& getSpecies(const Pokemon& pokemon, CoreStructures& gameData) {
-    return resource<PokemonSpeciesData>("pokemon-" + pokemon.species, gameData);
+    template<typename TEvent, typename... Args>
+    void enqueueMoveEvent(CoreStructures& gameData, Args&&... args) {
+        EventQueue& queue = resource<EventQueue>("move-event-queue", gameData);
+        queue.addEvent(std::make_unique<TEvent>(std::forward<Args>(args)...));
+    }
 }
 
 BattleState::BattleState(CoreStructures& gameData)
@@ -323,18 +322,36 @@ void BattleState::processMove(Pokemon* user, Pokemon* target, Move* move) {
 
 void BattleState::checkFaintedPokemon() {
     enqueueMoveEvent<ImmediateEvent>(gameData, [&] {
-        std::vector<Pokemon*> pokemonList = {
-            &pokemon(battle->playerPokemon),
-            &pokemon(battle->opponentPokemon)
+        std::vector<Entity> pokemonList = {
+            battle->playerPokemon,
+            battle->opponentPokemon
         };
 
-        for (Pokemon* pokemon : pokemonList) {
-            if (pokemon->currentHP <= 0) {
-                showMoveText(pokemon->displayName + " fainted!");
+        for (const auto& pokemonEntity : pokemonList) {
+            const Pokemon& currentPokemon = pokemon(pokemonEntity);
+
+            if (currentPokemon.currentHP <= 0) {
+                showMoveText(currentPokemon.displayName + " fainted!");
                 // TODO fainting animation?
+                addComponent(pokemonEntity, Fainted{}, gameData);
+
+                if (pokemonEntity == battle->playerPokemon) {
+                    showMoveText("You blacked out!");
+                    // TODO: move the player somewhere safe (in the Overworld)
+                    enqueueMoveEvent<ImmediateEvent>(gameData, [&] {
+                        gameData.stateMachine->pushState("overworld-state");
+                    });
+                } else {
+                    rewardScreen();
+                }
             }
         }
     });
+}
+
+void BattleState::rewardScreen() {
+    resource<EventQueue>("battle-event-queue", gameData).clear();
+    showText("TODO: Reward screen");
 }
 
 void BattleState::showText(const std::string& content) {
