@@ -4,7 +4,7 @@
 #include "battle/generate-pokemon.hpp"
 #include "battle/Pokemon.hpp"
 #include "battle/random.hpp"
-#include "components/Battle.hpp"
+#include "components/battle/Battle.hpp"
 #include "core-functions.hpp"
 #include "CoreStructures.hpp"
 
@@ -40,6 +40,12 @@ void setupWildEncounter(
     CoreStructures& gameData
 ) {
     Pokemon player = generatePokemon(*gameData.resourceStorage, "Rattata", 3);
+    auto playerEntity = createEntity(gameData);
+    addComponent(playerEntity, player, gameData);
+
     Pokemon opponent = findWildBattleOpponent(mapId, battle, gameData);
-    addComponent(battle, Battle{player, opponent}, gameData);
+    auto opponentEntity = createEntity(gameData);
+    addComponent(opponentEntity, opponent, gameData);
+
+    addComponent(battle, Battle{playerEntity, opponentEntity}, gameData);
 }

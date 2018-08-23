@@ -3,8 +3,8 @@
 #include <array>
 #include <cmath>
 #include <sstream>
-#include "components/BattleActionSelection.hpp"
-#include "components/BattleMoveSelection.hpp"
+#include "components/battle/BattleActionSelection.hpp"
+#include "components/battle/BattleMoveSelection.hpp"
 #include "components/Camera.hpp"
 #include "components/TextBox.hpp"
 #include "engine/entity-system/include.hpp"

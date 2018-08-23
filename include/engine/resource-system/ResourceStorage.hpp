@@ -39,6 +39,12 @@ namespace engine::resourcesystem {
          */
         template<typename T>
         T& get(const std::string& identifier) const;
+
+        /**
+         * \brief Removes data assigned to the given identifier.
+         */
+        template<typename T>
+        void remove(const std::string& identifier);
     };
 
     template<typename T>
@@ -52,6 +58,11 @@ namespace engine::resourcesystem {
     template<typename T>
     T& ResourceStorage::get(const std::string& identifier) const {
         return __detail::resourceData<T>().at(identifier);
+    }
+
+    template<typename T>
+    void ResourceStorage::remove(const std::string& identifier) {
+        __detail::resourceData<T>().erase(identifier);
     }
 }
 

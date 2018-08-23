@@ -38,6 +38,10 @@ class BattleState : public engine::statesystem::State {
 
     void showText(const std::string&);
     void showMoveText(const std::string&);
+
+    Pokemon& pokemon(Entity);
+    std::vector<Move*> moves(Entity);
+    void loadDetailedPokemonData();
 };
 
 #endif

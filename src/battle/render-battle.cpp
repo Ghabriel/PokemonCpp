@@ -1,7 +1,8 @@
 #include "render-textboxes.hpp"
 
-#include "components/Battle.hpp"
-#include "components/BattleActionSelection.hpp"
+#include "battle/Pokemon.hpp"
+#include "components/battle/Battle.hpp"
+#include "components/battle/BattleActionSelection.hpp"
 #include "components/Camera.hpp"
 #include "engine/entity-system/include.hpp"
 #include "engine/resource-system/include.hpp"
@@ -63,20 +64,22 @@ void renderBattle(
             Battle& battle
         ) {
             Camera& camera = storage.get<Camera>("camera");
-            renderAllyPokemon(window, camera, storage, battle.playerPokemon);
+            Pokemon& playerPokemon = manager.getData<Pokemon>(battle.playerPokemon);
+            renderAllyPokemon(window, camera, storage, playerPokemon);
             renderInfoCard(
                 window,
                 storage,
-                battle.playerPokemon,
+                playerPokemon,
                 7 * camera.width / 10,
                 3 * camera.height / 5,
                 true
             );
-            renderFoePokemon(window, camera, storage, battle.opponentPokemon);
+            Pokemon& opponentPokemon = manager.getData<Pokemon>(battle.opponentPokemon);
+            renderFoePokemon(window, camera, storage, opponentPokemon);
             renderInfoCard(
                 window,
                 storage,
-                battle.opponentPokemon,
+                opponentPokemon,
                 camera.width / 10,
                 camera.height / 7,
                 false

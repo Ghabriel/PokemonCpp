@@ -9,9 +9,9 @@
 #include "battle/Pokemon.hpp"
 #include "battle/PokemonSpeciesData.hpp"
 #include "battle/random.hpp"
-#include "components/Battle.hpp"
-#include "components/BattleActionSelection.hpp"
-#include "components/BattleMoveSelection.hpp"
+#include "components/battle/Battle.hpp"
+#include "components/battle/BattleActionSelection.hpp"
+#include "components/battle/BattleMoveSelection.hpp"
 #include "components/TextBox.hpp"
 #include "constants.hpp"
 #include "core-functions.hpp"
@@ -23,6 +23,7 @@
 
 #include "engine/utils/debug/xtrace.hpp"
 
+using engine::entitysystem::Entity;
 using engine::inputsystem::InputContext;
 
 enum class BattleAction {
@@ -51,47 +52,29 @@ PokemonSpeciesData& getSpecies(const Pokemon& pokemon, CoreStructures& gameData)
 BattleState::BattleState(CoreStructures& gameData)
  : gameData(gameData),
    battleEntity(createEntity(gameData)) {
-    registerInputContext();
     lua::internal::setBattle(battleEntity);
     effects::internal::setGameData(gameData);
     effects::internal::setBattle(battleEntity);
 }
 
-void BattleState::registerInputContext() {
-    InputContext context;
-
-    context.actions = {
-        {"Action", [&] { std::cout << "Actionl\n"; }},
-        {"Cancel", [&] { std::cout << "Cancel\n"; }},
-        {"Start", [&] { std::cout << "Start\n"; }},
-        {"Left", [&] { std::cout << "Arrow\n";/* onPressDirectionKey(Direction::West); */ }},
-        {"Right", [&] { std::cout << "Arrow\n";/* onPressDirectionKey(Direction::East); */ }},
-        {"Up", [&] { std::cout << "Arrow\n";/* onPressDirectionKey(Direction::North); */ }},
-        {"Down", [&] { std::cout << "Arrow\n";/* onPressDirectionKey(Direction::South); */ }}
-    };
-
-    context.priority = 0;
-
-    gameData.inputDispatcher->registerContext("battle-state", context);
-}
-
 void BattleState::onEnterImpl() {
     restoreEntity(battleEntity, gameData);
-    enableInputContext("battle-state", gameData);
     setupWildEncounter("map-basic", battleEntity, gameData);
     gameData.resourceStorage->store("battle-event-queue", EventQueue());
     gameData.resourceStorage->store("move-event-queue", EventQueue());
     battle = &data<Battle>(battleEntity, gameData);
+    loadDetailedPokemonData();
 
-    showText("Wild " + battle->opponentPokemon.displayName + " appeared!");
+    showText("Wild " + pokemon(battle->opponentPokemon).displayName + " appeared!");
     // TODO: only show the player's pokémon now
     actionSelectionScreen();
 }
 
 void BattleState::onExitImpl() {
-    disableInputContext("battle-state", gameData);
     music("bgm-wild-battle", gameData).stop();
     deleteEntity(battleEntity, gameData);
+    gameData.resourceStorage->remove<EventQueue>("battle-event-queue");
+    gameData.resourceStorage->remove<EventQueue>("move-event-queue");
 }
 
 void BattleState::executeImpl() {
@@ -110,7 +93,7 @@ void BattleState::actionSelectionScreen() {
         addComponent(
             battleEntity,
             BattleActionSelection{
-                "What will " + battle->playerPokemon.displayName + " do?",
+                "What will " + pokemon(battle->playerPokemon).displayName + " do?",
                 {"Fight", "Bag", "Pokemon", "Run"},
                 300,
                 0
@@ -160,15 +143,16 @@ void BattleState::actionSelectionScreen() {
 void BattleState::moveSelectionScreen() {
     enqueueEvent<ImmediateEvent>(gameData, [&] {
         BattleMoveSelection moveSelection;
-        for (size_t i = 0; i < battle->playerPokemon.moves.size(); ++i) {
-            const auto& pokemon = battle->playerPokemon;
-            const auto& move = resource<Move>("move-" + pokemon.moves[i], gameData);
-            int maxPP = move.pp * (1 + 0.2 * pokemon.ppUps[i]);
+        const Pokemon& currentPokemon = pokemon(battle->playerPokemon);
+        const auto& moveList = moves(battle->playerPokemon);
+        for (size_t i = 0; i < currentPokemon.moves.size(); ++i) {
+            const auto& move = *moveList[i];
+            int maxPP = move.pp * (1 + 0.2 * currentPokemon.ppUps[i]);
 
             moveSelection.moves[i] = {{
                 move.displayName,
                 move.type, // TODO: display name of type?
-                pokemon.pp[i],
+                currentPokemon.pp[i],
                 maxPP
             }};
         }
@@ -197,15 +181,13 @@ void BattleState::moveSelectionScreen() {
 
 void BattleState::processTurn() {
     enqueueEvent<ImmediateEvent>(gameData, [&] {
-        Pokemon& playerPokemon = battle->playerPokemon;
-        const auto& playerMoveId = playerPokemon.moves[selectedAction];
-        const Move& playerMove = resource<Move>("move-" + playerMoveId, gameData);
+        Pokemon& playerPokemon = pokemon(battle->playerPokemon);
+        const Move& playerMove = *moves(battle->playerPokemon)[selectedAction];
         int playerSpeed = playerPokemon.stats[5];
 
-        size_t opponentMoveIndex = chooseMoveAI(battle->opponentPokemon);
-        Pokemon& opponentPokemon = battle->opponentPokemon;
-        const auto& opponentMoveId = opponentPokemon.moves[opponentMoveIndex];
-        const Move& opponentMove = resource<Move>("move-" + opponentMoveId, gameData);
+        Pokemon& opponentPokemon = pokemon(battle->opponentPokemon);
+        size_t opponentMoveIndex = chooseMoveAI(opponentPokemon);
+        const Move& opponentMove = *moves(battle->opponentPokemon)[opponentMoveIndex];
         int opponentSpeed = opponentPokemon.stats[5];
 
         if (playerMove.priority > opponentMove.priority) {
@@ -234,8 +216,8 @@ void BattleState::processTurn() {
 
 void BattleState::updateAIVariables() {
     std::unordered_map<std::string, Pokemon*> pokemonList = {
-        {"user", &battle->opponentPokemon},
-        {"foe", &battle->playerPokemon},
+        {"user", &pokemon(battle->opponentPokemon)},
+        {"foe", &pokemon(battle->playerPokemon)},
     };
 
     auto& ai = script("ai", gameData);
@@ -282,35 +264,33 @@ size_t BattleState::chooseMoveAI(const Pokemon& pokemon) {
 
 void BattleState::processPlayerMove(size_t moveIndex) {
     enqueueEvent<ImmediateEvent>(gameData, [&, moveIndex] {
-        Pokemon& user = battle->playerPokemon;
+        Pokemon& user = pokemon(battle->playerPokemon);
 
         if (user.currentHP <= 0) {
             return;
         }
 
-        const auto& moveId = user.moves[moveIndex];
-        Move& move = resource<Move>("move-" + moveId, gameData);
+        Move& move = *moves(battle->playerPokemon)[moveIndex];
         showMoveText(user.displayName + " used " + move.displayName + "!");
         // TODO: move animation?
         // TODO: handle non-single-target moves
-        processMove(&user, &battle->opponentPokemon, &move);
+        processMove(&user, &pokemon(battle->opponentPokemon), &move);
     });
 }
 
 void BattleState::processOpponentMove(size_t moveIndex) {
     enqueueEvent<ImmediateEvent>(gameData, [&, moveIndex] {
-        Pokemon& user = battle->opponentPokemon;
+        Pokemon& user = pokemon(battle->opponentPokemon);
 
         if (user.currentHP <= 0) {
             return;
         }
 
-        const auto& moveId = user.moves[moveIndex];
-        Move& move = resource<Move>("move-" + moveId, gameData);
+        Move& move = *moves(battle->opponentPokemon)[moveIndex];
         showMoveText("Foe " + user.displayName + " used " + move.displayName + "!");
         // TODO: move animation?
         // TODO: handle non-single-target moves
-        processMove(&user, &battle->playerPokemon, &move);
+        processMove(&user, &pokemon(battle->playerPokemon), &move);
     });
 }
 
@@ -344,15 +324,14 @@ void BattleState::processMove(Pokemon* user, Pokemon* target, Move* move) {
 void BattleState::checkFaintedPokemon() {
     enqueueMoveEvent<ImmediateEvent>(gameData, [&] {
         std::vector<Pokemon*> pokemonList = {
-            &battle->playerPokemon,
-            &battle->opponentPokemon
+            &pokemon(battle->playerPokemon),
+            &pokemon(battle->opponentPokemon)
         };
 
         for (Pokemon* pokemon : pokemonList) {
             if (pokemon->currentHP <= 0) {
                 showMoveText(pokemon->displayName + " fainted!");
-                // TODO: remove the pokémon's sprite and
-                // go to the battle end screen if applicable
+                // TODO fainting animation?
             }
         }
     });
@@ -364,4 +343,31 @@ void BattleState::showText(const std::string& content) {
 
 void BattleState::showMoveText(const std::string& content) {
     enqueueMoveEvent<TextEvent>(gameData, content, battleEntity, gameData);
+}
+
+Pokemon& BattleState::pokemon(Entity entity) {
+    return data<Pokemon>(entity, gameData);
+}
+
+std::vector<Move*> BattleState::moves(Entity entity) {
+    return data<std::vector<Move*>>(entity, gameData);
+}
+
+void BattleState::loadDetailedPokemonData() {
+    std::vector<Entity> pokemonList = {
+        battle->playerPokemon,
+        battle->opponentPokemon
+    };
+
+    for (const auto& pokemonEntity : pokemonList) {
+        const Pokemon& currentPokemon = pokemon(pokemonEntity);
+        std::vector<Move*> moveList;
+
+        for (size_t i = 0; i < currentPokemon.moves.size(); ++i) {
+            Move& move = resource<Move>("move-" + currentPokemon.moves[i], gameData);
+            moveList.push_back(&move);
+        }
+
+        addComponent(pokemonEntity, moveList, gameData);
+    }
 }
