@@ -8,5 +8,11 @@
         "loop-end": "175",
         "start-offset": "0.8",
         "volume": "30"
+    },
+    "bgm-wild-battle-victory": {
+        "file": "resources/bgm/wild-battle-victory.wav",
+        "loop-start": "3.5",
+        "loop-end": "31",
+        "volume": "30"
     }
 }

@@ -351,6 +351,12 @@ void BattleState::checkFaintedPokemon() {
 
 void BattleState::rewardScreen() {
     resource<EventQueue>("battle-event-queue", gameData).clear();
+
+    enqueueEvent<ImmediateEvent>(gameData, [&] {
+        music("bgm-wild-battle", gameData).stop();
+        music("bgm-wild-battle-victory", gameData).play();
+    });
+
     showText("TODO: Reward screen");
 }
 
