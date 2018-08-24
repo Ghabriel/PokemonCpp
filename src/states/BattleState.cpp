@@ -72,6 +72,7 @@ void BattleState::onEnterImpl() {
 void BattleState::onExitImpl() {
     music("bgm-wild-battle", gameData).stop();
     deleteEntity(battleEntity, gameData);
+    gameData.componentManager->cleanup<Battle, Pokemon>();
     gameData.resourceStorage->remove<EventQueue>("battle-event-queue");
     gameData.resourceStorage->remove<EventQueue>("move-event-queue");
 }
@@ -336,16 +337,20 @@ void BattleState::checkFaintedPokemon() {
                 addComponent(pokemonEntity, Fainted{}, gameData);
 
                 if (pokemonEntity == battle->playerPokemon) {
-                    showMoveText("You blacked out!");
-                    // TODO: move the player somewhere safe (in the Overworld)
-                    enqueueMoveEvent<ImmediateEvent>(gameData, [&] {
-                        gameData.stateMachine->pushState("overworld-state");
-                    });
+                    blackOutScreen();
                 } else {
                     rewardScreen();
                 }
             }
         }
+    });
+}
+
+void BattleState::blackOutScreen() {
+    showMoveText("You blacked out!");
+    // TODO: move the player somewhere safe (in the Overworld)
+    enqueueMoveEvent<ImmediateEvent>(gameData, [&] {
+        gameData.stateMachine->pushState("overworld-state");
     });
 }
 
@@ -366,6 +371,7 @@ void BattleState::rewardScreen() {
     showText(playerPokemon.displayName + " gained " + std::to_string(exp) + " EXP. Points!");
 
     enqueueEvent<ImmediateEvent>(gameData, [&] {
+        deleteEntity(battle->opponentPokemon, gameData);
         music("bgm-wild-battle-victory", gameData).stop();
         gameData.stateMachine->pushState("overworld-state");
     });
