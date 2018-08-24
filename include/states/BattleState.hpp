@@ -42,6 +42,7 @@ class BattleState : public engine::statesystem::State {
 
     Pokemon& pokemon(Entity);
     std::vector<Move*> moves(Entity);
+    PokemonSpeciesData& species(Entity);
     void loadDetailedPokemonData();
 };
 

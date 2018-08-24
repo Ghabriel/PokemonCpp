@@ -1,5 +1,6 @@
 #include "battle/battle-utils.hpp"
 
+#include <cmath>
 #include "battle/Move.hpp"
 #include "battle/Pokemon.hpp"
 #include "battle/PokemonSpeciesData.hpp"
@@ -85,4 +86,17 @@ float getTypeEffectiveness(const PokemonSpeciesData& species, const Move& move) 
     }
 
     return result;
+}
+
+int calculateExpGain(
+    const Pokemon& winner,
+    const Pokemon& fainted,
+    const PokemonSpeciesData& faintedSpecies
+) {
+    float luckyEgg = 1; // TODO: handle Lucky Egg
+    int shareFactor = 1; // TODO: handle Exp. Share
+    float factor1 = (faintedSpecies.baseExp * fainted.level) / (5 * shareFactor);
+    float factor2 = std::pow(2 * fainted.level + 10, 2.5);
+    float factor3 = std::pow(fainted.level + winner.level + 10, 2.5);
+    return (factor1 * (factor2 / factor3) + 1) * luckyEgg;
 }

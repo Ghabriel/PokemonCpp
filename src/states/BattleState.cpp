@@ -357,7 +357,18 @@ void BattleState::rewardScreen() {
         music("bgm-wild-battle-victory", gameData).play();
     });
 
-    showText("TODO: Reward screen");
+    Pokemon& playerPokemon = pokemon(battle->playerPokemon);
+    int exp = calculateExpGain(
+        playerPokemon,
+        pokemon(battle->opponentPokemon),
+        species(battle->opponentPokemon)
+    );
+    showText(playerPokemon.displayName + " gained " + std::to_string(exp) + " EXP. Points!");
+
+    enqueueEvent<ImmediateEvent>(gameData, [&] {
+        music("bgm-wild-battle-victory", gameData).stop();
+        gameData.stateMachine->pushState("overworld-state");
+    });
 }
 
 void BattleState::showText(const std::string& content) {
@@ -376,6 +387,10 @@ std::vector<Move*> BattleState::moves(Entity entity) {
     return data<std::vector<Move*>>(entity, gameData);
 }
 
+PokemonSpeciesData& BattleState::species(Entity entity) {
+    return data<PokemonSpeciesData>(entity, gameData);
+}
+
 void BattleState::loadDetailedPokemonData() {
     std::vector<Entity> pokemonList = {
         battle->playerPokemon,
@@ -392,5 +407,12 @@ void BattleState::loadDetailedPokemonData() {
         }
 
         addComponent(pokemonEntity, moveList, gameData);
+
+        PokemonSpeciesData& speciesData = resource<PokemonSpeciesData>(
+            "pokemon-" + currentPokemon.species,
+            gameData
+        );
+
+        addComponent(pokemonEntity, speciesData, gameData);
     }
 }
