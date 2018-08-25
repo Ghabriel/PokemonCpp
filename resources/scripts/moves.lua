@@ -9,6 +9,11 @@ stats = {
     evasion = 7
 }
 
+function Struggle_onUse()
+    damage()
+    recoil(10)
+end
+
 function TailWhip_onUse()
     lowerStat(stats.defense, 1)
 end

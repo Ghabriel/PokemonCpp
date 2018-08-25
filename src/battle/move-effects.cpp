@@ -113,7 +113,10 @@ void effects::lowerStat(int statId, int levels) {
                 break;
         }
 
-        currentStage = std::max(-6, currentStage - levels);
+        // TODO: currentStage will be an INVALID REFERENCE!
+        enqueueEvent<ImmediateEvent>([&, levels] {
+            currentStage = std::max(-6, currentStage - levels);
+        });
     }
 
     showText(text);
@@ -141,10 +144,22 @@ void effects::raiseStat(int statId, int levels) {
                 break;
         }
 
-        currentStage = std::min(6, currentStage + levels);
+        // TODO: currentStage will be an INVALID REFERENCE!
+        enqueueEvent<ImmediateEvent>([&, levels] {
+            currentStage = std::min(6, currentStage + levels);
+        });
     }
 
     showText(text);
+}
+
+void effects::recoil(int lostHP) {
+    enqueueEvent<ImmediateEvent>([&, lostHP] {
+        int& userHP = data<Pokemon>(user, *gameData).currentHP;
+        userHP = std::max(0, userHP - lostHP);
+    });
+
+    showText("Recoil damage!"); // TODO
 }
 
 
@@ -156,5 +171,6 @@ void injectNativeBattleFunctions(engine::scriptingsystem::Lua& script) {
     script.registerNative("damage", effects::damage);
     script.registerNative("lowerStat", effects::lowerStat);
     script.registerNative("raiseStat", effects::raiseStat);
+    script.registerNative("recoil", effects::recoil);
     script.registerNative("showText", effects::showText);
 }

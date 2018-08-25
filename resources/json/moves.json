@@ -1,4 +1,19 @@
 {
+    "Struggle": {
+        "display-name": "Struggle",
+        "type": "Normal",
+        "kind": "Physical",
+        "function-code": 99,
+        "function-parameter": 0,
+        "power": 50,
+        "accuracy": 0,
+        "pp": 1,
+        "effect-rate": 0,
+        "target-type": "single-target",
+        "priority": 0,
+        "flags": "abf",
+        "description": "This attack is used in desperation only if the user has no PP. It also damages the user a little."
+    },
     "Tackle": {
         "display-name": "Tackle",
         "type": "Normal",

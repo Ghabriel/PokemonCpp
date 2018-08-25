@@ -175,6 +175,13 @@ void BattleState::moveSelectionScreen() {
 
     enqueueEvent<ImmediateEvent>(gameData, [&] {
         removeComponent<BattleMoveSelection>(battleEntity, gameData);
+
+        if (pokemon(battle->playerPokemon).pp[selectedAction] == 0) {
+            showText("That move has no PP left!");
+            moveSelectionScreen();
+            return;
+        }
+
         // TODO: handle lack of PP
         processTurn();
     });
@@ -183,13 +190,11 @@ void BattleState::moveSelectionScreen() {
 void BattleState::processTurn() {
     enqueueEvent<ImmediateEvent>(gameData, [&] {
         const Move& playerMove = *moves(battle->playerPokemon)[selectedAction];
-        // int playerSpeed = playerPokemon.stats[5];
         int playerSpeed = getEffectiveStat(battle->playerPokemon, Stat::Speed, gameData);
 
         Pokemon& opponentPokemon = pokemon(battle->opponentPokemon);
         size_t opponentMoveIndex = chooseMoveAI(opponentPokemon);
         const Move& opponentMove = *moves(battle->opponentPokemon)[opponentMoveIndex];
-        // int opponentSpeed = opponentPokemon.stats[5];
         int opponentSpeed = getEffectiveStat(battle->opponentPokemon, Stat::Speed, gameData);
 
         if (playerMove.priority > opponentMove.priority) {
@@ -217,45 +222,50 @@ void BattleState::processTurn() {
 }
 
 void BattleState::updateAIVariables() {
-    std::unordered_map<std::string, Pokemon*> pokemonList = {
-        {"user", &pokemon(battle->opponentPokemon)},
-        {"foe", &pokemon(battle->playerPokemon)},
+    std::unordered_map<std::string, Entity> pokemonList = {
+        {"user", battle->opponentPokemon},
+        {"foe", battle->playerPokemon},
     };
 
     auto& ai = script("ai", gameData);
 
-    for (const auto& [varName, pokemonPtr] : pokemonList) {
-        const auto& pokemon = *pokemonPtr;
-        ai.set(varName + ".species", pokemon.species);
-        ai.set(varName + ".nature", static_cast<int>(pokemon.nature));
-        ai.set(varName + ".heldItem", pokemon.heldItem);
-        ai.set(varName + ".ability", pokemon.ability);
+    for (const auto& [varName, pokemonEntity] : pokemonList) {
+        const Pokemon& currentPokemon = pokemon(pokemonEntity);
+
+        const auto getStat = [&](Stat stat) {
+            return getEffectiveStat(pokemonEntity, stat, gameData);
+        };
+
+        ai.set(varName + ".species", currentPokemon.species);
+        ai.set(varName + ".nature", static_cast<int>(currentPokemon.nature));
+        ai.set(varName + ".heldItem", currentPokemon.heldItem);
+        ai.set(varName + ".ability", currentPokemon.ability);
 
         for (size_t i = 0; i < constants::MOVE_LIMIT; ++i) {
-            if (i < pokemon.moves.size()) {
-                ai.set(varName + ".move" + std::to_string(i), pokemon.moves[i]);
-                ai.set(varName + ".pp" + std::to_string(i), pokemon.pp[i]);
+            if (i < currentPokemon.moves.size()) {
+                ai.set(varName + ".move" + std::to_string(i), currentPokemon.moves[i]);
+                ai.set(varName + ".pp" + std::to_string(i), currentPokemon.pp[i]);
             } else {
                 ai.set(varName + ".move" + std::to_string(i), std::string{});
                 ai.set(varName + ".pp" + std::to_string(i), std::string{});
             }
         }
 
-        ai.set<int>(varName + ".moveCount", pokemon.moves.size());
+        ai.set<int>(varName + ".moveCount", currentPokemon.moves.size());
 
-        ai.set(varName + ".gender", static_cast<int>(pokemon.gender));
-        ai.set(varName + ".form", pokemon.form);
-        ai.set(varName + ".displayName", pokemon.displayName);
-        ai.set(varName + ".status", static_cast<int>(pokemon.status));
-        ai.set(varName + ".asleepRounds", pokemon.asleepRounds);
-        ai.set(varName + ".level", pokemon.level);
-        ai.set(varName + ".hp", pokemon.stats[0]);
-        ai.set(varName + ".attack", pokemon.stats[1]);
-        ai.set(varName + ".defense", pokemon.stats[2]);
-        ai.set(varName + ".specialAttack", pokemon.stats[3]);
-        ai.set(varName + ".specialDefense", pokemon.stats[4]);
-        ai.set(varName + ".speed", pokemon.stats[5]);
-        ai.set(varName + ".currentHP", pokemon.currentHP);
+        ai.set(varName + ".gender", static_cast<int>(currentPokemon.gender));
+        ai.set(varName + ".form", currentPokemon.form);
+        ai.set(varName + ".displayName", currentPokemon.displayName);
+        ai.set(varName + ".status", static_cast<int>(currentPokemon.status));
+        ai.set(varName + ".asleepRounds", currentPokemon.asleepRounds);
+        ai.set(varName + ".level", currentPokemon.level);
+        ai.set(varName + ".hp", getStat(Stat::HP));
+        ai.set(varName + ".attack", getStat(Stat::Attack));
+        ai.set(varName + ".defense", getStat(Stat::Defense));
+        ai.set(varName + ".specialAttack", getStat(Stat::SpecialAttack));
+        ai.set(varName + ".specialDefense", getStat(Stat::SpecialDefense));
+        ai.set(varName + ".speed", getStat(Stat::Speed));
+        ai.set(varName + ".currentHP", currentPokemon.currentHP);
     }
 }
 
@@ -274,6 +284,7 @@ void BattleState::processPlayerMove(size_t moveIndex) {
 
         Move& move = *moves(battle->playerPokemon)[moveIndex];
         showMoveText(user.displayName + " used " + move.displayName + "!");
+        user.pp[moveIndex]--;
         // TODO: move animation?
         // TODO: handle non-single-target moves
         processMove(
@@ -294,6 +305,7 @@ void BattleState::processOpponentMove(size_t moveIndex) {
 
         Move& move = *moves(battle->opponentPokemon)[moveIndex];
         showMoveText("Foe " + user.displayName + " used " + move.displayName + "!");
+        user.pp[moveIndex]--;
         // TODO: move animation?
         // TODO: handle non-single-target moves
         processMove(

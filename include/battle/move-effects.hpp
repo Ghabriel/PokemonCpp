@@ -22,6 +22,7 @@ namespace effects {
     void damage();
     void lowerStat(int statId, int levels);
     void raiseStat(int statId, int levels);
+    void recoil(int lostHP);
 
     void showText(const std::string& content);
 }

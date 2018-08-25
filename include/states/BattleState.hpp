@@ -21,7 +21,6 @@ class BattleState : public engine::statesystem::State {
     Battle* battle;
     int selectedAction;
 
-    void registerInputContext();
     void onEnterImpl() override;
     void onExitImpl() override;
     void executeImpl() override;
