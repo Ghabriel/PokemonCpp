@@ -2,6 +2,7 @@
 #define MOVE_EFFECTS_HPP
 
 #include <string>
+#include "battle/Stat.hpp"
 #include "engine/entity-system/types.hpp"
 #include "engine/scripting-system/forward-declarations.hpp"
 
@@ -13,14 +14,14 @@ namespace effects {
     namespace internal {
         void setGameData(CoreStructures&);
         void setBattle(engine::entitysystem::Entity);
-        void setMoveUser(Pokemon&);
-        void setMoveTarget(Pokemon&);
+        void setMoveUser(engine::entitysystem::Entity);
+        void setMoveTarget(engine::entitysystem::Entity);
         void setMove(Move&);
     }
 
     void damage();
-    void lowerStat(int stat, int levels);
-    void raiseStat(int stat, int levels);
+    void lowerStat(int statId, int levels);
+    void raiseStat(int statId, int levels);
 
     void showText(const std::string& content);
 }

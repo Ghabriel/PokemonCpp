@@ -13,6 +13,7 @@
 #include "components/battle/BattleActionSelection.hpp"
 #include "components/battle/BattleMoveSelection.hpp"
 #include "components/battle/Fainted.hpp"
+#include "components/battle/VolatileData.hpp"
 #include "components/TextBox.hpp"
 #include "constants.hpp"
 #include "core-functions.hpp"
@@ -181,14 +182,15 @@ void BattleState::moveSelectionScreen() {
 
 void BattleState::processTurn() {
     enqueueEvent<ImmediateEvent>(gameData, [&] {
-        Pokemon& playerPokemon = pokemon(battle->playerPokemon);
         const Move& playerMove = *moves(battle->playerPokemon)[selectedAction];
-        int playerSpeed = playerPokemon.stats[5];
+        // int playerSpeed = playerPokemon.stats[5];
+        int playerSpeed = getEffectiveStat(battle->playerPokemon, Stat::Speed, gameData);
 
         Pokemon& opponentPokemon = pokemon(battle->opponentPokemon);
         size_t opponentMoveIndex = chooseMoveAI(opponentPokemon);
         const Move& opponentMove = *moves(battle->opponentPokemon)[opponentMoveIndex];
-        int opponentSpeed = opponentPokemon.stats[5];
+        // int opponentSpeed = opponentPokemon.stats[5];
+        int opponentSpeed = getEffectiveStat(battle->opponentPokemon, Stat::Speed, gameData);
 
         if (playerMove.priority > opponentMove.priority) {
             processPlayerMove(selectedAction);
@@ -274,7 +276,11 @@ void BattleState::processPlayerMove(size_t moveIndex) {
         showMoveText(user.displayName + " used " + move.displayName + "!");
         // TODO: move animation?
         // TODO: handle non-single-target moves
-        processMove(&user, &pokemon(battle->opponentPokemon), &move);
+        processMove(
+            battle->playerPokemon,
+            battle->opponentPokemon,
+            move
+        );
     });
 }
 
@@ -290,31 +296,35 @@ void BattleState::processOpponentMove(size_t moveIndex) {
         showMoveText("Foe " + user.displayName + " used " + move.displayName + "!");
         // TODO: move animation?
         // TODO: handle non-single-target moves
-        processMove(&user, &pokemon(battle->playerPokemon), &move);
+        processMove(
+            battle->opponentPokemon,
+            battle->playerPokemon,
+            move
+        );
     });
 }
 
-void BattleState::processMove(Pokemon* user, Pokemon* target, Move* move) {
-    effects::internal::setMoveUser(*user);
-    effects::internal::setMoveTarget(*target);
-    effects::internal::setMove(*move);
+void BattleState::processMove(Entity user, Entity target, Move& move) {
+    effects::internal::setMoveUser(user);
+    effects::internal::setMoveTarget(target);
+    effects::internal::setMove(move);
 
-    switch (move->functionCode) {
+    switch (move.functionCode) {
         case 0:
             effects::damage();
             break;
         case -1:
         case -2:
         case -3:
-            effects::lowerStat(move->functionParameter, -move->functionCode);
+            effects::lowerStat(move.functionParameter, -move.functionCode);
             break;
         case 1:
         case 2:
         case 3:
-            effects::raiseStat(move->functionParameter, move->functionCode);
+            effects::raiseStat(move.functionParameter, move.functionCode);
             break;
         case 99:
-            script("moves", gameData).call<void>(move->id + "_onUse");
+            script("moves", gameData).call<void>(move.id + "_onUse");
             break;
     }
 
@@ -404,21 +414,30 @@ void BattleState::loadDetailedPokemonData() {
     };
 
     for (const auto& pokemonEntity : pokemonList) {
-        const Pokemon& currentPokemon = pokemon(pokemonEntity);
-        std::vector<Move*> moveList;
-
-        for (size_t i = 0; i < currentPokemon.moves.size(); ++i) {
-            Move& move = resource<Move>("move-" + currentPokemon.moves[i], gameData);
-            moveList.push_back(&move);
-        }
-
-        addComponent(pokemonEntity, moveList, gameData);
-
-        PokemonSpeciesData& speciesData = resource<PokemonSpeciesData>(
-            "pokemon-" + currentPokemon.species,
-            gameData
-        );
-
-        addComponent(pokemonEntity, speciesData, gameData);
+        loadMoves(pokemonEntity);
+        loadSpeciesData(pokemonEntity);
+        addComponent(pokemonEntity, VolatileData{}, gameData);
     }
+}
+
+void BattleState::loadMoves(Entity pokemonEntity) {
+    const Pokemon& currentPokemon = pokemon(pokemonEntity);
+    std::vector<Move*> moveList;
+
+    for (size_t i = 0; i < currentPokemon.moves.size(); ++i) {
+        Move& move = resource<Move>("move-" + currentPokemon.moves[i], gameData);
+        moveList.push_back(&move);
+    }
+
+    addComponent(pokemonEntity, moveList, gameData);
+}
+
+void BattleState::loadSpeciesData(Entity pokemonEntity) {
+    const Pokemon& currentPokemon = pokemon(pokemonEntity);
+    PokemonSpeciesData& speciesData = resource<PokemonSpeciesData>(
+        "pokemon-" + currentPokemon.species,
+        gameData
+    );
+
+    addComponent(pokemonEntity, speciesData, gameData);
 }

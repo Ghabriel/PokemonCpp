@@ -4,31 +4,56 @@
 #include "battle/Move.hpp"
 #include "battle/Pokemon.hpp"
 #include "battle/PokemonSpeciesData.hpp"
+#include "components/battle/VolatileData.hpp"
 #include "core-functions.hpp"
 #include "CoreStructures.hpp"
 
-int getAttackStatForMove(const Pokemon& pokemon, const Move& move) {
+using engine::entitysystem::Entity;
+
+namespace {
+    constexpr float getStatStageMultiplier(int stage) {
+        int absStage = std::abs(stage);
+        return stage >= 0 ? (2 + absStage) / 2.0 : 2.0 / (2 + absStage);
+    }
+}
+
+int getAttackStatForMove(
+    Entity pokemon,
+    const Move& move,
+    CoreStructures& gameData
+) {
     if (move.kind == "Physical") {
-        return pokemon.stats[1];
+        return getEffectiveStat(pokemon, Stat::Attack, gameData);
     }
 
     if (move.kind == "Special") {
-        return pokemon.stats[3];
+        return getEffectiveStat(pokemon, Stat::SpecialAttack, gameData);
     }
 
     return 0;
 }
 
-int getDefenseStatForMove(const Pokemon& pokemon, const Move& move) {
+int getDefenseStatForMove(
+    Entity pokemon,
+    const Move& move,
+    CoreStructures& gameData
+) {
     if (move.kind == "Physical") {
-        return pokemon.stats[2];
+        return getEffectiveStat(pokemon, Stat::Defense, gameData);
     }
 
     if (move.kind == "Special") {
-        return pokemon.stats[4];
+        return getEffectiveStat(pokemon, Stat::SpecialDefense, gameData);
     }
 
     return 0;
+}
+
+int getEffectiveStat(Entity pokemon, Stat stat, CoreStructures& gameData) {
+    int statId = static_cast<int>(stat);
+    int baseStatValue = data<Pokemon>(pokemon, gameData).stats[statId];
+    int currentStage = data<VolatileData>(pokemon, gameData).statStages[statId];
+    return baseStatValue * getStatStageMultiplier(currentStage);
 }
 
 PokemonSpeciesData& getSpecies(const Pokemon& pokemon, CoreStructures& gameData) {

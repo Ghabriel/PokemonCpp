@@ -1,13 +1,32 @@
 #ifndef BATTLE_UTILS_HPP
 #define BATTLE_UTILS_HPP
 
+#include "battle/Stat.hpp"
+#include "engine/entity-system/types.hpp"
+
 struct CoreStructures;
 struct Move;
 struct Pokemon;
 struct PokemonSpeciesData;
 
-int getAttackStatForMove(const Pokemon& pokemon, const Move& move);
-int getDefenseStatForMove(const Pokemon& pokemon, const Move& move);
+int getAttackStatForMove(
+    engine::entitysystem::Entity pokemon,
+    const Move& move,
+    CoreStructures& gameData
+);
+
+int getDefenseStatForMove(
+    engine::entitysystem::Entity pokemon,
+    const Move& move,
+    CoreStructures& gameData
+);
+
+int getEffectiveStat(
+    engine::entitysystem::Entity pokemon,
+    Stat stat,
+    CoreStructures& gameData
+);
+
 PokemonSpeciesData& getSpecies(const Pokemon& pokemon, CoreStructures& gameData);
 float getTypeEffectiveness(const PokemonSpeciesData& species, const Move& move);
 int calculateExpGain(

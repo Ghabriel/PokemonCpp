@@ -33,7 +33,7 @@ class BattleState : public engine::statesystem::State {
     size_t chooseMoveAI(const Pokemon&);
     void processPlayerMove(size_t moveIndex);
     void processOpponentMove(size_t moveIndex);
-    void processMove(Pokemon* user, Pokemon* target, Move* move);
+    void processMove(Entity user, Entity target, Move& move);
     void checkFaintedPokemon();
     void blackOutScreen();
     void rewardScreen();
@@ -45,6 +45,8 @@ class BattleState : public engine::statesystem::State {
     std::vector<Move*> moves(Entity);
     PokemonSpeciesData& species(Entity);
     void loadDetailedPokemonData();
+    void loadMoves(Entity);
+    void loadSpeciesData(Entity);
 };
 
 #endif

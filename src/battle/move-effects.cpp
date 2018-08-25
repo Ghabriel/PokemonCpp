@@ -6,6 +6,7 @@
 #include "battle/Pokemon.hpp"
 #include "battle/PokemonSpeciesData.hpp"
 #include "battle/random.hpp"
+#include "components/battle/VolatileData.hpp"
 #include "constants.hpp"
 #include "core-functions.hpp"
 #include "CoreStructures.hpp"
@@ -15,11 +16,13 @@
 #include "EventQueue.hpp"
 #include "lua-native-functions.hpp"
 
+using engine::entitysystem::Entity;
+
 namespace {
     CoreStructures* gameData;
-    engine::entitysystem::Entity battle;
-    Pokemon* user;
-    Pokemon* target;
+    Entity battle;
+    Entity user;
+    Entity target;
     Move* move;
 
     template<typename TEvent, typename... Args>
@@ -33,16 +36,16 @@ void effects::internal::setGameData(CoreStructures& _gameData) {
     gameData = &_gameData;
 }
 
-void effects::internal::setBattle(engine::entitysystem::Entity _battle) {
+void effects::internal::setBattle(Entity _battle) {
     battle = _battle;
 }
 
-void effects::internal::setMoveUser(Pokemon& pokemon) {
-    user = &pokemon;
+void effects::internal::setMoveUser(Entity pokemon) {
+    user = pokemon;
 }
 
-void effects::internal::setMoveTarget(Pokemon& pokemon) {
-    target = &pokemon;
+void effects::internal::setMoveTarget(Entity pokemon) {
+    target = pokemon;
 }
 
 void effects::internal::setMove(Move& _move) {
@@ -50,18 +53,22 @@ void effects::internal::setMove(Move& _move) {
 }
 
 void effects::damage() {
-    PokemonSpeciesData& targetSpecies = getSpecies(*target, *gameData);
+    PokemonSpeciesData& targetSpecies = data<PokemonSpeciesData>(target, *gameData);
     float type = getTypeEffectiveness(targetSpecies, *move);
 
     if (type < 0.1) {
-        lua::showBattleText("It doesn't affect " + target->displayName + "...");
+        lua::showBattleText(
+            "It doesn't affect " +
+            data<Pokemon>(target, *gameData).displayName + "..."
+        );
         return;
     }
 
-    PokemonSpeciesData& userSpecies = getSpecies(*user, *gameData);
-    int attack = getAttackStatForMove(*user, *move);
-    int defense = getDefenseStatForMove(*target, *move);
-    int baseDamage = (((2 * user->level) / 5 + 2) * move->power * (attack / defense)) / 50 + 2;
+    PokemonSpeciesData& userSpecies = data<PokemonSpeciesData>(user, *gameData);
+    int userLevel = data<Pokemon>(user, *gameData).level;
+    int attack = getAttackStatForMove(user, *move, *gameData);
+    int defense = getDefenseStatForMove(target, *move, *gameData);
+    int baseDamage = (((2 * userLevel) / 5 + 2) * move->power * (attack / defense)) / 50 + 2;
     float targets = 1; // TODO: handle multi-target moves
     float weather = 1; // TODO
     float critical = 1; // TODO
@@ -79,43 +86,62 @@ void effects::damage() {
     }
 
     enqueueEvent<ImmediateEvent>([damage] {
-        target->currentHP = std::max(0, target->currentHP - damage);
+        int& targetHP = data<Pokemon>(target, *gameData).currentHP;
+        targetHP = std::max(0, targetHP - damage);
     });
 }
 
-void effects::lowerStat(int stat, int levels) {
-    // TODO
-    std::string text = target->displayName + "'s " + constants::DISPLAYNAME_STATS[stat] + " ";
+void effects::lowerStat(int statId, int levels) {
+    int& currentStage = data<VolatileData>(target, *gameData).statStages[statId];
 
-    switch (levels) {
-        case 1:
-            text += "fell!";
-            break;
-        case 2:
-            text += "harshly fell!";
-            break;
-        default:
-            text += "severely fell!";
-            break;
+    std::string text =
+        data<Pokemon>(target, *gameData).displayName +
+        "'s " + constants::DISPLAYNAME_STATS[statId] + " ";
+
+    if (currentStage == -6) {
+        text += "won't go any lower!";
+    } else {
+        switch (levels) {
+            case 1:
+                text += "fell!";
+                break;
+            case 2:
+                text += "harshly fell!";
+                break;
+            default:
+                text += "severely fell!";
+                break;
+        }
+
+        currentStage = std::max(-6, currentStage - levels);
     }
 
     showText(text);
 }
 
-void effects::raiseStat(int stat, int levels) {
-    // TODO
-    std::string text = target->displayName + "'s " + constants::DISPLAYNAME_STATS[stat] + " ";
+void effects::raiseStat(int statId, int levels) {
+    int& currentStage = data<VolatileData>(target, *gameData).statStages[statId];
 
-    switch (levels) {
-        case 1:
-            text += "rose!";
-            break;
-        case 2:
-            text += "rose sharply!";
-            break;
-        default:
-            text += "rose drastically!";
-            break;
+    std::string text =
+        data<Pokemon>(target, *gameData).displayName +
+        "'s " + constants::DISPLAYNAME_STATS[statId] + " ";
+
+    if (currentStage == 6) {
+        text += "won't go any higher!";
+    } else {
+        switch (levels) {
+            case 1:
+                text += "rose!";
+                break;
+            case 2:
+                text += "rose sharply!";
+                break;
+            default:
+                text += "rose drastically!";
+                break;
+        }
+
+        currentStage = std::min(6, currentStage + levels);
     }
 
     showText(text);
