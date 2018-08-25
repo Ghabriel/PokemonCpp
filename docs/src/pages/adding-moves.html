@@ -1,6 +1,6 @@
 <h2>Adding moves</h2>
 
-<p>The main file that tells the game which moves exist is <strong>moves.json</strong>. An example content is illustrated below.</p>
+<p>The main file that tells the game which moves exist and what they do is <strong>moves.json</strong>. An example content is illustrated below.</p>
 <code>{
     "Tackle": {
         "display-name": "Tackle",
@@ -113,7 +113,7 @@
         </tr>
         <tr>
             <td>priority</td>
-            <td>The priority of the move, from -6 to 6.</td>
+            <td>The priority of the move, from -7 to 5.</td>
         </tr>
         <tr>
             <td>flags</td>
@@ -232,12 +232,18 @@ The following table lists all possible function codes and the purpose of "functi
         </tr>
         <tr>
             <td>6</td>
+            <td>damage + recoil</td>
+            <td>-</td>
+            <td>the percentage (1-100) of the damage dealt that is received as recoil damage.</td>
+        </tr>
+        <tr>
+            <td>7</td>
             <td>damage + user faints</td>
             <td>-</td>
             <td>-</td>
         </tr>
         <tr>
-            <td>7</td>
+            <td>8</td>
             <td>fixed damage</td>
             <td>-</td>
             <td>the amount of damage dealt</td>
@@ -357,7 +363,7 @@ The following table lists all possible function codes and the purpose of "functi
 
 <h3 id="scripting">Scripting a move</h3>
 
-<p>Most simple moves fit in one of the possible function codes, and thus don't need a script. There are, however, moves that combine several effects or introduce completely new ones, in which case the function code 99 should be used. A move that has function code 99 <strong>does nothing by itself</strong>, it simply makes the game look for the move's effect somewhere else: the <strong>moves.lua</strong> file.</p>
+<p>Most simple moves fit in one of the possible function codes, and thus don't need a script. There are, however, moves that combine several effects or introduce completely new ones, in which case the function code 99 should be used. A move that has function code 99 <strong>does nothing by itself</strong>, it simply tells the game to look for the move's effect somewhere else: the <strong>moves.lua</strong> file.</p>
 
 The moves.lua file contains functions of the form:
 <code>function MoveName_eventType
@@ -425,6 +431,14 @@ The functions that are available inside the script's function body are:
             <td>Deals damage to the target according to the <a href="#move-fields">move properties</a>.</td>
         </tr>
         <tr>
+            <td>void damageWithFixedRecoil(int lostHP)</td>
+            <td>Calls <code class="inline">damage()</code> and, if it hits, deals exactly <code class="inline">lostHP</code> recoil damage to the user.</td>
+        </tr>
+        <tr>
+            <td>void damageWithRecoil(float recoilRate)</td>
+            <td>Calls <code class="inline">damage()</code> and, if it hits, deals <code class="inline">"damage dealt" * recoilRate</code> recoil damage to the user.</td>
+        </tr>
+        <tr>
             <td>void lowerStat(int <a href="#stat-id">statID</a>, int levels)</td>
             <td>Reduces the corresponding stat stages of the target by the specified number of levels.</td>
         </tr>
@@ -438,3 +452,141 @@ The functions that are available inside the script's function body are:
         </tr>
     </tbody>
 </table>
+
+Additionally, the following variables are available as well:
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Variable</th>
+            <th>Description</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>string user.species</td>
+            <td>The internal name of the user's species.</td>
+        </tr>
+        <tr>
+            <td>int user.nature</td>
+            <td>
+                The nature ID of the user:
+                <ul>
+                    <li>0 - Hardy</li>
+                    <li>1 - Lonely</li>
+                    <li>2 - Adamant</li>
+                    <li>3 - Naughty</li>
+                    <li>4 - Brave</li>
+                    <li>5 - Bold</li>
+                    <li>6 - Docile</li>
+                    <li>7 - Impish</li>
+                    <li>8 - Lax</li>
+                    <li>9 - Relaxed</li>
+                    <li>10 - Modest</li>
+                    <li>11 - Mild</li>
+                    <li>12 - Bashful</li>
+                    <li>13 - Rash</li>
+                    <li>14 - Quiet</li>
+                    <li>15 - Calm</li>
+                    <li>16 - Gentle</li>
+                    <li>17 - Careful</li>
+                    <li>18 - Quirky</li>
+                    <li>19 - Sassy</li>
+                    <li>20 - Timid</li>
+                    <li>21 - Hasty</li>
+                    <li>22 - Jolly</li>
+                    <li>23 - Naive</li>
+                    <li>24 - Serious</li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <td>string user.heldItem</td>
+            <td>The internal name of the user's held item.</td>
+        </tr>
+        <tr>
+            <td>string user.ability</td>
+            <td>The internal name of the user's ability.</td>
+        </tr>
+        <tr>
+            <td>int user.moveCount</td>
+            <td>The number of moves the user has.</td>
+        </tr>
+        <tr>
+            <td>
+                string user.move0<br>
+                string user.move1<br>
+                string user.move2<br>
+                string user.move3
+            </td>
+            <td>The internal names of the user's moves.</td>
+        </tr>
+        <tr>
+            <td>
+                int user.pp0<br>
+                int user.pp1<br>
+                int user.pp2<br>
+                int user.pp3
+            </td>
+            <td>The current PP values of the user.</td>
+        </tr>
+        <tr>
+            <td>int user.gender</td>
+            <td>
+                The gender ID of the user:
+                <ul>
+                    <li>0 - Male</li>
+                    <li>1 - Female</li>
+                    <li>2 - Genderless</li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <td>int user.form</td>
+            <td>The form ID of the user.</td>
+        </tr>
+        <tr>
+            <td>string user.displayName</td>
+            <td>The display name of the user.</td>
+        </tr>
+        <tr>
+            <td>int user.status</td>
+            <td>
+                The current status condition of the user:
+                <ul>
+                    <li>0 - Normal</li>
+                    <li>1 - Sleep</li>
+                    <li>2 - Poison</li>
+                    <li>3 - Freeze</li>
+                    <li>4 - Paralysis</li>
+                    <li>5 - Toxic</li>
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <td>int user.asleepRounds</td>
+            <td>The number of turns the user will stay asleep (0 if it's not sleeping).</td>
+        </tr>
+        <tr>
+            <td>int user.level</td>
+            <td>The level of the user.</td>
+        </tr>
+        <tr>
+            <td>
+                int user.hp<br>
+                int user.attack<br>
+                int user.defense<br>
+                int user.specialAttack<br>
+                int user.specialDefense<br>
+                int user.speed
+            </td>
+            <td>The current stats of the user (user.hp corresponds to its maximum HP).</td>
+        </tr>
+        <tr>
+            <td>int user.currentHP</td>
+            <td>The current HP of the user.</td>
+        </tr>
+    </tbody>
+</table>
+
+<strong>Note:</strong> the same fields are available for the <code class="inline">target</code> variable, which contains information about the target of the move.

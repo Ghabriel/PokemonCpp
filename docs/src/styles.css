@@ -40,6 +40,11 @@ html, body {
     white-space: pre-wrap;
 }
 
+#content code.inline {
+    display: inline-block;
+    margin-bottom: 2px;
+}
+
 #content table {
     margin-top: 10px;
 }
