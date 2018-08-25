@@ -27,8 +27,15 @@ int getEffectiveStat(
     CoreStructures& gameData
 );
 
+bool hasUsableMoves(
+    engine::entitysystem::Entity pokemon,
+    CoreStructures& gameData
+);
+
 PokemonSpeciesData& getSpecies(const Pokemon& pokemon, CoreStructures& gameData);
+
 float getTypeEffectiveness(const PokemonSpeciesData& species, const Move& move);
+
 int calculateExpGain(
     const Pokemon& winner,
     const Pokemon& fainted,

@@ -56,6 +56,21 @@ int getEffectiveStat(Entity pokemon, Stat stat, CoreStructures& gameData) {
     return baseStatValue * getStatStageMultiplier(currentStage);
 }
 
+bool hasUsableMoves(
+    engine::entitysystem::Entity pokemon,
+    CoreStructures& gameData
+) {
+    const auto& ppList = data<Pokemon>(pokemon, gameData).pp;
+
+    for (int pp : ppList) {
+        if (pp > 0) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 PokemonSpeciesData& getSpecies(const Pokemon& pokemon, CoreStructures& gameData) {
     return resource<PokemonSpeciesData>("pokemon-" + pokemon.species, gameData);
 }
@@ -102,6 +117,10 @@ float getTypeEffectiveness(const PokemonSpeciesData& species, const Move& move) 
         {"Dark", 16},
         {"Fairy", 17},
     };
+
+    if (move.type == "???") {
+        return 1;
+    }
 
     size_t moveType = typeMapping.at(move.type);
     float result = typeTable[moveType][typeMapping.at(species.types[0])];

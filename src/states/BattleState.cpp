@@ -27,6 +27,7 @@
 
 using engine::entitysystem::Entity;
 using engine::inputsystem::InputContext;
+using engine::scriptingsystem::Lua;
 
 namespace {
     enum class BattleAction {
@@ -35,6 +36,8 @@ namespace {
         Pokemon,
         Run
     };
+
+    constexpr int STRUGGLE = -2;
 
     template<typename TEvent, typename... Args>
     void enqueueEvent(CoreStructures& gameData, Args&&... args) {
@@ -46,6 +49,51 @@ namespace {
     void enqueueMoveEvent(CoreStructures& gameData, Args&&... args) {
         EventQueue& queue = resource<EventQueue>("move-event-queue", gameData);
         queue.addEvent(std::make_unique<TEvent>(std::forward<Args>(args)...));
+    }
+
+    void injectNativeBattleVariables(
+        const std::unordered_map<std::string, Entity>& pokemonList,
+        Lua& script,
+        CoreStructures& gameData
+    ) {
+        for (const auto& [varName, pokemonEntity] : pokemonList) {
+            const Pokemon& currentPokemon = data<Pokemon>(pokemonEntity, gameData);
+
+            const auto getStat = [&](Stat stat) {
+                return getEffectiveStat(pokemonEntity, stat, gameData);
+            };
+
+            script.set(varName + ".species", currentPokemon.species);
+            script.set(varName + ".nature", static_cast<int>(currentPokemon.nature));
+            script.set(varName + ".heldItem", currentPokemon.heldItem);
+            script.set(varName + ".ability", currentPokemon.ability);
+
+            for (size_t i = 0; i < constants::MOVE_LIMIT; ++i) {
+                if (i < currentPokemon.moves.size()) {
+                    script.set(varName + ".move" + std::to_string(i), currentPokemon.moves[i]);
+                    script.set(varName + ".pp" + std::to_string(i), currentPokemon.pp[i]);
+                } else {
+                    script.set(varName + ".move" + std::to_string(i), std::string{});
+                    script.set(varName + ".pp" + std::to_string(i), std::string{});
+                }
+            }
+
+            script.set<int>(varName + ".moveCount", currentPokemon.moves.size());
+
+            script.set(varName + ".gender", static_cast<int>(currentPokemon.gender));
+            script.set(varName + ".form", currentPokemon.form);
+            script.set(varName + ".displayName", currentPokemon.displayName);
+            script.set(varName + ".status", static_cast<int>(currentPokemon.status));
+            script.set(varName + ".asleepRounds", currentPokemon.asleepRounds);
+            script.set(varName + ".level", currentPokemon.level);
+            script.set(varName + ".hp", getStat(Stat::HP));
+            script.set(varName + ".attack", getStat(Stat::Attack));
+            script.set(varName + ".defense", getStat(Stat::Defense));
+            script.set(varName + ".specialAttack", getStat(Stat::SpecialAttack));
+            script.set(varName + ".specialDefense", getStat(Stat::SpecialDefense));
+            script.set(varName + ".speed", getStat(Stat::Speed));
+            script.set(varName + ".currentHP", currentPokemon.currentHP);
+        }
     }
 }
 
@@ -118,7 +166,14 @@ void BattleState::actionSelectionScreen() {
 
         switch (static_cast<BattleAction>(selectedAction)) {
             case BattleAction::Fight:
-                // TODO: use Struggle if no moves can be used
+                if (!hasUsableMoves(battle->playerPokemon, gameData)) {
+                    std::string& displayName = pokemon(battle->playerPokemon).displayName;
+                    showText(displayName + " has no moves left!");
+                    selectedAction = STRUGGLE;
+                    processTurn();
+                    return;
+                }
+
                 moveSelectionScreen();
                 break;
             case BattleAction::Bag:
@@ -177,19 +232,20 @@ void BattleState::moveSelectionScreen() {
         removeComponent<BattleMoveSelection>(battleEntity, gameData);
 
         if (pokemon(battle->playerPokemon).pp[selectedAction] == 0) {
-            showText("That move has no PP left!");
+            showText("That move has no PP left!"); // TODO
             moveSelectionScreen();
             return;
         }
 
-        // TODO: handle lack of PP
         processTurn();
     });
 }
 
 void BattleState::processTurn() {
     enqueueEvent<ImmediateEvent>(gameData, [&] {
-        const Move& playerMove = *moves(battle->playerPokemon)[selectedAction];
+        const Move& playerMove = (selectedAction == STRUGGLE)
+            ? resource<Move>("move-Struggle", gameData)
+            : *moves(battle->playerPokemon)[selectedAction];
         int playerSpeed = getEffectiveStat(battle->playerPokemon, Stat::Speed, gameData);
 
         Pokemon& opponentPokemon = pokemon(battle->opponentPokemon);
@@ -228,45 +284,7 @@ void BattleState::updateAIVariables() {
     };
 
     auto& ai = script("ai", gameData);
-
-    for (const auto& [varName, pokemonEntity] : pokemonList) {
-        const Pokemon& currentPokemon = pokemon(pokemonEntity);
-
-        const auto getStat = [&](Stat stat) {
-            return getEffectiveStat(pokemonEntity, stat, gameData);
-        };
-
-        ai.set(varName + ".species", currentPokemon.species);
-        ai.set(varName + ".nature", static_cast<int>(currentPokemon.nature));
-        ai.set(varName + ".heldItem", currentPokemon.heldItem);
-        ai.set(varName + ".ability", currentPokemon.ability);
-
-        for (size_t i = 0; i < constants::MOVE_LIMIT; ++i) {
-            if (i < currentPokemon.moves.size()) {
-                ai.set(varName + ".move" + std::to_string(i), currentPokemon.moves[i]);
-                ai.set(varName + ".pp" + std::to_string(i), currentPokemon.pp[i]);
-            } else {
-                ai.set(varName + ".move" + std::to_string(i), std::string{});
-                ai.set(varName + ".pp" + std::to_string(i), std::string{});
-            }
-        }
-
-        ai.set<int>(varName + ".moveCount", currentPokemon.moves.size());
-
-        ai.set(varName + ".gender", static_cast<int>(currentPokemon.gender));
-        ai.set(varName + ".form", currentPokemon.form);
-        ai.set(varName + ".displayName", currentPokemon.displayName);
-        ai.set(varName + ".status", static_cast<int>(currentPokemon.status));
-        ai.set(varName + ".asleepRounds", currentPokemon.asleepRounds);
-        ai.set(varName + ".level", currentPokemon.level);
-        ai.set(varName + ".hp", getStat(Stat::HP));
-        ai.set(varName + ".attack", getStat(Stat::Attack));
-        ai.set(varName + ".defense", getStat(Stat::Defense));
-        ai.set(varName + ".specialAttack", getStat(Stat::SpecialAttack));
-        ai.set(varName + ".specialDefense", getStat(Stat::SpecialDefense));
-        ai.set(varName + ".speed", getStat(Stat::Speed));
-        ai.set(varName + ".currentHP", currentPokemon.currentHP);
-    }
+    injectNativeBattleVariables(pokemonList, ai, gameData);
 }
 
 size_t BattleState::chooseMoveAI(const Pokemon& pokemon) {
@@ -274,7 +292,7 @@ size_t BattleState::chooseMoveAI(const Pokemon& pokemon) {
     return script("ai", gameData).call<int>("chooseMoveWildBattle");
 }
 
-void BattleState::processPlayerMove(size_t moveIndex) {
+void BattleState::processPlayerMove(int moveIndex) {
     enqueueEvent<ImmediateEvent>(gameData, [&, moveIndex] {
         Pokemon& user = pokemon(battle->playerPokemon);
 
@@ -282,9 +300,15 @@ void BattleState::processPlayerMove(size_t moveIndex) {
             return;
         }
 
-        Move& move = *moves(battle->playerPokemon)[moveIndex];
+        Move& move = (moveIndex == STRUGGLE)
+            ? resource<Move>("move-Struggle", gameData)
+            : *moves(battle->playerPokemon)[moveIndex];
         showMoveText(user.displayName + " used " + move.displayName + "!");
-        user.pp[moveIndex]--;
+
+        if (moveIndex != STRUGGLE) {
+            user.pp[moveIndex]--;
+        }
+
         // TODO: move animation?
         // TODO: handle non-single-target moves
         processMove(
@@ -295,7 +319,7 @@ void BattleState::processPlayerMove(size_t moveIndex) {
     });
 }
 
-void BattleState::processOpponentMove(size_t moveIndex) {
+void BattleState::processOpponentMove(int moveIndex) {
     enqueueEvent<ImmediateEvent>(gameData, [&, moveIndex] {
         Pokemon& user = pokemon(battle->opponentPokemon);
 
@@ -303,9 +327,15 @@ void BattleState::processOpponentMove(size_t moveIndex) {
             return;
         }
 
-        Move& move = *moves(battle->opponentPokemon)[moveIndex];
+        Move& move = (moveIndex == STRUGGLE)
+            ? resource<Move>("move-Struggle", gameData)
+            : *moves(battle->opponentPokemon)[moveIndex];
         showMoveText("Foe " + user.displayName + " used " + move.displayName + "!");
-        user.pp[moveIndex]--;
+
+        if (moveIndex != STRUGGLE) {
+            user.pp[moveIndex]--;
+        }
+
         // TODO: move animation?
         // TODO: handle non-single-target moves
         processMove(
@@ -336,11 +366,22 @@ void BattleState::processMove(Entity user, Entity target, Move& move) {
             effects::raiseStat(move.functionParameter, move.functionCode);
             break;
         case 99:
+            updateMoveVariables(user, target);
             script("moves", gameData).call<void>(move.id + "_onUse");
             break;
     }
 
     checkFaintedPokemon();
+}
+
+void BattleState::updateMoveVariables(Entity user, Entity target) {
+    std::unordered_map<std::string, Entity> pokemonList = {
+        {"user", user},
+        {"target", target},
+    };
+
+    auto& moves = script("moves", gameData);
+    injectNativeBattleVariables(pokemonList, moves, gameData);
 }
 
 void BattleState::checkFaintedPokemon() {

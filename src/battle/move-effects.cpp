@@ -24,6 +24,7 @@ namespace {
     Entity user;
     Entity target;
     Move* move;
+    bool hitFlag = false;
 
     template<typename TEvent, typename... Args>
     void enqueueEvent(Args&&... args) {
@@ -53,11 +54,15 @@ void effects::internal::setMove(Move& _move) {
 }
 
 void effects::damage() {
+    enqueueEvent<ImmediateEvent>([&] {
+        hitFlag = false;
+    });
+
     PokemonSpeciesData& targetSpecies = data<PokemonSpeciesData>(target, *gameData);
     float type = getTypeEffectiveness(targetSpecies, *move);
 
     if (type < 0.1) {
-        lua::showBattleText(
+        showText(
             "It doesn't affect " +
             data<Pokemon>(target, *gameData).displayName + "..."
         );
@@ -88,6 +93,20 @@ void effects::damage() {
     enqueueEvent<ImmediateEvent>([damage] {
         int& targetHP = data<Pokemon>(target, *gameData).currentHP;
         targetHP = std::max(0, targetHP - damage);
+        hitFlag = true;
+    });
+}
+
+void effects::damageWithFixedRecoil(int lostHP) {
+    damage();
+
+    enqueueEvent<ImmediateEvent>([&, lostHP] {
+        if (hitFlag) {
+            Pokemon& userPokemon = data<Pokemon>(user, *gameData);
+            int& userHP = userPokemon.currentHP;
+            userHP = std::max(0, userHP - lostHP);
+            showText(userPokemon.displayName + " is hit with recoil!");
+        }
     });
 }
 
@@ -153,15 +172,6 @@ void effects::raiseStat(int statId, int levels) {
     showText(text);
 }
 
-void effects::recoil(int lostHP) {
-    enqueueEvent<ImmediateEvent>([&, lostHP] {
-        int& userHP = data<Pokemon>(user, *gameData).currentHP;
-        userHP = std::max(0, userHP - lostHP);
-    });
-
-    showText("Recoil damage!"); // TODO
-}
-
 
 void effects::showText(const std::string& content) {
     enqueueEvent<TextEvent>(content, battle, *gameData);
@@ -169,8 +179,8 @@ void effects::showText(const std::string& content) {
 
 void injectNativeBattleFunctions(engine::scriptingsystem::Lua& script) {
     script.registerNative("damage", effects::damage);
+    script.registerNative("damageWithFixedRecoil", effects::damageWithFixedRecoil);
     script.registerNative("lowerStat", effects::lowerStat);
     script.registerNative("raiseStat", effects::raiseStat);
-    script.registerNative("recoil", effects::recoil);
     script.registerNative("showText", effects::showText);
 }

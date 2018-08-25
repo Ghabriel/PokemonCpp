@@ -9,9 +9,11 @@ stats = {
     evasion = 7
 }
 
+user = {}
+target = {}
+
 function Struggle_onUse()
-    damage()
-    recoil(10)
+    damageWithFixedRecoil((user.hp + 3) / 4)
 end
 
 function TailWhip_onUse()

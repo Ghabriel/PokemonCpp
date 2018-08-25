@@ -30,9 +30,10 @@ class BattleState : public engine::statesystem::State {
     void processTurn();
     void updateAIVariables();
     size_t chooseMoveAI(const Pokemon&);
-    void processPlayerMove(size_t moveIndex);
-    void processOpponentMove(size_t moveIndex);
+    void processPlayerMove(int moveIndex);
+    void processOpponentMove(int moveIndex);
     void processMove(Entity user, Entity target, Move& move);
+    void updateMoveVariables(Entity user, Entity target);
     void checkFaintedPokemon();
     void blackOutScreen();
     void rewardScreen();
