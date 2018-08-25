@@ -10,10 +10,12 @@ ActionSelectionEvent::ActionSelectionEvent(
     int& selectedOption,
     bool cancelable,
     std::function<size_t&()> getFocusedOption,
+    std::function<bool(size_t)> isValidOption,
     CoreStructures& gameData
 ) : selectedOption(&selectedOption),
     cancelable(cancelable),
     getFocusedOption(getFocusedOption),
+    isValidOption(isValidOption),
     gameData(gameData) {
     registerInputContext();
 }
@@ -68,6 +70,10 @@ void ActionSelectionEvent::onStartImpl() {
 }
 
 bool ActionSelectionEvent::tickImpl() {
+    if (!isValidOption(getFocusedOption())) {
+        state = SelectionState::Pending;
+    }
+
     if (state == SelectionState::Pending) {
         return false;
     }

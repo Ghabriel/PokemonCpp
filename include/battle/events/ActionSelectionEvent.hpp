@@ -20,6 +20,7 @@ class ActionSelectionEvent : public Event {
         int& selectedOption,
         bool cancelable,
         std::function<size_t&()> getFocusedOption,
+        std::function<bool(size_t)> isValidOption,
         CoreStructures& gameData
     );
 
@@ -27,6 +28,7 @@ class ActionSelectionEvent : public Event {
     int* selectedOption;
     bool cancelable;
     std::function<size_t&()> getFocusedOption;
+    std::function<bool(size_t)> isValidOption;
     CoreStructures& gameData;
     SelectionState state;
 

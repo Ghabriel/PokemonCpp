@@ -158,6 +158,7 @@ void BattleState::actionSelectionScreen() {
         [&]() -> size_t& {
             return data<BattleActionSelection>(battleEntity, gameData).focusedOption;
         },
+        [](size_t) { return true; },
         gameData
     );
 
@@ -224,6 +225,9 @@ void BattleState::moveSelectionScreen() {
         true,
         [&]() -> size_t& {
             return data<BattleMoveSelection>(battleEntity, gameData).focusedOption;
+        },
+        [&](size_t option) {
+            return option < pokemon(battle->playerPokemon).moves.size();
         },
         gameData
     );
