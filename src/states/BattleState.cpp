@@ -374,6 +374,9 @@ void BattleState::processMove(Entity user, Entity target, Move& move) {
         case 3:
             effects::raiseStat(move.functionParameter, move.functionCode);
             break;
+        case 6:
+            effects::damageWithRecoil(move.functionParameter / 100.0);
+            break;
         case 99:
             updateMoveVariables(user, target);
             script("moves", gameData).call<void>(move.id + "_onUse");

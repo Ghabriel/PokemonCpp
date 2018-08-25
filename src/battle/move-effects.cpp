@@ -24,7 +24,9 @@ namespace {
     Entity user;
     Entity target;
     Move* move;
+
     bool hitFlag = false;
+    int damageBuffer = 0;
 
     template<typename TEvent, typename... Args>
     void enqueueEvent(Args&&... args) {
@@ -56,6 +58,7 @@ void effects::internal::setMove(Move& _move) {
 void effects::damage() {
     enqueueEvent<ImmediateEvent>([&] {
         hitFlag = false;
+        damageBuffer = 0;
     });
 
     PokemonSpeciesData& targetSpecies = data<PokemonSpeciesData>(target, *gameData);
@@ -94,6 +97,7 @@ void effects::damage() {
         int& targetHP = data<Pokemon>(target, *gameData).currentHP;
         targetHP = std::max(0, targetHP - damage);
         hitFlag = true;
+        damageBuffer = damage;
     });
 }
 
@@ -105,6 +109,19 @@ void effects::damageWithFixedRecoil(int lostHP) {
             Pokemon& userPokemon = data<Pokemon>(user, *gameData);
             int& userHP = userPokemon.currentHP;
             userHP = std::max(0, userHP - lostHP);
+            showText(userPokemon.displayName + " is hit with recoil!");
+        }
+    });
+}
+
+void effects::damageWithRecoil(float recoilRate) {
+    damage();
+
+    enqueueEvent<ImmediateEvent>([&, recoilRate] {
+        if (hitFlag) {
+            Pokemon& userPokemon = data<Pokemon>(user, *gameData);
+            int& userHP = userPokemon.currentHP;
+            userHP = std::max(0, userHP - static_cast<int>(damageBuffer * recoilRate));
             showText(userPokemon.displayName + " is hit with recoil!");
         }
     });
