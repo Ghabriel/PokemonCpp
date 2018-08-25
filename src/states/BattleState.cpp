@@ -221,7 +221,7 @@ void BattleState::moveSelectionScreen() {
     enqueueEvent<ActionSelectionEvent>(
         gameData,
         selectedAction,
-        false,
+        true,
         [&]() -> size_t& {
             return data<BattleMoveSelection>(battleEntity, gameData).focusedOption;
         },
@@ -230,6 +230,11 @@ void BattleState::moveSelectionScreen() {
 
     enqueueEvent<ImmediateEvent>(gameData, [&] {
         removeComponent<BattleMoveSelection>(battleEntity, gameData);
+
+        if (selectedAction == -1) {
+            actionSelectionScreen();
+            return;
+        }
 
         if (pokemon(battle->playerPokemon).pp[selectedAction] == 0) {
             showText("That move has no PP left!"); // TODO
