@@ -2,6 +2,7 @@
 
 #include <queue>
 #include "battle/battle-utils.hpp"
+#include "battle/events/ValueAnimationEvent.hpp"
 #include "battle/Move.hpp"
 #include "battle/Pokemon.hpp"
 #include "battle/PokemonSpeciesData.hpp"
@@ -93,9 +94,18 @@ void effects::damage() {
         damage = 1;
     }
 
+    damage *= 40;
+
+    float& targetHP = data<Pokemon>(target, *gameData).currentHP;
+    enqueueEvent<ValueAnimationEvent>(
+        targetHP,
+        std::max(0, static_cast<int>(targetHP - damage)),
+        *gameData
+    );
+
     enqueueEvent<ImmediateEvent>([damage] {
-        int& targetHP = data<Pokemon>(target, *gameData).currentHP;
-        targetHP = std::max(0, targetHP - damage);
+        // int& targetHP = data<Pokemon>(target, *gameData).currentHP;
+        // targetHP = std::max(0, targetHP - damage);
         hitFlag = true;
         damageBuffer = damage;
     });
@@ -107,8 +117,8 @@ void effects::damageWithFixedRecoil(int lostHP) {
     enqueueEvent<ImmediateEvent>([&, lostHP] {
         if (hitFlag) {
             Pokemon& userPokemon = data<Pokemon>(user, *gameData);
-            int& userHP = userPokemon.currentHP;
-            userHP = std::max(0, userHP - lostHP);
+            float& userHP = userPokemon.currentHP;
+            userHP = std::max(0, static_cast<int>(userHP - lostHP));
             showText(userPokemon.displayName + " is hit with recoil!");
         }
     });
@@ -120,8 +130,11 @@ void effects::damageWithRecoil(float recoilRate) {
     enqueueEvent<ImmediateEvent>([&, recoilRate] {
         if (hitFlag) {
             Pokemon& userPokemon = data<Pokemon>(user, *gameData);
-            int& userHP = userPokemon.currentHP;
-            userHP = std::max(0, userHP - static_cast<int>(damageBuffer * recoilRate));
+            float& userHP = userPokemon.currentHP;
+            userHP = std::max(
+                0,
+                static_cast<int>(userHP - static_cast<int>(damageBuffer * recoilRate))
+            );
             showText(userPokemon.displayName + " is hit with recoil!");
         }
     });

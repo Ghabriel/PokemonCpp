@@ -92,7 +92,7 @@ namespace {
             script.set(varName + ".specialAttack", getStat(Stat::SpecialAttack));
             script.set(varName + ".specialDefense", getStat(Stat::SpecialDefense));
             script.set(varName + ".speed", getStat(Stat::Speed));
-            script.set(varName + ".currentHP", currentPokemon.currentHP);
+            script.set(varName + ".currentHP", static_cast<int>(currentPokemon.currentHP));
         }
     }
 }

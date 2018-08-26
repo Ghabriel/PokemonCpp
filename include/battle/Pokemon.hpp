@@ -76,7 +76,7 @@ struct Pokemon {
     int asleepRounds;
     int level;
     std::array<int, 6> stats;
-    int currentHP;
+    float currentHP;
 };
 
 #endif

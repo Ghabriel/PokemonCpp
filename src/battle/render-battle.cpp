@@ -85,7 +85,7 @@ void renderInfoCard(
     hpContainer.setFillColor(sf::Color::Black);
     window.draw(hpContainer);
 
-    float hpPercentage = static_cast<float>(pokemon.currentHP) / pokemon.stats[0];
+    float hpPercentage = pokemon.currentHP / pokemon.stats[0];
     sf::RectangleShape hpBar({
         (hpContainerWidth - 2 * hpMargin) * hpPercentage,
         hpContainerHeight - 2 * hpMargin
@@ -102,7 +102,8 @@ void renderInfoCard(
         constexpr size_t expMargin = 1;
 
         sf::Text hpText(
-            std::to_string(pokemon.currentHP) + "/" + std::to_string(pokemon.stats[0]),
+            std::to_string(static_cast<int>(pokemon.currentHP)) +
+                "/" + std::to_string(pokemon.stats[0]),
             font
         );
         hpText.setCharacterSize(25);
