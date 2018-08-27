@@ -1,0 +1,33 @@
+<h2>Architectural Overview</h2>
+
+<p class="indent">The game consists of two major classes: the <strong>GameLogic</strong> and the <strong>GameRenderer</strong>. The GameLogic is responsible for telling the game what to do in each <strong>update frame</strong>, while the GameRenderer displays the relevant information about the current state of the game in each <strong>rendering frame</strong>. A <a href="https://gafferongames.com/post/fix_your_timestep/">fixed timestep</a> is used in the update logic (60 ticks per second) and the rendering logic is unbounded.</p>
+
+<span class="indent">The game itself is organized in <strong>states</strong>. A State is a very simple class that looks like this (the <a href="https://en.wikipedia.org/wiki/Non-virtual_interface_pattern">non-virtual interface (NVI)</a> pattern is used):</span>
+<code>class State {
+ public:
+    virtual ~State() = default;
+
+    void execute() { executeImpl(); }
+    void onEnter() { onEnterImpl(); }
+    void onExit() { onExitImpl(); }
+
+ private:
+    virtual void executeImpl() = 0;
+    virtual void onEnterImpl() { }
+    virtual void onExitImpl() { }
+};
+</code>
+
+<p class="indent">Game states inherit from this class to provide the desired functionality. Examples of states used in the game are the <strong>MenuState</strong>, the <strong>OverworldState</strong> and the <strong>BattleState</strong>.</p>
+
+<h3>Example code flow</h3>
+
+<p class="indent">The GameLogic starts by creating a <strong>CoreStructures</strong> container, which contains:
+    <ol>
+        <li>A Component Manager, which stores the game entities and which components they have, providing methods for entity creation and deletion, component addition and removal, data retrieval, etc;</li>
+        <li>An Input Dispatcher, which provides access to the game controls;</li>
+        <li>A Resource Storage, which provides easy access to the resources used by the game (textures, BGM, etc);</li>
+        <li>A State Machine, which manages the possible game states;</li>
+        <li>The elapsed time since the last frame, in milliseconds. Since the game uses a fixed timestep, this is currently always equal to ~16.667. However, for future compatibility this value should not be considered "hard-coded" in the game logic.</li>
+    </ol>
+</p>

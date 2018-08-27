@@ -4,6 +4,15 @@ html, body {
     height: 100%;
 }
 
+.indent {
+    text-align: justify;
+    text-indent: 20px;
+}
+
+span.indent {
+    display: inline-block;
+}
+
 #sidebar {
     background-color: #ddd;
     border-right: 1px solid #c4c4c4;
