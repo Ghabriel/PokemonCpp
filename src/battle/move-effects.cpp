@@ -94,9 +94,8 @@ void effects::damage() {
         damage = 1;
     }
 
-    damage *= 40;
-
     float& targetHP = data<Pokemon>(target, *gameData).currentHP;
+
     enqueueEvent<ValueAnimationEvent>(
         targetHP,
         std::max(0, static_cast<int>(targetHP - damage)),

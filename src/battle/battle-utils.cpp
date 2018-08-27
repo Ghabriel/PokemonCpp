@@ -4,6 +4,7 @@
 #include "battle/Move.hpp"
 #include "battle/Pokemon.hpp"
 #include "battle/PokemonSpeciesData.hpp"
+#include "battle/random.hpp"
 #include "components/battle/VolatileData.hpp"
 #include "core-functions.hpp"
 #include "CoreStructures.hpp"
@@ -14,6 +15,11 @@ namespace {
     constexpr float getStatStageMultiplier(int stage) {
         int absStage = std::abs(stage);
         return stage >= 0 ? (2 + absStage) / 2.0 : 2.0 / (2 + absStage);
+    }
+
+    constexpr float getAccuracyStatStageMultiplier(int stage) {
+        int absStage = std::abs(stage);
+        return stage >= 0 ? (3 + absStage) / 3.0 : 3.0 / (3 + absStage);
     }
 }
 
@@ -69,6 +75,24 @@ bool hasUsableMoves(
     }
 
     return false;
+}
+
+bool checkMiss(
+    engine::entitysystem::Entity user,
+    engine::entitysystem::Entity target,
+    const Move& move,
+    CoreStructures& gameData
+) {
+    if (move.accuracy == 0) {
+        return false;
+    }
+
+    VolatileData& userData = data<VolatileData>(user, gameData);
+    VolatileData& targetData = data<VolatileData>(target, gameData);
+    int accuracyStage = std::clamp(userData.statStages[6] - targetData.statStages[7], -6, 6);
+    float accuracyStageMultiplier = getAccuracyStatStageMultiplier(accuracyStage);
+    float hitRate = move.accuracy * accuracyStageMultiplier;
+    return random(1, 100) > hitRate;
 }
 
 PokemonSpeciesData& getSpecies(const Pokemon& pokemon, CoreStructures& gameData) {

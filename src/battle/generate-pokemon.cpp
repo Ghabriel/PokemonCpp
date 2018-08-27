@@ -78,7 +78,6 @@ void pickStats(const PokemonSpeciesData& speciesData, Pokemon& pokemon) {
     }
 
     pokemon.stats[0] += level + 5;
-    pokemon.stats[0] *= 100;
 
     int nature = static_cast<int>(pokemon.nature);
     size_t natureIncreasingStat = nature / 5 + 1;

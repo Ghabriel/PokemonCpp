@@ -360,6 +360,12 @@ void BattleState::processMove(Entity user, Entity target, Move& move) {
     effects::internal::setMoveTarget(target);
     effects::internal::setMove(move);
 
+    if (checkMiss(user, target, move, gameData)) {
+        std::string& displayName = pokemon(user).displayName;
+        showMoveText(displayName + "'s attack missed!");
+        return;
+    }
+
     switch (move.functionCode) {
         case 0:
             effects::damage();

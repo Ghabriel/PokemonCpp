@@ -32,6 +32,13 @@ bool hasUsableMoves(
     CoreStructures& gameData
 );
 
+bool checkMiss(
+    engine::entitysystem::Entity user,
+    engine::entitysystem::Entity target,
+    const Move& move,
+    CoreStructures& gameData
+);
+
 PokemonSpeciesData& getSpecies(const Pokemon& pokemon, CoreStructures& gameData);
 
 float getTypeEffectiveness(const PokemonSpeciesData& species, const Move& move);

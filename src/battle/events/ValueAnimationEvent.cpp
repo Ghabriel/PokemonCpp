@@ -23,7 +23,7 @@ bool ValueAnimationEvent::tickImpl() {
         accumulator = 0;
         int direction = finalValue > *animatedValue ? 1 : -1;
         // float speed = std::sqrt(std::abs(finalValue - *animatedValue)) / (3.0 * 2.23);
-        float speed = std::sqrt(std::abs(finalValue - initialValue)) / (3.0 * 2.23);
+        float speed = std::sqrt(std::abs(finalValue - initialValue)) / 6.7;
         *animatedValue += speed * direction;
 
         int newDirection = finalValue > *animatedValue ? 1 : -1;

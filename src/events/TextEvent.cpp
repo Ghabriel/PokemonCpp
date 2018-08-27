@@ -32,8 +32,8 @@ bool TextEvent::tickImpl() {
 
     if (textBox.overflow) {
         if (actionKeyPressed) {
-            onClose();
             content = textBox.fullContent.substr(textBox.content.size() - 1);
+            onClose();
             onStart();
             return tick();
         }

@@ -4,7 +4,7 @@
 #include <array>
 
 struct VolatileData {
-    std::array<int, 6> statStages;
+    std::array<int, 8> statStages;
 };
 
 #endif
