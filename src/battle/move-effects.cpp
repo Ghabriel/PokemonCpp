@@ -26,6 +26,7 @@ namespace {
     Entity target;
     Move* move;
 
+    bool criticalHitFlag = false;
     bool hitFlag = false;
     int damageBuffer = 0;
 
@@ -74,19 +75,25 @@ void effects::damage() {
     }
 
     PokemonSpeciesData& userSpecies = data<PokemonSpeciesData>(user, *gameData);
+    // "Base Damage" parameters
+    StatFlags attackStatFlags = criticalHitFlag ? StatFlags::IgnoreNegative : StatFlags::All;
+    StatFlags defenseStatFlags = criticalHitFlag ? StatFlags::IgnorePositive : StatFlags::All;
     int userLevel = data<Pokemon>(user, *gameData).level;
-    int attack = getAttackStatForMove(user, *move, *gameData);
-    int defense = getDefenseStatForMove(target, *move, *gameData);
-    int baseDamage = (((2 * userLevel) / 5 + 2) * move->power * (attack / defense)) / 50 + 2;
+    int attack = getAttackStatForMove(user, *move, *gameData, attackStatFlags);
+    int defense = getDefenseStatForMove(target, *move, *gameData, defenseStatFlags);
+
+    // Modifiers
     float targets = 1; // TODO: handle multi-target moves
     float weather = 1; // TODO
-    float critical = 1; // TODO
+    float critical = criticalHitFlag ? 1.5 : 1;
     float rand = random(217, 255) / 255.0;
     float stab = (move->type == userSpecies.types[0] || move->type == userSpecies.types[1])
         ? 1.5
         : 1; // TODO: handle Adaptability
     float burn = 1; // TODO
     float others = 1; // TODO
+
+    int baseDamage = (((2 * userLevel) / 5 + 2) * move->power * (attack / defense)) / 50 + 2;
     float modifier = targets * weather * critical * rand * stab * type * burn * others;
     int damage = baseDamage * modifier;
 
@@ -103,11 +110,14 @@ void effects::damage() {
     );
 
     enqueueEvent<ImmediateEvent>([damage] {
-        // int& targetHP = data<Pokemon>(target, *gameData).currentHP;
-        // targetHP = std::max(0, targetHP - damage);
+        criticalHitFlag = false;
         hitFlag = true;
         damageBuffer = damage;
     });
+
+    if (criticalHitFlag) {
+        showText("A critical hit!");
+    }
 }
 
 void effects::damageWithFixedRecoil(int lostHP) {
@@ -201,6 +211,10 @@ void effects::raiseStat(int statId, int levels) {
     showText(text);
 }
 
+void effects::ensureCriticalHit() {
+    criticalHitFlag = true;
+}
+
 
 void effects::showText(const std::string& content) {
     enqueueEvent<TextEvent>(content, battle, *gameData);
@@ -211,5 +225,6 @@ void injectNativeBattleFunctions(engine::scriptingsystem::Lua& script) {
     script.registerNative("damageWithFixedRecoil", effects::damageWithFixedRecoil);
     script.registerNative("lowerStat", effects::lowerStat);
     script.registerNative("raiseStat", effects::raiseStat);
+    script.registerNative("ensureCriticalHit", effects::ensureCriticalHit);
     script.registerNative("showText", effects::showText);
 }

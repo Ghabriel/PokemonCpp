@@ -5,6 +5,7 @@
 
 struct VolatileData {
     std::array<int, 8> statStages;
+    int criticalHitStage;
 };
 
 #endif

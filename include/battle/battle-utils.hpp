@@ -9,22 +9,31 @@ struct Move;
 struct Pokemon;
 struct PokemonSpeciesData;
 
+enum class StatFlags {
+    All,
+    IgnorePositive,
+    IgnoreNegative
+};
+
 int getAttackStatForMove(
     engine::entitysystem::Entity pokemon,
     const Move& move,
-    CoreStructures& gameData
+    CoreStructures& gameData,
+    StatFlags flags = StatFlags::All
 );
 
 int getDefenseStatForMove(
     engine::entitysystem::Entity pokemon,
     const Move& move,
-    CoreStructures& gameData
+    CoreStructures& gameData,
+    StatFlags flags = StatFlags::All
 );
 
 int getEffectiveStat(
     engine::entitysystem::Entity pokemon,
     Stat stat,
-    CoreStructures& gameData
+    CoreStructures &gameData,
+    StatFlags flags = StatFlags::All
 );
 
 bool hasUsableMoves(
@@ -33,6 +42,13 @@ bool hasUsableMoves(
 );
 
 bool checkMiss(
+    engine::entitysystem::Entity user,
+    engine::entitysystem::Entity target,
+    const Move& move,
+    CoreStructures& gameData
+);
+
+bool checkCritical(
     engine::entitysystem::Entity user,
     engine::entitysystem::Entity target,
     const Move& move,

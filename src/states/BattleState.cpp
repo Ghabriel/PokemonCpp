@@ -366,6 +366,10 @@ void BattleState::processMove(Entity user, Entity target, Move& move) {
         return;
     }
 
+    if (checkCritical(user, target, move, gameData)) {
+        effects::ensureCriticalHit();
+    }
+
     switch (move.functionCode) {
         case 0:
             effects::damage();

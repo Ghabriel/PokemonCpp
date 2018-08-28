@@ -24,6 +24,7 @@ namespace effects {
     void damageWithRecoil(float recoilRate);
     void lowerStat(int statId, int levels);
     void raiseStat(int statId, int levels);
+    void ensureCriticalHit();
 
     void showText(const std::string& content);
 }

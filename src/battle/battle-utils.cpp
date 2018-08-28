@@ -26,14 +26,15 @@ namespace {
 int getAttackStatForMove(
     Entity pokemon,
     const Move& move,
-    CoreStructures& gameData
+    CoreStructures& gameData,
+    StatFlags flags
 ) {
     if (move.kind == "Physical") {
-        return getEffectiveStat(pokemon, Stat::Attack, gameData);
+        return getEffectiveStat(pokemon, Stat::Attack, gameData, flags);
     }
 
     if (move.kind == "Special") {
-        return getEffectiveStat(pokemon, Stat::SpecialAttack, gameData);
+        return getEffectiveStat(pokemon, Stat::SpecialAttack, gameData, flags);
     }
 
     return 0;
@@ -42,23 +43,41 @@ int getAttackStatForMove(
 int getDefenseStatForMove(
     Entity pokemon,
     const Move& move,
-    CoreStructures& gameData
+    CoreStructures& gameData,
+    StatFlags flags
 ) {
     if (move.kind == "Physical") {
-        return getEffectiveStat(pokemon, Stat::Defense, gameData);
+        return getEffectiveStat(pokemon, Stat::Defense, gameData, flags);
     }
 
     if (move.kind == "Special") {
-        return getEffectiveStat(pokemon, Stat::SpecialDefense, gameData);
+        return getEffectiveStat(pokemon, Stat::SpecialDefense, gameData, flags);
     }
 
     return 0;
 }
 
-int getEffectiveStat(Entity pokemon, Stat stat, CoreStructures& gameData) {
+int getEffectiveStat(
+    Entity pokemon,
+    Stat stat,
+    CoreStructures& gameData,
+    StatFlags flags
+) {
     int statId = static_cast<int>(stat);
     int baseStatValue = data<Pokemon>(pokemon, gameData).stats[statId];
     int currentStage = data<VolatileData>(pokemon, gameData).statStages[statId];
+
+    switch (flags) {
+        case StatFlags::All:
+            break;
+        case StatFlags::IgnorePositive:
+            currentStage = std::min(0, currentStage);
+            break;
+        case StatFlags::IgnoreNegative:
+            currentStage = std::max(0, currentStage);
+            break;
+    }
+
     return baseStatValue * getStatStageMultiplier(currentStage);
 }
 
@@ -93,6 +112,33 @@ bool checkMiss(
     float accuracyStageMultiplier = getAccuracyStatStageMultiplier(accuracyStage);
     float hitRate = move.accuracy * accuracyStageMultiplier;
     return random(1, 100) > hitRate;
+}
+
+bool checkCritical(
+    engine::entitysystem::Entity user,
+    engine::entitysystem::Entity target,
+    const Move& move,
+    CoreStructures& gameData
+) {
+    int criticalHitStage = data<VolatileData>(user, gameData).criticalHitStage;
+    int chancesIn24;
+
+    switch (criticalHitStage) {
+        case 0:
+            chancesIn24 = 1;
+            break;
+        case 1:
+            chancesIn24 = 3;
+            break;
+        case 2:
+            chancesIn24 = 12;
+            break;
+        default:
+            chancesIn24 = 24;
+            break;
+    }
+
+    return random(1, 24) <= chancesIn24;
 }
 
 PokemonSpeciesData& getSpecies(const Pokemon& pokemon, CoreStructures& gameData) {
