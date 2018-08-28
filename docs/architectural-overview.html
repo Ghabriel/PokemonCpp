@@ -50,6 +50,8 @@
         <li>A State Machine, which manages the possible game states;</li>
         <li>The elapsed time since the last frame, in milliseconds. Since the game uses a fixed timestep, this is currently always equal to ~16.667. However, for future compatibility this value should not be considered "hard-coded" in the game logic.</li>
     </ol>
+
+Most functions in the game use at least one of these objects. It is encouraged to only provide the necessary object to each function instead of passing the whole container. The GameLogic then calls <code class="inline">loadResources(resourceStorage)</code>, which fills the Resource Storage with the game's fonts, BGMs, Pokémon data and many other kinds of resources, allowing easy and efficient retrieval when they are needed. The State instances used by the game are loaded into the State Machine via <code class="inline">registerStates(gameData)</code> and the initial state (currently <strong>MenuState</strong>) is set as the current state. At this point, the game is ready to start.
 </p>
 
             </div>
