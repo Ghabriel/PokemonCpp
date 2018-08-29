@@ -252,38 +252,41 @@ void BattleState::moveSelectionScreen() {
 
 void BattleState::processTurn() {
     enqueueEvent<ImmediateEvent>(gameData, [&] {
-        const Move& playerMove = (selectedAction == STRUGGLE)
-            ? resource<Move>("move-Struggle", gameData)
-            : *moves(battle->playerPokemon)[selectedAction];
-        int playerSpeed = getEffectiveStat(battle->playerPokemon, Stat::Speed, gameData);
+        UsedMove playerMove = getUsedMoveBy(
+            battle->playerPokemon,
+            battle->opponentPokemon,
+            selectedAction
+        );
 
-        Pokemon& opponentPokemon = pokemon(battle->opponentPokemon);
-        size_t opponentMoveIndex = chooseMoveAI(opponentPokemon);
-        const Move& opponentMove = *moves(battle->opponentPokemon)[opponentMoveIndex];
-        int opponentSpeed = getEffectiveStat(battle->opponentPokemon, Stat::Speed, gameData);
+        size_t opponentMoveIndex = chooseMoveAI(pokemon(battle->opponentPokemon));
+        UsedMove opponentMove = getUsedMoveBy(
+            battle->opponentPokemon,
+            battle->playerPokemon,
+            opponentMoveIndex
+        );
 
-        if (playerMove.priority > opponentMove.priority) {
-            processPlayerMove(selectedAction);
-            processOpponentMove(opponentMoveIndex);
-        } else if (playerMove.priority < opponentMove.priority) {
-            processOpponentMove(opponentMoveIndex);
-            processPlayerMove(selectedAction);
-        } else if (playerSpeed > opponentSpeed) {
-            processPlayerMove(selectedAction);
-            processOpponentMove(opponentMoveIndex);
-        } else if (playerSpeed < opponentSpeed) {
-            processOpponentMove(opponentMoveIndex);
-            processPlayerMove(selectedAction);
-        } else if (random(1, 2) == 1) {
-            processPlayerMove(selectedAction);
-            processOpponentMove(opponentMoveIndex);
-        } else {
-            processOpponentMove(opponentMoveIndex);
-            processPlayerMove(selectedAction);
-        }
+        callMoveEvent(playerMove, "onTurnStart");
+        callMoveEvent(opponentMove, "onTurnStart");
 
-        actionSelectionScreen();
+        battle->usedMoves = {playerMove, opponentMove};
+        sortUsedMoves(battle->usedMoves);
+        processUsedMoves();
+
+        enqueueEvent<ImmediateEvent>(gameData, [this, playerMove, opponentMove] {
+            callMoveEvent(playerMove, "onTurnEnd");
+            callMoveEvent(opponentMove, "onTurnEnd");
+
+            actionSelectionScreen();
+        });
     });
+}
+
+UsedMove BattleState::getUsedMoveBy(Entity user, Entity target, int selectedAction) {
+    Move& move = (selectedAction == STRUGGLE)
+        ? resource<Move>("move-Struggle", gameData)
+        : *moves(user)[selectedAction];
+
+    return {user, target, &move, selectedAction};
 }
 
 void BattleState::updateAIVariables() {
@@ -301,56 +304,64 @@ size_t BattleState::chooseMoveAI(const Pokemon& pokemon) {
     return script("ai", gameData).call<int>("chooseMoveWildBattle");
 }
 
-void BattleState::processPlayerMove(int moveIndex) {
-    enqueueEvent<ImmediateEvent>(gameData, [&, moveIndex] {
-        Pokemon& user = pokemon(battle->playerPokemon);
-
-        if (user.currentHP <= 0) {
-            return;
-        }
-
-        Move& move = (moveIndex == STRUGGLE)
-            ? resource<Move>("move-Struggle", gameData)
-            : *moves(battle->playerPokemon)[moveIndex];
-        showMoveText(user.displayName + " used " + move.displayName + "!");
-
-        if (moveIndex != STRUGGLE) {
-            user.pp[moveIndex]--;
-        }
-
-        // TODO: move animation?
-        // TODO: handle non-single-target moves
-        processMove(
-            battle->playerPokemon,
-            battle->opponentPokemon,
-            move
-        );
-    });
+void BattleState::callMoveEvent(const UsedMove& usedMove, const std::string& eventName) {
+    effects::internal::setMoveUser(usedMove.user);
+    effects::internal::setMoveTarget(usedMove.target);
+    effects::internal::setMove(*usedMove.move);
+    script("moves", gameData).call<void>(usedMove.move->id + '_' + eventName);
 }
 
-void BattleState::processOpponentMove(int moveIndex) {
-    enqueueEvent<ImmediateEvent>(gameData, [&, moveIndex] {
-        Pokemon& user = pokemon(battle->opponentPokemon);
+void BattleState::sortUsedMoves(std::deque<UsedMove>& usedMoves) {
+    std::sort(
+        usedMoves.begin(),
+        usedMoves.end(),
+        [&](const UsedMove& first, const UsedMove& second) {
+            if (first.move->priority != second.move->priority) {
+                return first.move->priority > second.move->priority;
+            }
+
+            int firstSpeed = getEffectiveStat(first.user, Stat::Speed, gameData);
+            int secondSpeed = getEffectiveStat(second.user, Stat::Speed, gameData);
+
+            if (firstSpeed != secondSpeed) {
+                return firstSpeed > secondSpeed;
+            }
+
+            return random(1, 2) == 1;
+        }
+    );
+}
+
+void BattleState::processUsedMoves() {
+    while (!battle->usedMoves.empty()) {
+        processNextMove(battle->usedMoves.front());
+        battle->usedMoves.pop_front();
+    }
+}
+
+void BattleState::processNextMove(UsedMove usedMove) {
+    enqueueEvent<ImmediateEvent>(gameData, [&, usedMove] {
+        Pokemon& user = pokemon(usedMove.user);
 
         if (user.currentHP <= 0) {
             return;
         }
 
-        Move& move = (moveIndex == STRUGGLE)
-            ? resource<Move>("move-Struggle", gameData)
-            : *moves(battle->opponentPokemon)[moveIndex];
-        showMoveText("Foe " + user.displayName + " used " + move.displayName + "!");
+        std::string userDisplayName = (usedMove.user == battle->playerPokemon)
+            ? user.displayName
+            : "Foe " + user.displayName;
+        showMoveText(userDisplayName + " used " + usedMove.move->displayName + "!");
 
-        if (moveIndex != STRUGGLE) {
-            user.pp[moveIndex]--;
+        if (usedMove.move->id != "Struggle") {
+            user.pp[usedMove.moveIndex]--;
         }
 
         // TODO: move animation?
         // TODO: handle non-single-target moves
         processMove(
-            battle->opponentPokemon,
-            battle->playerPokemon,
-            move
+            usedMove.user,
+            usedMove.target,
+            *usedMove.move
         );
     });
 }

@@ -212,6 +212,7 @@ void effects::raiseStat(int statId, int levels) {
 }
 
 void effects::ensureCriticalHit() {
+    // TODO: this must be done in the Event Queue
     criticalHitFlag = true;
 }
 
