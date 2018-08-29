@@ -31,8 +31,8 @@ class BattleState : public engine::statesystem::State {
     void moveSelectionScreen();
     void processTurn();
     UsedMove getUsedMoveBy(Entity user, Entity target, int selectedAction);
+    int chooseMoveAI(const Pokemon&);
     void updateAIVariables();
-    size_t chooseMoveAI(const Pokemon&);
     void callMoveEvent(const UsedMove&, const std::string& eventName);
     void sortUsedMoves(std::deque<UsedMove>& usedMoves);
     void processUsedMoves();

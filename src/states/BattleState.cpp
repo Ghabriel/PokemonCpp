@@ -258,7 +258,7 @@ void BattleState::processTurn() {
             selectedAction
         );
 
-        size_t opponentMoveIndex = chooseMoveAI(pokemon(battle->opponentPokemon));
+        int opponentMoveIndex = chooseMoveAI(pokemon(battle->opponentPokemon));
         UsedMove opponentMove = getUsedMoveBy(
             battle->opponentPokemon,
             battle->playerPokemon,
@@ -289,6 +289,11 @@ UsedMove BattleState::getUsedMoveBy(Entity user, Entity target, int selectedActi
     return {user, target, &move, selectedAction};
 }
 
+int BattleState::chooseMoveAI(const Pokemon& pokemon) {
+    updateAIVariables();
+    return script("ai", gameData).call<int>("chooseMoveWildBattle");
+}
+
 void BattleState::updateAIVariables() {
     std::unordered_map<std::string, Entity> pokemonList = {
         {"user", battle->opponentPokemon},
@@ -297,11 +302,6 @@ void BattleState::updateAIVariables() {
 
     auto& ai = script("ai", gameData);
     injectNativeBattleVariables(pokemonList, ai, gameData);
-}
-
-size_t BattleState::chooseMoveAI(const Pokemon& pokemon) {
-    updateAIVariables();
-    return script("ai", gameData).call<int>("chooseMoveWildBattle");
 }
 
 void BattleState::callMoveEvent(const UsedMove& usedMove, const std::string& eventName) {

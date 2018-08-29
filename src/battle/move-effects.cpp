@@ -127,7 +127,13 @@ void effects::damageWithFixedRecoil(int lostHP) {
         if (hitFlag) {
             Pokemon& userPokemon = data<Pokemon>(user, *gameData);
             float& userHP = userPokemon.currentHP;
-            userHP = std::max(0, static_cast<int>(userHP - lostHP));
+
+            enqueueEvent<ValueAnimationEvent>(
+                userHP,
+                std::max(0, static_cast<int>(userHP - lostHP)),
+                *gameData
+            );
+
             showText(userPokemon.displayName + " is hit with recoil!");
         }
     });
@@ -140,10 +146,16 @@ void effects::damageWithRecoil(float recoilRate) {
         if (hitFlag) {
             Pokemon& userPokemon = data<Pokemon>(user, *gameData);
             float& userHP = userPokemon.currentHP;
-            userHP = std::max(
-                0,
-                static_cast<int>(userHP - static_cast<int>(damageBuffer * recoilRate))
+
+            enqueueEvent<ValueAnimationEvent>(
+                userHP,
+                std::max(
+                    0,
+                    static_cast<int>(userHP - static_cast<int>(damageBuffer * recoilRate))
+                ),
+                *gameData
             );
+
             showText(userPokemon.displayName + " is hit with recoil!");
         }
     });
