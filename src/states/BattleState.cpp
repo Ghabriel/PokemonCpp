@@ -267,11 +267,11 @@ void BattleState::processTurn() {
 
         battle->usedMoves = {playerMove, opponentMove};
         sortUsedMoves(battle->usedMoves);
-        dispatchEvent("onTurnStart");
+        triggerEvent("onTurnStart");
         processUsedMoves();
 
-        enqueueEvent<ImmediateEvent>(gameData, [this, playerMove, opponentMove] {
-            dispatchEvent("onTurnEnd");
+        enqueueEvent<ImmediateEvent>(gameData, [this] {
+            triggerEvent("onTurnEnd");
             updateActiveMoveList();
             actionSelectionScreen();
         });
@@ -301,7 +301,28 @@ void BattleState::updateAIVariables() {
     injectNativeBattleVariables(pokemonList, ai, gameData);
 }
 
-void BattleState::dispatchEvent(const std::string& eventName) {
+void BattleState::sortUsedMoves(std::deque<UsedMove>& usedMoves) {
+    std::sort(
+        usedMoves.begin(),
+        usedMoves.end(),
+        [&](const UsedMove& first, const UsedMove& second) {
+            if (first.move->priority != second.move->priority) {
+                return first.move->priority > second.move->priority;
+            }
+
+            int firstSpeed = getEffectiveStat(first.user, Stat::Speed, gameData);
+            int secondSpeed = getEffectiveStat(second.user, Stat::Speed, gameData);
+
+            if (firstSpeed != secondSpeed) {
+                return firstSpeed > secondSpeed;
+            }
+
+            return random(1, 2) == 1;
+        }
+    );
+}
+
+void BattleState::triggerEvent(const std::string& eventName) {
     for (const auto& [usedMove, _] : battle->activeMoves) {
         callMoveEvent(usedMove, eventName);
     }
@@ -331,58 +352,43 @@ void BattleState::updateActiveMoveList() {
     battle->activeMoves.swap(newList);
 }
 
-void BattleState::sortUsedMoves(std::deque<UsedMove>& usedMoves) {
-    std::sort(
-        usedMoves.begin(),
-        usedMoves.end(),
-        [&](const UsedMove& first, const UsedMove& second) {
-            if (first.move->priority != second.move->priority) {
-                return first.move->priority > second.move->priority;
-            }
-
-            int firstSpeed = getEffectiveStat(first.user, Stat::Speed, gameData);
-            int secondSpeed = getEffectiveStat(second.user, Stat::Speed, gameData);
-
-            if (firstSpeed != secondSpeed) {
-                return firstSpeed > secondSpeed;
-            }
-
-            return random(1, 2) == 1;
-        }
-    );
-}
-
 void BattleState::processUsedMoves() {
     while (!battle->usedMoves.empty()) {
-        processNextMove(battle->usedMoves.front());
+        processMove(battle->usedMoves.front());
         battle->usedMoves.pop_front();
     }
 }
 
-void BattleState::processNextMove(UsedMove usedMove) {
+void BattleState::processMove(UsedMove usedMove) {
     enqueueEvent<ImmediateEvent>(gameData, [&, usedMove] {
-        Pokemon& user = pokemon(usedMove.user);
-
-        if (user.currentHP <= 0) {
+        if (pokemon(usedMove.user).currentHP <= 0) {
             return;
         }
 
-        std::string userDisplayName = (usedMove.user == battle->playerPokemon)
-            ? user.displayName
-            : "Foe " + user.displayName;
-        showMoveText(userDisplayName + " used " + usedMove.move->displayName + "!");
-
-        if (usedMove.move->id != "Struggle") {
-            user.pp[usedMove.moveIndex]--;
-        }
-
+        showUsedMoveText(usedMove);
+        deductPPIfApplicable(usedMove);
         // TODO: move animation?
-        // TODO: handle non-single-target moves
-        processMove(usedMove);
+        processMoveEffects(usedMove);
     });
 }
 
-void BattleState::processMove(const UsedMove& usedMove) {
+void BattleState::showUsedMoveText(const UsedMove& usedMove) {
+    std::string userDisplayName = pokemon(usedMove.user).displayName;
+
+    if (usedMove.user == battle->opponentPokemon) {
+        userDisplayName = "Foe " + userDisplayName;
+    }
+
+    showMoveText(userDisplayName + " used " + usedMove.move->displayName + "!");
+}
+
+void BattleState::deductPPIfApplicable(const UsedMove& usedMove) {
+    if (usedMove.move->id != "Struggle") {
+        pokemon(usedMove.user).pp[usedMove.moveIndex]--;
+    }
+}
+
+void BattleState::processMoveEffects(const UsedMove& usedMove) {
     Entity user = usedMove.user;
     Entity target = usedMove.target;
     Move& move = *usedMove.move;

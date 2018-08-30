@@ -277,6 +277,8 @@ void effects::showText(const std::string& content) {
 void injectNativeBattleFunctions(engine::scriptingsystem::Lua& script) {
     script.registerNative("damage", effects::damage);
     script.registerNative("damageWithFixedRecoil", effects::damageWithFixedRecoil);
+    script.registerNative("damageWithRecoil", effects::damageWithRecoil);
+    script.registerNative("fixedDamage", effects::fixedDamage);
     script.registerNative("lowerStat", effects::lowerStat);
     script.registerNative("raiseStat", effects::raiseStat);
     script.registerNative("ensureCriticalHit", effects::ensureCriticalHit);
