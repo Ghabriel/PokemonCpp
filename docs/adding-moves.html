@@ -269,6 +269,12 @@ The following table lists all possible function codes and the purpose of "functi
             <td>the amount of damage dealt</td>
         </tr>
         <tr>
+            <td>9</td>
+            <td>one-hit KO damage</td>
+            <td>-</td>
+            <td>-</td>
+        </tr>
+        <tr>
             <td>11</td>
             <td>damage</td>
             <td>increase stat, 1 level</td>
@@ -457,6 +463,10 @@ The functions that are available inside the script's function body are:
         <tr>
             <td>void damageWithRecoil(float recoilRate)</td>
             <td>Calls <code class="inline">damage()</code> and, if it hits, deals <code class="inline">"damage dealt" * recoilRate</code> recoil damage to the user.</td>
+        </tr>
+        <tr>
+            <td>void fixedDamage(int lostHP)</td>
+            <td>Equivalent to <code class="inline">damage()</code> except that, if it hits, exactly <code class="inline">lostHP</code> damage is dealt. No critical hit check is performed and type effectiveness is not considered except for type immunity.</td>
         </tr>
         <tr>
             <td>void lowerStat(int <a href="#stat-id">statID</a>, int levels)</td>
