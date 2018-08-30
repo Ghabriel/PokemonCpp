@@ -323,7 +323,7 @@ void BattleState::updateActiveMoveList() {
     std::vector<std::pair<UsedMove, int>> newList;
 
     for (auto& [usedMove, duration] : battle->activeMoves) {
-        if (duration > 0) {
+        if (duration != 0) {
             newList.push_back({std::move(usedMove), duration - 1});
         }
     }
@@ -418,6 +418,12 @@ void BattleState::processMove(const UsedMove& usedMove) {
             break;
         case 6:
             effects::damageWithRecoil(move.functionParameter / 100.0);
+            break;
+        case 8:
+            effects::fixedDamage(move.functionParameter);
+            break;
+        case 9:
+            effects::fixedDamage(data<Pokemon>(target, gameData).currentHP);
             break;
         case 99:
             updateMoveVariables(user, target);

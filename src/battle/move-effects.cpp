@@ -167,6 +167,37 @@ void effects::damageWithRecoil(float recoilRate) {
     });
 }
 
+void effects::fixedDamage(int lostHP) {
+    enqueueEvent<ImmediateEvent>([&] {
+        hitFlag = false;
+        damageBuffer = 0;
+    });
+
+    PokemonSpeciesData& targetSpecies = data<PokemonSpeciesData>(target, *gameData);
+    float type = getTypeEffectiveness(targetSpecies, *move);
+
+    if (type < 0.1) {
+        showText(
+            "It doesn't affect " +
+            data<Pokemon>(target, *gameData).displayName + "..."
+        );
+        return;
+    }
+
+    float& targetHP = data<Pokemon>(target, *gameData).currentHP;
+
+    enqueueEvent<ValueAnimationEvent>(
+        targetHP,
+        std::max(0, static_cast<int>(targetHP - lostHP)),
+        *gameData
+    );
+
+    enqueueEvent<ImmediateEvent>([lostHP] {
+        hitFlag = true;
+        damageBuffer = lostHP;
+    });
+}
+
 void effects::lowerStat(int statId, int levels) {
     int& currentStage = data<VolatileData>(target, *gameData).statStages[statId];
 

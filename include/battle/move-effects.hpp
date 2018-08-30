@@ -24,6 +24,7 @@ namespace effects {
     void damage();
     void damageWithFixedRecoil(int lostHP);
     void damageWithRecoil(float recoilRate);
+    void fixedDamage(int lostHP);
     void lowerStat(int statId, int levels);
     void raiseStat(int statId, int levels);
     void ensureCriticalHit();
