@@ -33,13 +33,15 @@ class BattleState : public engine::statesystem::State {
     UsedMove getUsedMoveBy(Entity user, Entity target, int selectedAction);
     int chooseMoveAI(const Pokemon&);
     void updateAIVariables();
+    void dispatchEvent(const std::string& eventName);
     void callMoveEvent(const UsedMove&, const std::string& eventName);
+    void updateActiveMoveList();
     void sortUsedMoves(std::deque<UsedMove>& usedMoves);
     void processUsedMoves();
     void processNextMove(UsedMove);
     void processPlayerMove(int moveIndex);
     void processOpponentMove(int moveIndex);
-    void processMove(Entity user, Entity target, Move& move);
+    void processMove(const UsedMove&);
     void updateMoveVariables(Entity user, Entity target);
     void checkFaintedPokemon();
     void blackOutScreen();

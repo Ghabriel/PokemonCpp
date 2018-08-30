@@ -7,6 +7,7 @@
 #include "battle/Pokemon.hpp"
 #include "battle/PokemonSpeciesData.hpp"
 #include "battle/random.hpp"
+#include "components/battle/Battle.hpp"
 #include "components/battle/VolatileData.hpp"
 #include "constants.hpp"
 #include "core-functions.hpp"
@@ -25,6 +26,7 @@ namespace {
     Entity user;
     Entity target;
     Move* move;
+    const UsedMove* usedMove;
 
     bool criticalHitFlag = false;
     bool hitFlag = false;
@@ -55,6 +57,10 @@ void effects::internal::setMoveTarget(Entity pokemon) {
 
 void effects::internal::setMove(Move& _move) {
     move = &_move;
+}
+
+void effects::internal::setUsedMove(const UsedMove& _usedMove) {
+    usedMove = &_usedMove;
 }
 
 void effects::damage() {
@@ -228,6 +234,10 @@ void effects::ensureCriticalHit() {
     criticalHitFlag = true;
 }
 
+void effects::persist(int numTurns) {
+    data<Battle>(battle, *gameData).activeMoves.push_back({*usedMove, numTurns});
+}
+
 
 void effects::showText(const std::string& content) {
     enqueueEvent<TextEvent>(content, battle, *gameData);
@@ -239,5 +249,6 @@ void injectNativeBattleFunctions(engine::scriptingsystem::Lua& script) {
     script.registerNative("lowerStat", effects::lowerStat);
     script.registerNative("raiseStat", effects::raiseStat);
     script.registerNative("ensureCriticalHit", effects::ensureCriticalHit);
+    script.registerNative("persist", effects::persist);
     script.registerNative("showText", effects::showText);
 }

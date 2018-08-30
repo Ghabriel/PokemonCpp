@@ -2,6 +2,7 @@
 #define BATTLE_HPP
 
 #include <deque>
+#include <vector>
 #include "../../battle/Move.hpp"
 #include "../../engine/entity-system/types.hpp"
 
@@ -16,6 +17,7 @@ struct Battle {
     engine::entitysystem::Entity playerPokemon;
     engine::entitysystem::Entity opponentPokemon;
     std::deque<UsedMove> usedMoves;
+    std::vector<std::pair<UsedMove, int>> activeMoves;
 };
 
 #endif

@@ -265,17 +265,14 @@ void BattleState::processTurn() {
             opponentMoveIndex
         );
 
-        callMoveEvent(playerMove, "onTurnStart");
-        callMoveEvent(opponentMove, "onTurnStart");
-
         battle->usedMoves = {playerMove, opponentMove};
         sortUsedMoves(battle->usedMoves);
+        dispatchEvent("onTurnStart");
         processUsedMoves();
 
         enqueueEvent<ImmediateEvent>(gameData, [this, playerMove, opponentMove] {
-            callMoveEvent(playerMove, "onTurnEnd");
-            callMoveEvent(opponentMove, "onTurnEnd");
-
+            dispatchEvent("onTurnEnd");
+            updateActiveMoveList();
             actionSelectionScreen();
         });
     });
@@ -304,11 +301,34 @@ void BattleState::updateAIVariables() {
     injectNativeBattleVariables(pokemonList, ai, gameData);
 }
 
+void BattleState::dispatchEvent(const std::string& eventName) {
+    for (const auto& [usedMove, _] : battle->activeMoves) {
+        callMoveEvent(usedMove, eventName);
+    }
+
+    for (const auto& usedMove : battle->usedMoves) {
+        callMoveEvent(usedMove, eventName);
+    }
+}
+
 void BattleState::callMoveEvent(const UsedMove& usedMove, const std::string& eventName) {
     effects::internal::setMoveUser(usedMove.user);
     effects::internal::setMoveTarget(usedMove.target);
     effects::internal::setMove(*usedMove.move);
+    effects::internal::setUsedMove(usedMove);
     script("moves", gameData).call<void>(usedMove.move->id + '_' + eventName);
+}
+
+void BattleState::updateActiveMoveList() {
+    std::vector<std::pair<UsedMove, int>> newList;
+
+    for (auto& [usedMove, duration] : battle->activeMoves) {
+        if (duration > 0) {
+            newList.push_back({std::move(usedMove), duration - 1});
+        }
+    }
+
+    battle->activeMoves.swap(newList);
 }
 
 void BattleState::sortUsedMoves(std::deque<UsedMove>& usedMoves) {
@@ -358,18 +378,19 @@ void BattleState::processNextMove(UsedMove usedMove) {
 
         // TODO: move animation?
         // TODO: handle non-single-target moves
-        processMove(
-            usedMove.user,
-            usedMove.target,
-            *usedMove.move
-        );
+        processMove(usedMove);
     });
 }
 
-void BattleState::processMove(Entity user, Entity target, Move& move) {
+void BattleState::processMove(const UsedMove& usedMove) {
+    Entity user = usedMove.user;
+    Entity target = usedMove.target;
+    Move& move = *usedMove.move;
+
     effects::internal::setMoveUser(user);
     effects::internal::setMoveTarget(target);
     effects::internal::setMove(move);
+    effects::internal::setUsedMove(usedMove);
 
     if (checkMiss(user, target, move, gameData)) {
         std::string& displayName = pokemon(user).displayName;

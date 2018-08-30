@@ -9,6 +9,7 @@
 struct CoreStructures;
 struct Move;
 struct Pokemon;
+struct UsedMove;
 
 namespace effects {
     namespace internal {
@@ -17,6 +18,7 @@ namespace effects {
         void setMoveUser(engine::entitysystem::Entity);
         void setMoveTarget(engine::entitysystem::Entity);
         void setMove(Move&);
+        void setUsedMove(const UsedMove&);
     }
 
     void damage();
@@ -25,6 +27,7 @@ namespace effects {
     void lowerStat(int statId, int levels);
     void raiseStat(int statId, int levels);
     void ensureCriticalHit();
+    void persist(int numTurns);
 
     void showText(const std::string& content);
 }
