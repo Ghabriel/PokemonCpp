@@ -40,7 +40,7 @@
 
 <p class="indent">Game states inherit from this class to provide the desired functionality. Examples of states used in the game are the <strong>MenuState</strong>, the <strong>OverworldState</strong> and the <strong>BattleState</strong>.</p>
 
-<h3>Example code flow</h3>
+<h3>Code flow - Initialization</h3>
 
 <p class="indent">The GameLogic starts by creating a <strong>CoreStructures</strong> container, which contains:
     <ol>
@@ -51,7 +51,20 @@
         <li>The elapsed time since the last frame, in milliseconds. Since the game uses a fixed timestep, this is currently always equal to ~16.667. However, for future compatibility this value should not be considered "hard-coded" in the game logic.</li>
     </ol>
 
-Most functions in the game use at least one of these objects. It is encouraged to only provide the necessary object to each function instead of passing the whole container. The GameLogic then calls <code class="inline">loadResources(resourceStorage)</code>, which fills the Resource Storage with the game's fonts, BGMs, Pokémon data and many other kinds of resources, allowing easy and efficient retrieval when they are needed. The State instances used by the game are loaded into the State Machine via <code class="inline">registerStates(gameData)</code> and the initial state (currently <strong>MenuState</strong>) is set as the current state. At this point, the game is ready to start.
+Most functions in the game use at least one of these objects. It is encouraged to only provide the necessary object to each function instead of passing the whole container. The GameLogic then calls <code class="inline">loadResources(resourceStorage)</code>, which fills the Resource Storage with the game's fonts, BGMs, Pokémon data and many other kinds of resources, allowing easy and efficient retrieval when they are needed. The State instances used by the game are loaded into the State Machine via <code class="inline">registerStates(gameData)</code> and the initial state (currently <strong>MenuState</strong>) is set as the current state. Meanwhile, the GameRenderer instantiates a window and adjusts the view to match the internal <code class="inline">Camera</code>. At this point, the game is ready to start.
+</p>
+
+<h3>Code flow - Game Loop</h3>
+
+<p class="indent">
+    After the initialization phase is completed, the game enters the <i>loop phase</i>. The overall structure of this phase is pretty simple. The GameLogic does the following:
+    <ol>
+        <li>updates the internal "elapsed time since last frame" variable;</li>
+        <li>calls <code class="inline">inputDispatcher.tick()</code>, which reads the keyboard state and calls the appropriate event handlers;</li>
+        <li>calls <code class="inline">stateMachine.execute()</code>, which calls the <code class="inline">execute()</code> method on the current state.</li>
+    </ol>
+
+    The GameRenderer updates the view according to the internal <code class="inline">Camera</code>, processes window events (close and resize) and redraws the frame.
 </p>
 
             </div>
