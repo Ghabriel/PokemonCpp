@@ -27,10 +27,13 @@ namespace {
     Entity target;
     Move* move;
     const UsedMove* usedMove;
+    std::function<void(const std::string& eventName)> triggerEvent;
 
     bool criticalHitFlag = false;
     bool hitFlag = false;
     int damageBuffer = 0;
+    float damageMultiplier = 1;
+    bool moveIsNegated = false;
 
     template<typename TEvent, typename... Args>
     void enqueueEvent(Args&&... args) {
@@ -61,6 +64,22 @@ void effects::internal::setMove(Move& _move) {
 
 void effects::internal::setUsedMove(const UsedMove& _usedMove) {
     usedMove = &_usedMove;
+}
+
+void effects::internal::setTriggerEvent(std::function<void(const std::string& eventName)> fn) {
+    triggerEvent = fn;
+}
+
+void effects::cleanup() {
+    criticalHitFlag = false;
+    hitFlag = false;
+    damageBuffer = 0;
+    damageMultiplier = 1;
+    moveIsNegated = false;
+}
+
+bool effects::isMoveNegated() {
+    return moveIsNegated;
 }
 
 void effects::damage() {
@@ -102,6 +121,10 @@ void effects::damage() {
     int baseDamage = (((2 * userLevel) / 5 + 2) * move->power * (attack / defense)) / 50 + 2;
     float modifier = targets * weather * critical * rand * stab * type * burn * others;
     int damage = baseDamage * modifier;
+
+    // TODO: apply this for fixedDamage() (OHKO moves might become bugged)
+    triggerEvent("beforeDamageInflict");
+    damage *= damageMultiplier;
 
     if (damage == 0) {
         damage = 1;
@@ -269,6 +292,22 @@ void effects::persist(int numTurns) {
     data<Battle>(battle, *gameData).activeMoves.push_back({*usedMove, numTurns});
 }
 
+void effects::addFlag(const std::string& flagName) {
+    data<VolatileData>(target, *gameData).flags.insert(flagName);
+}
+
+void effects::removeFlag(const std::string& flagName) {
+    data<VolatileData>(target, *gameData).flags.erase(flagName);
+}
+
+void effects::multiplyDamage(float factor) {
+    damageMultiplier *= factor;
+}
+
+void effects::negateMove() {
+    moveIsNegated = true;
+}
+
 
 void effects::showText(const std::string& content) {
     enqueueEvent<TextEvent>(content, battle, *gameData);
@@ -283,5 +322,9 @@ void injectNativeBattleFunctions(engine::scriptingsystem::Lua& script) {
     script.registerNative("raiseStat", effects::raiseStat);
     script.registerNative("ensureCriticalHit", effects::ensureCriticalHit);
     script.registerNative("persist", effects::persist);
+    script.registerNative("addFlag", effects::addFlag);
+    script.registerNative("removeFlag", effects::removeFlag);
+    script.registerNative("multiplyDamage", effects::multiplyDamage);
+    script.registerNative("negateMove", effects::negateMove);
     script.registerNative("showText", effects::showText);
 }

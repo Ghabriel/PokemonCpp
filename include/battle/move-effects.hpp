@@ -1,6 +1,7 @@
 #ifndef MOVE_EFFECTS_HPP
 #define MOVE_EFFECTS_HPP
 
+#include <functional>
 #include <string>
 #include "battle/Stat.hpp"
 #include "engine/entity-system/types.hpp"
@@ -19,7 +20,12 @@ namespace effects {
         void setMoveTarget(engine::entitysystem::Entity);
         void setMove(Move&);
         void setUsedMove(const UsedMove&);
+        void setTriggerEvent(std::function<void(const std::string& eventName)>);
     }
+
+    // used by C++ only
+    void cleanup();
+    bool isMoveNegated();
 
     void damage();
     void damageWithFixedRecoil(int lostHP);
@@ -29,6 +35,10 @@ namespace effects {
     void raiseStat(int statId, int levels);
     void ensureCriticalHit();
     void persist(int numTurns);
+    void addFlag(const std::string& flagName);
+    void removeFlag(const std::string& flagName);
+    void multiplyDamage(float factor);
+    void negateMove();
 
     void showText(const std::string& content);
 }

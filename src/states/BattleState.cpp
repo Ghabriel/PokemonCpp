@@ -103,6 +103,9 @@ BattleState::BattleState(CoreStructures& gameData)
     lua::internal::setBattle(battleEntity);
     effects::internal::setGameData(gameData);
     effects::internal::setBattle(battleEntity);
+    effects::internal::setTriggerEvent([&](const std::string& eventName) {
+        triggerEvent(eventName);
+    });
 }
 
 void BattleState::onEnterImpl() {
@@ -353,9 +356,8 @@ void BattleState::updateActiveMoveList() {
 }
 
 void BattleState::processUsedMoves() {
-    while (!battle->usedMoves.empty()) {
-        processMove(battle->usedMoves.front());
-        battle->usedMoves.pop_front();
+    for (const auto& usedMove : battle->usedMoves) {
+        processMove(usedMove);
     }
 }
 
@@ -365,10 +367,25 @@ void BattleState::processMove(UsedMove usedMove) {
             return;
         }
 
-        showUsedMoveText(usedMove);
-        deductPPIfApplicable(usedMove);
-        // TODO: move animation?
-        processMoveEffects(usedMove);
+        effects::internal::setMoveUser(usedMove.user);
+        effects::internal::setMoveTarget(usedMove.target);
+        effects::internal::setMove(*usedMove.move);
+        effects::internal::setUsedMove(usedMove);
+        updateMoveVariables(usedMove.user, usedMove.target);
+
+        callMoveEvent(usedMove, "beforeMove");
+
+        enqueueMoveEvent<ImmediateEvent>(gameData, [&] {
+            if (effects::isMoveNegated()) {
+                effects::cleanup();
+                return;
+            }
+
+            showUsedMoveText(usedMove);
+            deductPPIfApplicable(usedMove);
+            // TODO: move animation?
+            processMoveEffects(usedMove);
+        });
     });
 }
 
@@ -392,11 +409,6 @@ void BattleState::processMoveEffects(const UsedMove& usedMove) {
     Entity user = usedMove.user;
     Entity target = usedMove.target;
     Move& move = *usedMove.move;
-
-    effects::internal::setMoveUser(user);
-    effects::internal::setMoveTarget(target);
-    effects::internal::setMove(move);
-    effects::internal::setUsedMove(usedMove);
 
     if (checkMiss(user, target, move, gameData)) {
         std::string& displayName = pokemon(user).displayName;
@@ -432,11 +444,11 @@ void BattleState::processMoveEffects(const UsedMove& usedMove) {
             effects::fixedDamage(data<Pokemon>(target, gameData).currentHP);
             break;
         case 99:
-            updateMoveVariables(user, target);
             script("moves", gameData).call<void>(move.id + "_onUse");
             break;
     }
 
+    enqueueMoveEvent<ImmediateEvent>(gameData, effects::cleanup);
     checkFaintedPokemon();
 }
 

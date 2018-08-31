@@ -42,11 +42,12 @@ enum class Gender {
 
 enum class StatusCondition {
     Normal,
-    Sleep,
-    Poison,
+    Burn,
     Freeze,
     Paralysis,
-    Toxic
+    Poison,
+    Toxic,
+    Sleep
 };
 
 struct Pokemon {
