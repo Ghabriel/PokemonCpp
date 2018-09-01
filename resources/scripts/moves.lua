@@ -33,7 +33,7 @@ end
 
 function Flag_Burn_onTurnEnd()
     showText(target.displayName.." is hurt by its burn!")
-    damage((target.hp + 15) / 16)
+    fixedDamage((target.hp + 15) / 16)
 end
 
 
@@ -62,7 +62,7 @@ end
 -- Poison
 function Flag_Poison_onTurnEnd()
     showText(target.displayName.." is hurt by poison!")
-    damage((target.hp + 7) / 8)
+    fixedDamage((target.hp + 7) / 8)
 end
 
 -- Toxic
@@ -70,7 +70,7 @@ toxicCounter = {}
 function Flag_Toxic_onTurnEnd()
     showText(target.displayName.." is hurt by poison!")
     toxicCounter[target] = toxicCounter[target] + 1
-    damage((toxicCounter * target.hp + 7) / 8)
+    fixedDamage((toxicCounter * target.hp + 7) / 8)
 end
 
 function Flag_Toxic_onSwitchIn()

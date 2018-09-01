@@ -36,6 +36,11 @@ class BattleState : public engine::statesystem::State {
     void sortUsedMoves(std::deque<UsedMove>& usedMoves);
     void triggerEvent(const std::string& eventName);
     void callMoveEvent(const UsedMove&, const std::string& eventName);
+    void callFlagEvent(
+        Entity target,
+        const std::string& flagName,
+        const std::string& eventName
+    );
     void updateActiveMoveList();
     void processUsedMoves();
     void processMove(UsedMove);

@@ -122,6 +122,7 @@ void effects::damage() {
     float modifier = targets * weather * critical * rand * stab * type * burn * others;
     int damage = baseDamage * modifier;
 
+    Entity targetCopy = target; // might be changed by beforeDamageInflict
     // TODO: apply this for fixedDamage() (OHKO moves might become bugged)
     triggerEvent("beforeDamageInflict");
     damage *= damageMultiplier;
@@ -130,7 +131,7 @@ void effects::damage() {
         damage = 1;
     }
 
-    float& targetHP = data<Pokemon>(target, *gameData).currentHP;
+    float& targetHP = data<Pokemon>(targetCopy, *gameData).currentHP;
 
     enqueueEvent<ValueAnimationEvent>(
         targetHP,

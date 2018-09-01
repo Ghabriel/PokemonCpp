@@ -333,6 +333,22 @@ void BattleState::triggerEvent(const std::string& eventName) {
     for (const auto& usedMove : battle->usedMoves) {
         callMoveEvent(usedMove, eventName);
     }
+
+    for (const auto& flag : battle->playerTeamFlags) {
+        callFlagEvent(battle->playerPokemon, flag, eventName);
+    }
+
+    for (const auto& flag : data<VolatileData>(battle->playerPokemon, gameData).flags) {
+        callFlagEvent(battle->playerPokemon, flag, eventName);
+    }
+
+    for (const auto& flag : battle->opponentTeamFlags) {
+        callFlagEvent(battle->opponentPokemon, flag, eventName);
+    }
+
+    for (const auto& flag : data<VolatileData>(battle->opponentPokemon, gameData).flags) {
+        callFlagEvent(battle->opponentPokemon, flag, eventName);
+    }
 }
 
 void BattleState::callMoveEvent(const UsedMove& usedMove, const std::string& eventName) {
@@ -341,6 +357,16 @@ void BattleState::callMoveEvent(const UsedMove& usedMove, const std::string& eve
     effects::internal::setMove(*usedMove.move);
     effects::internal::setUsedMove(usedMove);
     script("moves", gameData).call<void>(usedMove.move->id + '_' + eventName);
+}
+
+void BattleState::callFlagEvent(
+    Entity target,
+    const std::string& flagName,
+    const std::string& eventName
+) {
+    effects::internal::setMoveTarget(target);
+    updateMoveVariables(9999999, target);
+    script("moves", gameData).call<void>("Flag_" + flagName + '_' + eventName);
 }
 
 void BattleState::updateActiveMoveList() {
@@ -444,7 +470,7 @@ void BattleState::processMoveEffects(const UsedMove& usedMove) {
             effects::fixedDamage(data<Pokemon>(target, gameData).currentHP);
             break;
         case 99:
-            script("moves", gameData).call<void>(move.id + "_onUse");
+            callMoveEvent(usedMove, "onUse");
             break;
     }
 
@@ -453,10 +479,14 @@ void BattleState::processMoveEffects(const UsedMove& usedMove) {
 }
 
 void BattleState::updateMoveVariables(Entity user, Entity target) {
-    std::unordered_map<std::string, Entity> pokemonList = {
-        {"user", user},
-        {"target", target},
-    };
+    std::unordered_map<std::string, Entity> pokemonList;
+    if (user < 99999) { // TODO: fix this
+        pokemonList.insert({"user", user});
+    }
+
+    if (target < 99999) { // TODO: fix this
+        pokemonList.insert({"target", target});
+    }
 
     auto& moves = script("moves", gameData);
     injectNativeBattleVariables(pokemonList, moves, gameData);
