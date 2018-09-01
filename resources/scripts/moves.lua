@@ -9,6 +9,8 @@ stats = {
     evasion = 7
 }
 
+pokemon0 = {}
+pokemon1 = {}
 user = {}
 target = {}
 move = {}
@@ -18,7 +20,9 @@ function Struggle_onUse()
 end
 
 function TailWhip_onUse()
-    lowerStat(stats.defense, 1)
+    -- lowerStat(stats.defense, 1)
+    showText("It's... FREEZING TIME!!")
+    addFlag("Freeze")
     -- if not hasType("Fire") then
     --     addFlag("Burn")
     -- end

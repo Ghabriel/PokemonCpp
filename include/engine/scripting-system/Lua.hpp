@@ -22,6 +22,11 @@ namespace engine::scriptingsystem {
         void set(const std::string& variableName, const T& value);
 
         /**
+         * \brief Runs the given Lua code.
+         */
+        void eval(const std::string& code);
+
+        /**
          * \brief Retrieves the value of a variable. The syntax "a.b.c" is
          * supported to retrieve specific fields of a structure.
          */
@@ -53,7 +58,7 @@ namespace engine::scriptingsystem {
     inline Lua::Lua(const std::string& filename) : luaState(filename) { }
 
     template<typename T>
-    void Lua::set(const std::string& variableName, const T& value) {
+    inline void Lua::set(const std::string& variableName, const T& value) {
         std::vector<std::string> components = getVariableComponents(variableName);
 
         for (size_t i = 0; i < components.size() - 1; ++i) {
@@ -63,6 +68,10 @@ namespace engine::scriptingsystem {
         luaState.pushValue(value);
         luaState.setField(components[components.size() - 1]);
         luaState.pop(components.size() - 1);
+    }
+
+    inline void Lua::eval(const std::string& code) {
+        luaState.eval(code);
     }
 
     template<typename T>

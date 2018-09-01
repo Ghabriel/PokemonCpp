@@ -1,5 +1,7 @@
+pokemon0 = {}
+pokemon1 = {}
 user = {}
-foe = {}
+target = {}
 
 function chooseMoveWildBattle()
     return 0

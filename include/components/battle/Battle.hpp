@@ -7,6 +7,11 @@
 #include "../../battle/Move.hpp"
 #include "../../engine/entity-system/types.hpp"
 
+struct BoundFlag {
+    engine::entitysystem::Entity target;
+    std::string flag;
+};
+
 struct UsedMove {
     engine::entitysystem::Entity user;
     engine::entitysystem::Entity target;

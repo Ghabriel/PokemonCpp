@@ -50,61 +50,18 @@ namespace {
         EventQueue& queue = resource<EventQueue>("move-event-queue", gameData);
         queue.addEvent(std::make_unique<TEvent>(std::forward<Args>(args)...));
     }
-
-    void injectNativeBattleVariables(
-        const std::unordered_map<std::string, Entity>& pokemonList,
-        Lua& script,
-        CoreStructures& gameData
-    ) {
-        for (const auto& [varName, pokemonEntity] : pokemonList) {
-            const Pokemon& currentPokemon = data<Pokemon>(pokemonEntity, gameData);
-
-            const auto getStat = [&](Stat stat) {
-                return getEffectiveStat(pokemonEntity, stat, gameData);
-            };
-
-            script.set(varName + ".species", currentPokemon.species);
-            script.set(varName + ".nature", static_cast<int>(currentPokemon.nature));
-            script.set(varName + ".heldItem", currentPokemon.heldItem);
-            script.set(varName + ".ability", currentPokemon.ability);
-
-            for (size_t i = 0; i < constants::MOVE_LIMIT; ++i) {
-                if (i < currentPokemon.moves.size()) {
-                    script.set(varName + ".move" + std::to_string(i), currentPokemon.moves[i]);
-                    script.set(varName + ".pp" + std::to_string(i), currentPokemon.pp[i]);
-                } else {
-                    script.set(varName + ".move" + std::to_string(i), std::string{});
-                    script.set(varName + ".pp" + std::to_string(i), std::string{});
-                }
-            }
-
-            script.set<int>(varName + ".moveCount", currentPokemon.moves.size());
-
-            script.set(varName + ".gender", static_cast<int>(currentPokemon.gender));
-            script.set(varName + ".form", currentPokemon.form);
-            script.set(varName + ".displayName", currentPokemon.displayName);
-            script.set(varName + ".status", static_cast<int>(currentPokemon.status));
-            script.set(varName + ".asleepRounds", currentPokemon.asleepRounds);
-            script.set(varName + ".level", currentPokemon.level);
-            script.set(varName + ".hp", getStat(Stat::HP));
-            script.set(varName + ".attack", getStat(Stat::Attack));
-            script.set(varName + ".defense", getStat(Stat::Defense));
-            script.set(varName + ".specialAttack", getStat(Stat::SpecialAttack));
-            script.set(varName + ".specialDefense", getStat(Stat::SpecialDefense));
-            script.set(varName + ".speed", getStat(Stat::Speed));
-            script.set(varName + ".currentHP", static_cast<int>(currentPokemon.currentHP));
-        }
-    }
 }
 
 BattleState::BattleState(CoreStructures& gameData)
  : gameData(gameData),
+   scriptVariables(gameData),
+   eventManager(scriptVariables, gameData),
    battleEntity(createEntity(gameData)) {
     lua::internal::setBattle(battleEntity);
     effects::internal::setGameData(gameData);
     effects::internal::setBattle(battleEntity);
     effects::internal::setTriggerEvent([&](const std::string& eventName) {
-        triggerEvent(eventName);
+        eventManager.triggerEvent(eventName);
     });
 }
 
@@ -114,6 +71,8 @@ void BattleState::onEnterImpl() {
     gameData.resourceStorage->store("battle-event-queue", EventQueue());
     gameData.resourceStorage->store("move-event-queue", EventQueue());
     battle = &data<Battle>(battleEntity, gameData);
+    scriptVariables.setBattle(*battle);
+    eventManager.setBattle(*battle);
     loadDetailedPokemonData();
 
     showText("Wild " + pokemon(battle->opponentPokemon).displayName + " appeared!");
@@ -270,11 +229,11 @@ void BattleState::processTurn() {
 
         battle->usedMoves = {playerMove, opponentMove};
         sortUsedMoves(battle->usedMoves);
-        triggerEvent("onTurnStart");
+        eventManager.triggerEvent("onTurnStart");
         processUsedMoves();
 
         enqueueEvent<ImmediateEvent>(gameData, [this] {
-            triggerEvent("onTurnEnd");
+            eventManager.triggerEvent("onTurnEnd");
             updateActiveMoveList();
             actionSelectionScreen();
         });
@@ -290,18 +249,8 @@ UsedMove BattleState::getUsedMoveBy(Entity user, Entity target, int selectedActi
 }
 
 int BattleState::chooseMoveAI(const Pokemon& pokemon) {
-    updateAIVariables();
+    scriptVariables.updateScriptVariables();
     return script("ai", gameData).call<int>("chooseMoveWildBattle");
-}
-
-void BattleState::updateAIVariables() {
-    std::unordered_map<std::string, Entity> pokemonList = {
-        {"user", battle->opponentPokemon},
-        {"foe", battle->playerPokemon},
-    };
-
-    auto& ai = script("ai", gameData);
-    injectNativeBattleVariables(pokemonList, ai, gameData);
 }
 
 void BattleState::sortUsedMoves(std::deque<UsedMove>& usedMoves) {
@@ -323,50 +272,6 @@ void BattleState::sortUsedMoves(std::deque<UsedMove>& usedMoves) {
             return random(1, 2) == 1;
         }
     );
-}
-
-void BattleState::triggerEvent(const std::string& eventName) {
-    for (const auto& [usedMove, _] : battle->activeMoves) {
-        callMoveEvent(usedMove, eventName);
-    }
-
-    for (const auto& usedMove : battle->usedMoves) {
-        callMoveEvent(usedMove, eventName);
-    }
-
-    for (const auto& flag : battle->playerTeamFlags) {
-        callFlagEvent(battle->playerPokemon, flag, eventName);
-    }
-
-    for (const auto& flag : data<VolatileData>(battle->playerPokemon, gameData).flags) {
-        callFlagEvent(battle->playerPokemon, flag, eventName);
-    }
-
-    for (const auto& flag : battle->opponentTeamFlags) {
-        callFlagEvent(battle->opponentPokemon, flag, eventName);
-    }
-
-    for (const auto& flag : data<VolatileData>(battle->opponentPokemon, gameData).flags) {
-        callFlagEvent(battle->opponentPokemon, flag, eventName);
-    }
-}
-
-void BattleState::callMoveEvent(const UsedMove& usedMove, const std::string& eventName) {
-    effects::internal::setMoveUser(usedMove.user);
-    effects::internal::setMoveTarget(usedMove.target);
-    effects::internal::setMove(*usedMove.move);
-    effects::internal::setUsedMove(usedMove);
-    script("moves", gameData).call<void>(usedMove.move->id + '_' + eventName);
-}
-
-void BattleState::callFlagEvent(
-    Entity target,
-    const std::string& flagName,
-    const std::string& eventName
-) {
-    effects::internal::setMoveTarget(target);
-    updateMoveVariables(9999999, target);
-    script("moves", gameData).call<void>("Flag_" + flagName + '_' + eventName);
 }
 
 void BattleState::updateActiveMoveList() {
@@ -397,9 +302,10 @@ void BattleState::processMove(UsedMove usedMove) {
         effects::internal::setMoveTarget(usedMove.target);
         effects::internal::setMove(*usedMove.move);
         effects::internal::setUsedMove(usedMove);
-        updateMoveVariables(usedMove.user, usedMove.target);
+        scriptVariables.updateScriptUserPointer(usedMove.user);
+        scriptVariables.updateScriptTargetPointer(usedMove.target);
 
-        callMoveEvent(usedMove, "beforeMove");
+        eventManager.triggerMoveEvent(usedMove, "beforeMove");
 
         enqueueMoveEvent<ImmediateEvent>(gameData, [&] {
             if (effects::isMoveNegated()) {
@@ -470,26 +376,12 @@ void BattleState::processMoveEffects(const UsedMove& usedMove) {
             effects::fixedDamage(data<Pokemon>(target, gameData).currentHP);
             break;
         case 99:
-            callMoveEvent(usedMove, "onUse");
+            eventManager.triggerMoveEvent(usedMove, "onUse");
             break;
     }
 
     enqueueMoveEvent<ImmediateEvent>(gameData, effects::cleanup);
     checkFaintedPokemon();
-}
-
-void BattleState::updateMoveVariables(Entity user, Entity target) {
-    std::unordered_map<std::string, Entity> pokemonList;
-    if (user < 99999) { // TODO: fix this
-        pokemonList.insert({"user", user});
-    }
-
-    if (target < 99999) { // TODO: fix this
-        pokemonList.insert({"target", target});
-    }
-
-    auto& moves = script("moves", gameData);
-    injectNativeBattleVariables(pokemonList, moves, gameData);
 }
 
 void BattleState::checkFaintedPokemon() {

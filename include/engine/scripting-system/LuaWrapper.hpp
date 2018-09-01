@@ -71,6 +71,7 @@ namespace engine::scriptingsystem {
         void setGlobal(const std::string& globalName);
         void setField(const std::string& fieldName);
         void call(size_t paramCount, size_t returnCount);
+        void eval(const std::string& code);
 
         bool isNil() const;
         template<typename T>
@@ -153,6 +154,10 @@ namespace engine::scriptingsystem {
 
     inline void LuaWrapper::call(size_t paramCount, size_t returnCount) {
         lua_pcall(L.get(), paramCount, returnCount, 0);
+    }
+
+    inline void LuaWrapper::eval(const std::string& code) {
+        luaL_dostring(L.get(), code.c_str());
     }
 
     inline bool LuaWrapper::isNil() const {
