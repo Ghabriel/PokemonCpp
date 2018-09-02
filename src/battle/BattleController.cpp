@@ -105,6 +105,8 @@ void BattleController::processTurn(const std::deque<UsedMove>& usedMoves) {
 }
 
 void BattleController::sortUsedMoves(std::deque<UsedMove>& usedMoves) {
+    shuffle(usedMoves.begin(), usedMoves.end());
+
     std::sort(
         usedMoves.begin(),
         usedMoves.end(),
@@ -115,12 +117,7 @@ void BattleController::sortUsedMoves(std::deque<UsedMove>& usedMoves) {
 
             int firstSpeed = getEffectiveStat(first.user, Stat::Speed, *gameData);
             int secondSpeed = getEffectiveStat(second.user, Stat::Speed, *gameData);
-
-            if (firstSpeed != secondSpeed) {
-                return firstSpeed > secondSpeed;
-            }
-
-            return random(1, 2) == 1;
+            return firstSpeed >= secondSpeed;
         }
     );
 }
