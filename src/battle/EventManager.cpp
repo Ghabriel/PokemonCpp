@@ -1,6 +1,6 @@
 #include "battle/EventManager.hpp"
 
-#include "battle/move-effects.hpp"
+#include "battle/helpers/move-effects.hpp"
 #include "battle/ScriptVariables.hpp"
 #include "components/battle/Battle.hpp"
 #include "components/battle/VolatileData.hpp"
@@ -8,7 +8,7 @@
 #include "CoreStructures.hpp"
 
 EventManager::EventManager(ScriptVariables& variables, CoreStructures& gameData)
- : scriptVariables(variables), gameData(gameData) { }
+ : scriptVariables(&variables), gameData(&gameData) { }
 
 void EventManager::triggerEvent(const std::string& eventName) {
     for (const auto& [usedMove, _] : battle->activeMoves) {
@@ -32,7 +32,7 @@ void EventManager::triggerMoveEvent(const UsedMove& usedMove, const std::string&
     effects::internal::setMoveTarget(usedMove.target);
     effects::internal::setMove(*usedMove.move);
     effects::internal::setUsedMove(usedMove);
-    script("moves", gameData).call<void>(usedMove.move->id + '_' + eventName);
+    script("moves", *gameData).call<void>(usedMove.move->id + '_' + eventName);
 }
 
 void EventManager::triggerFlagEvent(const BoundFlag& boundFlag, const std::string& eventName) {
@@ -42,8 +42,8 @@ void EventManager::triggerFlagEvent(const BoundFlag& boundFlag, const std::strin
     // ECHO("----------");
     effects::internal::setMoveTarget(boundFlag.target);
     // updateMoveVariables(9999999, target);
-    scriptVariables.updateScriptTargetPointer(boundFlag.target);
-    script("moves", gameData).call<void>("Flag_" + boundFlag.flag + '_' + eventName);
+    scriptVariables->updateScriptTargetPointer(boundFlag.target);
+    script("moves", *gameData).call<void>("Flag_" + boundFlag.flag + '_' + eventName);
 }
 
 void EventManager::triggerTargetFlagEvent(Entity target, const std::string& eventName) {
@@ -67,5 +67,5 @@ void EventManager::triggerTargetFlagEvent(Entity target, const std::string& even
 }
 
 std::unordered_set<std::string>& EventManager::getVolatileFlags(Entity entity) {
-    return data<VolatileData>(entity, gameData).flags;
+    return data<VolatileData>(entity, *gameData).flags;
 }

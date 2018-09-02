@@ -3,7 +3,7 @@
 
 #include <functional>
 #include <string>
-#include "battle/Stat.hpp"
+#include "battle/data/Stat.hpp"
 #include "engine/entity-system/types.hpp"
 #include "engine/scripting-system/forward-declarations.hpp"
 

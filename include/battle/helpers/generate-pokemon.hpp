@@ -2,7 +2,7 @@
 #define GENERATE_POKEMON_HPP
 
 #include <string>
-#include "../engine/resource-system/forward-declarations.hpp"
+#include "../../engine/resource-system/forward-declarations.hpp"
 
 struct Pokemon;
 

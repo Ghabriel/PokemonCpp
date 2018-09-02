@@ -4,8 +4,10 @@
 #include <deque>
 #include <unordered_set>
 #include <vector>
-#include "../../battle/Move.hpp"
+#include "../../battle/data/Move.hpp"
 #include "../../engine/entity-system/types.hpp"
+
+#include "../../engine/utils/debug/xtrace.hpp"
 
 struct BoundFlag {
     engine::entitysystem::Entity target;

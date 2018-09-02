@@ -1,9 +1,9 @@
-#include "battle/generate-pokemon.hpp"
+#include "battle/helpers/generate-pokemon.hpp"
 
-#include "battle/Move.hpp"
-#include "battle/Pokemon.hpp"
-#include "battle/PokemonSpeciesData.hpp"
-#include "battle/random.hpp"
+#include "battle/data/Move.hpp"
+#include "battle/data/Pokemon.hpp"
+#include "battle/data/PokemonSpeciesData.hpp"
+#include "battle/helpers/random.hpp"
 #include "constants.hpp"
 #include "engine/resource-system/include.hpp"
 

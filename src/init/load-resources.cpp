@@ -5,10 +5,10 @@
 #include <fstream>
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
-#include "battle/EncounterData.hpp"
-#include "battle/Move.hpp"
-#include "battle/move-effects.hpp"
-#include "battle/PokemonSpeciesData.hpp"
+#include "battle/data/EncounterData.hpp"
+#include "battle/data/Move.hpp"
+#include "battle/data/PokemonSpeciesData.hpp"
+#include "battle/helpers/move-effects.hpp"
 #include "components/Map.hpp"
 #include "engine/resource-system/include.hpp"
 #include "engine/resource-system/json/include.hpp"

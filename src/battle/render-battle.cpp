@@ -1,6 +1,6 @@
 #include "render-textboxes.hpp"
 
-#include "battle/Pokemon.hpp"
+#include "battle/data/Pokemon.hpp"
 #include "components/battle/Battle.hpp"
 #include "components/battle/BattleActionSelection.hpp"
 #include "components/battle/Fainted.hpp"

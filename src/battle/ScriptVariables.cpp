@@ -1,13 +1,13 @@
 #include "battle/ScriptVariables.hpp"
 
-#include "battle/battle-utils.hpp"
-#include "battle/Pokemon.hpp"
+#include "battle/data/Pokemon.hpp"
+#include "battle/helpers/battle-utils.hpp"
 #include "components/battle/Battle.hpp"
 #include "constants.hpp"
 #include "core-functions.hpp"
 #include "CoreStructures.hpp"
 
-ScriptVariables::ScriptVariables(CoreStructures& gameData) : gameData(gameData) {}
+ScriptVariables::ScriptVariables(CoreStructures& gameData) : gameData(&gameData) { }
 
 void ScriptVariables::setBattle(Battle& _battle) {
     battle = &_battle;
@@ -19,18 +19,18 @@ void ScriptVariables::updateScriptVariables() {
         battle->opponentPokemon,
     };
 
-    updateScriptVariables(pokemonList, script("ai", gameData));
-    updateScriptVariables(pokemonList, script("moves", gameData));
+    updateScriptVariables(pokemonList, script("ai", *gameData));
+    updateScriptVariables(pokemonList, script("moves", *gameData));
 }
 
 void ScriptVariables::updateScriptUserPointer(Entity user) {
     std::string index = std::to_string(getPokemonIndex(user));
-    script("ai", gameData).eval("user = pokemon" + index);
+    script("ai", *gameData).eval("user = pokemon" + index);
 }
 
 void ScriptVariables::updateScriptTargetPointer(Entity target) {
     std::string index = std::to_string(getPokemonIndex(target));
-    script("ai", gameData).eval("target = pokemon" + index);
+    script("ai", *gameData).eval("target = pokemon" + index);
 }
 
 size_t ScriptVariables::getPokemonIndex(Entity entity) {
@@ -41,10 +41,10 @@ void ScriptVariables::updateScriptVariables(const std::vector<Entity>& pokemonLi
     for (size_t i = 0; i < pokemonList.size(); ++i) {
         std::string varName = "pokemon" + std::to_string(i);
         Entity pokemonEntity = pokemonList[i];
-        const Pokemon& currentPokemon = data<Pokemon>(pokemonEntity, gameData);
+        const Pokemon& currentPokemon = data<Pokemon>(pokemonEntity, *gameData);
 
         const auto getStat = [&](Stat stat) {
-            return getEffectiveStat(pokemonEntity, stat, gameData);
+            return getEffectiveStat(pokemonEntity, stat, *gameData);
         };
 
         script.set(varName + ".species", currentPokemon.species);

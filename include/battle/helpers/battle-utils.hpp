@@ -1,7 +1,7 @@
 #ifndef BATTLE_UTILS_HPP
 #define BATTLE_UTILS_HPP
 
-#include "battle/Stat.hpp"
+#include "battle/data/Stat.hpp"
 #include "engine/entity-system/types.hpp"
 
 struct CoreStructures;

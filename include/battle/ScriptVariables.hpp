@@ -15,6 +15,7 @@ class ScriptVariables {
     using Entity = engine::entitysystem::Entity;
     using Lua = engine::scriptingsystem::Lua;
  public:
+    ScriptVariables() = default;
     explicit ScriptVariables(CoreStructures& gameData);
 
     /**
@@ -39,7 +40,7 @@ class ScriptVariables {
 
  private:
     Battle* battle;
-    CoreStructures& gameData;
+    CoreStructures* gameData;
 
     size_t getPokemonIndex(Entity);
     void updateScriptVariables(const std::vector<Entity>& pokemonList, Lua&);

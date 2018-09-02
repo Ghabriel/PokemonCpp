@@ -19,6 +19,7 @@ class EventManager {
     using Entity = engine::entitysystem::Entity;
     using Lua = engine::scriptingsystem::Lua;
  public:
+    EventManager() = default;
     EventManager(ScriptVariables&, CoreStructures& gameData);
 
     /**
@@ -48,8 +49,8 @@ class EventManager {
     void triggerTargetFlagEvent(Entity target, const std::string& eventName);
 
  private:
-    ScriptVariables& scriptVariables;
-    CoreStructures& gameData;
+    ScriptVariables* scriptVariables;
+    CoreStructures* gameData;
     Battle* battle;
 
     std::unordered_set<std::string>& getVolatileFlags(Entity);
