@@ -40,6 +40,7 @@ BattleController::BattleController(Entity battleEntity, CoreStructures& gameData
    state(State::PENDING_START) { }
 
 void BattleController::startBattle() {
+    assert(state == State::PENDING_START);
     gameData->resourceStorage->store("battle-event-queue", EventQueue());
     gameData->resourceStorage->store("move-event-queue", EventQueue());
     battle = &data<Battle>(battleEntity, *gameData);
