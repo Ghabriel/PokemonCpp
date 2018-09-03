@@ -11,11 +11,11 @@
 
 using engine::resourcesystem::ResourceStorage;
 
-Nature pickNature() {
+Nature generation::pickNature() {
     return static_cast<Nature>(random(0, static_cast<int>(Nature::Count) - 1));
 }
 
-std::array<int, 6> pickIVs() {
+std::array<int, 6> generation::pickIVs() {
     return {
         random(0, 31),
         random(0, 31),
@@ -26,7 +26,10 @@ std::array<int, 6> pickIVs() {
     };
 }
 
-std::vector<std::string> pickMoves(const PokemonSpeciesData& speciesData, int level) {
+std::vector<std::string> generation::pickMoves(
+    const PokemonSpeciesData& speciesData,
+    int level
+) {
     std::vector<std::string> result;
 
     for (auto it = speciesData.moves.rbegin(); it != speciesData.moves.rend(); ++it) {
@@ -44,7 +47,7 @@ std::vector<std::string> pickMoves(const PokemonSpeciesData& speciesData, int le
     return result;
 }
 
-std::vector<int> pickPPs(
+std::vector<int> generation::pickPPs(
     ResourceStorage& storage,
     const std::vector<std::string>& moves
 ) {
@@ -58,7 +61,7 @@ std::vector<int> pickPPs(
     return result;
 }
 
-Gender pickGender(const PokemonSpeciesData& speciesData) {
+Gender generation::pickGender(const PokemonSpeciesData& speciesData) {
     if (speciesData.maleRatio == "-") {
         return Gender::Genderless;
     }
@@ -67,7 +70,7 @@ Gender pickGender(const PokemonSpeciesData& speciesData) {
     return random(1, 1000) <= maleRatio ? Gender::Male : Gender::Female;
 }
 
-void pickStats(const PokemonSpeciesData& speciesData, Pokemon& pokemon) {
+void generation::pickStats(const PokemonSpeciesData& speciesData, Pokemon& pokemon) {
     const auto& baseStats = speciesData.baseStats;
     const auto& ev = pokemon.ev;
     const auto& iv = pokemon.iv;
@@ -94,6 +97,7 @@ Pokemon generatePokemon(
     const std::string& species,
     int level
 ) {
+    using namespace generation;
     PokemonSpeciesData& speciesData = storage.get<PokemonSpeciesData>("pokemon-" + species);
     Pokemon pokemon;
 
