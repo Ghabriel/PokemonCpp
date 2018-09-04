@@ -8,6 +8,7 @@
 
 struct CoreStructures;
 struct Pokemon;
+class TextProvider;
 struct UsedMove;
 
 class BattleController {
@@ -22,7 +23,7 @@ class BattleController {
     };
 
     BattleController() = default;
-    BattleController(Entity battleEntity, CoreStructures& gameData);
+    BattleController(Entity battleEntity, TextProvider&, CoreStructures& gameData);
 
     void startBattle();
     void abort();
@@ -35,6 +36,7 @@ class BattleController {
 
  private:
     Entity battleEntity;
+    TextProvider* textProvider;
     CoreStructures* gameData;
     Battle* battle;
     ScriptVariables scriptVariables;

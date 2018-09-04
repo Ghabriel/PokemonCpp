@@ -1,6 +1,7 @@
 #include "states/BattleState.hpp"
 
 #include "battle/data/Pokemon.hpp"
+#include "battle/text-providers/EventTextProvider.hpp"
 #include "components/battle/Battle.hpp"
 #include "core-functions.hpp"
 #include "CoreStructures.hpp"
@@ -8,17 +9,11 @@
 
 BattleState::BattleState(CoreStructures& gameData)
  : gameData(gameData),
-   battleEntity(createEntity(gameData)) {
-    // lua::internal::setBattle(battleEntity);
-    // effects::internal::setGameData(gameData);
-    // effects::internal::setBattle(battleEntity);
-    // effects::internal::setTriggerEvent([&](const std::string& eventName) {
-    //     eventManager.triggerEvent(eventName);
-    // });
-}
+   battleEntity(createEntity(gameData)),
+   textProvider(new EventTextProvider()) { }
 
 void BattleState::onEnterImpl() {
-    battleController = BattleController(battleEntity, gameData);
+    battleController = BattleController(battleEntity, *textProvider, gameData);
     interactiveLayer = InteractiveLayer(battleEntity, battleController, gameData);
     battleSetup = BattleSetup(battleEntity, battleController, interactiveLayer, gameData);
     battleSetup.startBattle();

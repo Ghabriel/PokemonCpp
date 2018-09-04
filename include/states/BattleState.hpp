@@ -1,8 +1,10 @@
 #ifndef BATTLE_STATE_HPP
 #define BATTLE_STATE_HPP
 
+#include <memory>
 #include "../battle/BattleController.hpp"
 #include "../battle/BattleSetup.hpp"
+#include "../battle/TextProvider.hpp"
 #include "../battle/InteractiveLayer.hpp"
 #include "../engine/entity-system/types.hpp"
 #include "../engine/state-system/State.hpp"
@@ -20,6 +22,7 @@ class BattleState : public engine::statesystem::State {
     BattleController battleController;
     InteractiveLayer interactiveLayer;
     BattleSetup battleSetup;
+    std::unique_ptr<TextProvider> textProvider;
 
     void onEnterImpl() override;
     void onExitImpl() override;

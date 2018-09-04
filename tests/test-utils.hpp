@@ -1,6 +1,7 @@
 #include "battle/BattleController.hpp"
 #include "battle/data/Pokemon.hpp"
 #include "battle/helpers/generate-pokemon.hpp"
+#include "battle/text-providers/NullTextProvider.hpp"
 #include "components/battle/Battle.hpp"
 #include "CoreStructures.hpp"
 #include "engine/entity-system/include.hpp"
@@ -68,10 +69,16 @@ UsedMove wrapMove(Entity user, Entity target, const std::string& moveId);
 
 
 namespace {
+    inline std::unique_ptr<TextProvider> textProvider(new NullTextProvider());
+
     TestData prepareTestData(CoreStructures& gameData) {
         TestData result;
         result.battleEntity = componentManager.createEntity();
-        result.battleController = BattleController(result.battleEntity, gameData);
+        result.battleController = BattleController(
+            result.battleEntity,
+            *textProvider,
+            gameData
+        );
         return result;
     }
 

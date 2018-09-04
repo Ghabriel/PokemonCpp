@@ -6,6 +6,7 @@
 #include "battle/helpers/battle-utils.hpp"
 #include "battle/helpers/move-effects.hpp"
 #include "battle/helpers/random.hpp"
+#include "battle/TextProvider.hpp"
 #include "components/battle/Battle.hpp"
 #include "components/battle/Fainted.hpp"
 #include "components/battle/VolatileData.hpp"
@@ -32,12 +33,16 @@ namespace {
     }
 }
 
-BattleController::BattleController(Entity battleEntity, CoreStructures& gameData)
- : battleEntity(battleEntity),
-   gameData(&gameData),
-   scriptVariables(gameData),
-   eventManager(scriptVariables, gameData),
-   state(State::PENDING_START) { }
+BattleController::BattleController(
+    Entity battleEntity,
+    TextProvider& textProvider,
+    CoreStructures& gameData
+) : battleEntity(battleEntity),
+    textProvider(&textProvider),
+    gameData(&gameData),
+    scriptVariables(gameData),
+    eventManager(scriptVariables, gameData),
+    state(State::PENDING_START) { }
 
 void BattleController::startBattle() {
     assert(state == State::PENDING_START);
@@ -267,11 +272,11 @@ void BattleController::checkFaintedPokemon() {
 }
 
 void BattleController::showText(const std::string& content) {
-    enqueueEvent<TextEvent>(*gameData, content, battleEntity, *gameData);
+    textProvider->showBattleText(content, battleEntity, *gameData);
 }
 
 void BattleController::showMoveText(const std::string& content) {
-    enqueueMoveEvent<TextEvent>(*gameData, content, battleEntity, *gameData);
+    textProvider->showMoveText(content, battleEntity, *gameData);
 }
 
 Pokemon& BattleController::pokemon(Entity entity) {
