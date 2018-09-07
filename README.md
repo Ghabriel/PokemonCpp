@@ -21,21 +21,26 @@ in order to update your repositories and packages:
 
 **On Ubuntu 18.04:**
 
-All dependencies are available on the distribution's repositories and may be installed
+Some dependencies are available on the distribution's repositories and may be installed
 with APT. The first step is optional, but recommended, in order to update your repositories:
 
 	# apt update
-	# apt install lua5.3 libsfml-dev build-essential
-
+	# apt install lua5.3 build-essential
+	
+However, the version of SFML available on the repositories is outdated and won't work with this project.
+Building from source is, therefore, required. Instructions for that are available at https://www.sfml-dev.org/tutorials/2.5/start-linux.php.
 
 **On Fedora:**
 
-All dependencies are available on the distribution's repositories and may be installed
+Some dependencies are available on the distribution's repositories and may be installed
 with DNF. The first step is optional, but recommended, in order to update your repositories and
 packages:
 
 	# dnf update
-	# dnf install lua SFML-devel gcc-c++
+	# dnf install lua gcc-c++
+	
+However, the version of SFML available on the repositories is outdated and won't work with this project.
+Building from source is, therefore, required. Instructions for that are available at https://www.sfml-dev.org/tutorials/2.5/start-linux.php.
 
 # Build instructions
 
