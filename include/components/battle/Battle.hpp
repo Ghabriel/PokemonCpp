@@ -1,33 +1,22 @@
 #ifndef BATTLE_HPP
 #define BATTLE_HPP
 
-#include <deque>
-#include <unordered_set>
+#include <unordered_map>
 #include <vector>
-#include "../../battle/data/Move.hpp"
+#include "../../battle/data/BoundMove.hpp"
+#include "../../battle/data/Flag.hpp"
+// #include "../../battle/data/Move.hpp"
 #include "../../engine/entity-system/types.hpp"
 
-#include "../../engine/utils/debug/xtrace.hpp"
-
-struct BoundFlag {
-    engine::entitysystem::Entity target;
-    std::string flag;
-};
-
-struct UsedMove {
-    engine::entitysystem::Entity user;
-    engine::entitysystem::Entity target;
-    Move* move;
-    int moveIndex;
-};
-
 struct Battle {
-    engine::entitysystem::Entity playerPokemon;
-    engine::entitysystem::Entity opponentPokemon;
-    std::unordered_set<std::string> playerTeamFlags;
-    std::unordered_set<std::string> opponentTeamFlags;
-    std::deque<UsedMove> usedMoves;
-    std::vector<std::pair<UsedMove, int>> activeMoves;
+    using Entity = engine::entitysystem::Entity;
+    std::vector<Entity> playerTeam;
+    std::vector<Entity> opponentTeam;
+    std::unordered_map<size_t, std::vector<Flag>> playerTeamPositionFlags;
+    std::unordered_map<size_t, std::vector<Flag>> opponentTeamPositionFlags;
+    std::unordered_map<Entity, std::vector<Flag>> pokemonFlags;
+    std::vector<BoundMove> usedMoves;
+    std::vector<BoundMove> moveHistory;
 };
 
 #endif

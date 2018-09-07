@@ -7,9 +7,9 @@
 
 struct Battle;
 class BattleController;
+struct BoundMove;
 struct CoreStructures;
 struct Move;
-struct UsedMove;
 struct Pokemon;
 
 class InteractiveLayer {
@@ -32,7 +32,7 @@ class InteractiveLayer {
     void actionSelectionScreen();
     void moveSelectionScreen();
     void processTurn();
-    UsedMove getUsedMoveBy(Entity user, Entity target, int selectedAction);
+    BoundMove getUsedMoveBy(Entity user, Entity target, int selectedAction);
     void blackOutScreen();
     void rewardScreen();
 

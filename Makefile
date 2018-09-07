@@ -39,7 +39,7 @@ MAINFILES :=$(SRCDIR)/main.cpp
 BINARIES  :=$(BINDIR)/pokemon
 # Compiler & linker flags
 CXX      :=g++
-CXXFLAGS :=-std=c++17 -Wall
+CXXFLAGS :=-std=c++17 -Wall -g
 LDFLAGS  :=
 LDLIBS   :=-lsfml-audio -lsfml-graphics -lsfml-system -lsfml-window -pthread -lX11 -llua
 INCLUDE  :=-I$(INCDIR)

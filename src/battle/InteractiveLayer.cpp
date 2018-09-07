@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include "battle/BattleController.hpp"
+#include "battle/data/Move.hpp"
 #include "battle/data/Pokemon.hpp"
 #include "battle/data/PokemonSpeciesData.hpp"
 #include "battle/events/ActionSelectionEvent.hpp"
@@ -47,7 +48,7 @@ void InteractiveLayer::startBattle() {
 
     gameData->resourceStorage->store(INTERACTION_QUEUE, EventQueue());
 
-    std::string& displayName = data<Pokemon>(battle->opponentPokemon, *gameData).displayName;
+    std::string& displayName = data<Pokemon>(battle->opponentTeam[0], *gameData).displayName;
     showText("Wild " + displayName + " appeared!");
     // TODO: only show the player's pokémon now
     actionSelectionScreen();
@@ -72,7 +73,7 @@ void InteractiveLayer::actionSelectionScreen() {
         addComponent(
             battleEntity,
             BattleActionSelection{
-                "What will " + pokemon(battle->playerPokemon).displayName + " do?",
+                "What will " + pokemon(battle->playerTeam[0]).displayName + " do?",
                 {"Fight", "Bag", "Pokemon", "Run"},
                 300,
                 0
@@ -97,8 +98,8 @@ void InteractiveLayer::actionSelectionScreen() {
 
         switch (static_cast<BattleAction>(selectedAction)) {
             case BattleAction::Fight:
-                if (!hasUsableMoves(battle->playerPokemon, *gameData)) {
-                    std::string& displayName = pokemon(battle->playerPokemon).displayName;
+                if (!hasUsableMoves(battle->playerTeam[0], *gameData)) {
+                    std::string& displayName = pokemon(battle->playerTeam[0]).displayName;
                     showText(displayName + " has no moves left!");
                     selectedAction = STRUGGLE;
                     processTurn();
@@ -130,8 +131,8 @@ void InteractiveLayer::actionSelectionScreen() {
 void InteractiveLayer::moveSelectionScreen() {
     enqueueEvent<ImmediateEvent>(*gameData, [&] {
         BattleMoveSelection moveSelection;
-        const Pokemon& currentPokemon = pokemon(battle->playerPokemon);
-        const auto& moveList = moves(battle->playerPokemon);
+        const Pokemon& currentPokemon = pokemon(battle->playerTeam[0]);
+        const auto& moveList = moves(battle->playerTeam[0]);
         for (size_t i = 0; i < currentPokemon.moves.size(); ++i) {
             const auto& move = *moveList[i];
             int maxPP = move.pp * (1 + 0.2 * currentPokemon.ppUps[i]);
@@ -157,7 +158,7 @@ void InteractiveLayer::moveSelectionScreen() {
             return data<BattleMoveSelection>(battleEntity, *gameData).focusedOption;
         },
         [&](size_t option) {
-            return option < pokemon(battle->playerPokemon).moves.size();
+            return option < pokemon(battle->playerTeam[0]).moves.size();
         },
         *gameData
     );
@@ -170,7 +171,7 @@ void InteractiveLayer::moveSelectionScreen() {
             return;
         }
 
-        if (pokemon(battle->playerPokemon).pp[selectedAction] == 0) {
+        if (pokemon(battle->playerTeam[0]).pp[selectedAction] == 0) {
             showText("That move has no PP left!"); // TODO
             moveSelectionScreen();
             return;
@@ -182,18 +183,18 @@ void InteractiveLayer::moveSelectionScreen() {
 
 void InteractiveLayer::processTurn() {
     enqueueEvent<ImmediateEvent>(*gameData, [&] {
-        UsedMove playerMove = getUsedMoveBy(
-            battle->playerPokemon,
-            battle->opponentPokemon,
+        BoundMove playerMove = getUsedMoveBy(
+            battle->playerTeam[0],
+            battle->opponentTeam[0],
             selectedAction
         );
 
         int opponentMoveIndex = battleController->chooseMoveAI(
-            pokemon(battle->opponentPokemon)
+            pokemon(battle->opponentTeam[0])
         );
-        UsedMove opponentMove = getUsedMoveBy(
-            battle->opponentPokemon,
-            battle->playerPokemon,
+        BoundMove opponentMove = getUsedMoveBy(
+            battle->opponentTeam[0],
+            battle->playerTeam[0],
             opponentMoveIndex
         );
 
@@ -211,6 +212,7 @@ void InteractiveLayer::processTurn() {
                     rewardScreen();
                     break;
                 case BattleController::State::DEFEAT:
+                case BattleController::State::DRAW:
                     blackOutScreen();
                     break;
             }
@@ -232,22 +234,22 @@ void InteractiveLayer::rewardScreen() {
         music("bgm-wild-battle-victory", *gameData).play();
     });
 
-    DEBUG Pokemon& playerPokemon = pokemon(battle->playerPokemon);
+    DEBUG Pokemon& playerPokemon = pokemon(battle->playerTeam[0]);
     DEBUG int exp = calculateExpGain(
         playerPokemon,
-        pokemon(battle->opponentPokemon),
-        data<PokemonSpeciesData>(battle->opponentPokemon, *gameData)
+        pokemon(battle->opponentTeam[0]),
+        data<PokemonSpeciesData>(battle->opponentTeam[0], *gameData)
     );
     DEBUG showText(playerPokemon.displayName + " gained " + std::to_string(exp) + " EXP. Points!");
 
     DEBUG enqueueEvent<ImmediateEvent>(*gameData, [&] {
-        deleteEntity(battle->opponentPokemon, *gameData);
+        deleteEntity(battle->opponentTeam[0], *gameData);
         music("bgm-wild-battle-victory", *gameData).stop();
         gameData->stateMachine->pushState("overworld-state");
     });
 }
 
-UsedMove InteractiveLayer::getUsedMoveBy(Entity user, Entity target, int selectedAction) {
+BoundMove InteractiveLayer::getUsedMoveBy(Entity user, Entity target, int selectedAction) {
     Move& move = (selectedAction == STRUGGLE)
         ? resource<Move>("move-Struggle", *gameData)
         : *moves(user)[selectedAction];

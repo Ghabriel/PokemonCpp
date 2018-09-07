@@ -5,6 +5,7 @@
 #include "battle/data/Pokemon.hpp"
 #include "battle/data/PokemonSpeciesData.hpp"
 #include "battle/helpers/random.hpp"
+#include "components/battle/Battle.hpp"
 #include "components/battle/VolatileData.hpp"
 #include "core-functions.hpp"
 #include "CoreStructures.hpp"
@@ -213,4 +214,19 @@ int calculateExpGain(
     float factor2 = std::pow(2 * fainted.level + 10, 2.5);
     float factor3 = std::pow(fainted.level + winner.level + 10, 2.5);
     return (factor1 * (factor2 / factor3) + 1) * luckyEgg;
+}
+
+std::vector<Entity> getPokemonList(Battle& battle) {
+    std::vector<Entity> result;
+    result.reserve(battle.playerTeam.size() + battle.opponentTeam.size());
+
+    for (const auto& entity : battle.playerTeam) {
+        result.push_back(entity);
+    }
+
+    for (const auto& entity : battle.opponentTeam) {
+        result.push_back(entity);
+    }
+
+    return result;
 }

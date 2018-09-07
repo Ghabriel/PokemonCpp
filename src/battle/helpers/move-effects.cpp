@@ -1,6 +1,8 @@
 #include "battle/helpers/move-effects.hpp"
 
 #include <queue>
+#include "battle/data/BoundMove.hpp"
+#include "battle/data/Flag.hpp"
 #include "battle/data/Move.hpp"
 #include "battle/data/Pokemon.hpp"
 #include "battle/data/PokemonSpeciesData.hpp"
@@ -26,7 +28,6 @@ namespace {
     Entity user;
     Entity target;
     Move* move;
-    const UsedMove* usedMove;
     std::function<void(const std::string& eventName)> triggerEvent;
 
     bool criticalHitFlag = false;
@@ -50,24 +51,18 @@ void effects::internal::setBattle(Entity _battle) {
     battle = _battle;
 }
 
-void effects::internal::setMoveUser(Entity pokemon) {
-    user = pokemon;
-}
-
-void effects::internal::setMoveTarget(Entity pokemon) {
-    target = pokemon;
-}
-
-void effects::internal::setMove(Move& _move) {
-    move = &_move;
-}
-
-void effects::internal::setUsedMove(const UsedMove& _usedMove) {
-    usedMove = &_usedMove;
-}
-
 void effects::internal::setTriggerEvent(std::function<void(const std::string& eventName)> fn) {
     triggerEvent = fn;
+}
+
+void effects::internal::setMove(const BoundMove& usedMove) {
+    user = usedMove.user;
+    target = usedMove.target;
+    move = usedMove.move;
+}
+
+void effects::internal::setFlag(const Flag& flag) {
+    target = flag.target;
 }
 
 void effects::cleanup() {
@@ -289,18 +284,6 @@ void effects::ensureCriticalHit() {
     criticalHitFlag = true;
 }
 
-void effects::persist(int numTurns) {
-    data<Battle>(battle, *gameData).activeMoves.push_back({*usedMove, numTurns});
-}
-
-void effects::addFlag(const std::string& flagName) {
-    data<VolatileData>(target, *gameData).flags.insert(flagName);
-}
-
-void effects::removeFlag(const std::string& flagName) {
-    data<VolatileData>(target, *gameData).flags.erase(flagName);
-}
-
 void effects::multiplyDamage(float factor) {
     damageMultiplier *= factor;
 }
@@ -322,9 +305,6 @@ void injectNativeBattleFunctions(engine::scriptingsystem::Lua& script) {
     script.registerNative("lowerStat", effects::lowerStat);
     script.registerNative("raiseStat", effects::raiseStat);
     script.registerNative("ensureCriticalHit", effects::ensureCriticalHit);
-    script.registerNative("persist", effects::persist);
-    script.registerNative("addFlag", effects::addFlag);
-    script.registerNative("removeFlag", effects::removeFlag);
     script.registerNative("multiplyDamage", effects::multiplyDamage);
     script.registerNative("negateMove", effects::negateMove);
     script.registerNative("showText", effects::showText);

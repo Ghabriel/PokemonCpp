@@ -47,5 +47,5 @@ void setupWildEncounter(
     auto opponentEntity = createEntity(gameData);
     addComponent(opponentEntity, opponent, gameData);
 
-    addComponent(battle, Battle{playerEntity, opponentEntity}, gameData);
+    addComponent(battle, Battle{{playerEntity}, {opponentEntity}}, gameData);
 }

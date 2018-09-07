@@ -1,9 +1,11 @@
 #ifndef BATTLE_UTILS_HPP
 #define BATTLE_UTILS_HPP
 
+#include <vector>
 #include "battle/data/Stat.hpp"
 #include "engine/entity-system/types.hpp"
 
+struct Battle;
 struct CoreStructures;
 struct Move;
 struct Pokemon;
@@ -64,5 +66,7 @@ int calculateExpGain(
     const Pokemon& fainted,
     const PokemonSpeciesData& faintedSpecies
 );
+
+std::vector<engine::entitysystem::Entity> getPokemonList(Battle&);
 
 #endif

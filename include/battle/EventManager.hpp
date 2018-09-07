@@ -7,10 +7,10 @@
 #include "../engine/scripting-system/forward-declarations.hpp"
 
 struct Battle;
-struct BoundFlag;
+struct BoundMove;
 struct CoreStructures;
+struct Flag;
 struct ScriptVariables;
-struct UsedMove;
 
 /**
  * \brief Handles the correct dispatching of battle events.
@@ -28,32 +28,30 @@ class EventManager {
     void setBattle(Battle&);
 
     /**
-     * \brief Triggers the specified event on all active moves, flags, and teams.
+     * \brief Triggers the specified event on all active moves and flags.
      */
     void triggerEvent(const std::string& eventName);
 
     /**
-     * \brief Triggers the specified event on the specified move.
+     * \brief Triggers the specified event on the given move and all flags
+     * that are bound to its user.
      */
-    void triggerMoveEvent(const UsedMove&, const std::string& eventName);
+    void triggerUserEvents(const BoundMove&, const std::string& eventName);
 
     /**
-     * \brief Triggers the specified event on the specified bound flag.
+     * \brief Triggers the specified event on the given flag.
      */
-    void triggerFlagEvent(const BoundFlag&, const std::string& eventName);
-
-    /**
-     * \brief Triggers the specified event on all flags of the target,
-     * including its team's.
-     */
-    void triggerTargetFlagEvent(Entity target, const std::string& eventName);
+    void triggerFlagEvent(const Flag&, const std::string& eventName);
 
  private:
     ScriptVariables* scriptVariables;
     CoreStructures* gameData;
     Battle* battle;
 
-    std::unordered_set<std::string>& getVolatileFlags(Entity);
+    /**
+     * \brief Triggers the specified event on the specified move.
+     */
+    void triggerMoveEvent(const BoundMove&, const std::string& eventName);
 };
 
 #endif

@@ -7,20 +7,19 @@
 #include "engine/entity-system/types.hpp"
 #include "engine/scripting-system/forward-declarations.hpp"
 
+struct BoundMove;
 struct CoreStructures;
+struct Flag;
 struct Move;
 struct Pokemon;
-struct UsedMove;
 
 namespace effects {
     namespace internal {
         void setGameData(CoreStructures&);
         void setBattle(engine::entitysystem::Entity);
-        void setMoveUser(engine::entitysystem::Entity);
-        void setMoveTarget(engine::entitysystem::Entity);
-        void setMove(Move&);
-        void setUsedMove(const UsedMove&);
         void setTriggerEvent(std::function<void(const std::string& eventName)>);
+        void setMove(const BoundMove&);
+        void setFlag(const Flag&);
     }
 
     // used by C++ only
@@ -34,9 +33,7 @@ namespace effects {
     void lowerStat(int statId, int levels);
     void raiseStat(int statId, int levels);
     void ensureCriticalHit();
-    void persist(int numTurns);
-    void addFlag(const std::string& flagName);
-    void removeFlag(const std::string& flagName);
+    // TODO: reimplement addFlag/removeFlag/etc
     void multiplyDamage(float factor);
     void negateMove();
 

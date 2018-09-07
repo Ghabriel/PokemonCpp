@@ -2,14 +2,15 @@
 #define BATTLE_CONTROLLER_HPP
 
 #include <deque>
+#include <vector>
 #include "../engine/entity-system/types.hpp"
 #include "EventManager.hpp"
 #include "ScriptVariables.hpp"
 
+struct BoundMove;
 struct CoreStructures;
 struct Pokemon;
 class TextProvider;
-struct UsedMove;
 
 class BattleController {
     using Entity = engine::entitysystem::Entity;
@@ -19,6 +20,7 @@ class BattleController {
         READY,
         VICTORY,
         DEFEAT,
+        DRAW,
         // PENDING_SWITCH,
     };
 
@@ -32,7 +34,7 @@ class BattleController {
     State getState() const;
 
     int chooseMoveAI(const Pokemon&);
-    void processTurn(const std::deque<UsedMove>& usedMoves);
+    void processTurn(const std::vector<BoundMove>& usedMoves);
 
  private:
     Entity battleEntity;
@@ -43,19 +45,23 @@ class BattleController {
     EventManager eventManager;
     State state;
 
-    void sortUsedMoves(std::deque<UsedMove>& usedMoves);
-    void updateActiveMoveList();
+    void sortUsedMoves(std::vector<BoundMove>& usedMoves);
+    void updateActiveFlags();
     void processUsedMoves();
-    void processMove(UsedMove);
-    void showUsedMoveText(const UsedMove&);
-    void deductPPIfApplicable(const UsedMove&);
-    void processMoveEffects(const UsedMove&);
+    void processMove(BoundMove);
+    void prepareScriptsForMove(const BoundMove&);
+    void showUsedMoveText(const BoundMove&);
+    void deductPPIfApplicable(const BoundMove&);
+    void processMoveEffects(const BoundMove&);
     void checkFaintedPokemon();
 
     void showText(const std::string& content);
-    void showMoveText(const std::string& content);
 
-    Pokemon& pokemon(Entity entity);
+    bool isPlayerUnableToContinue() const;
+    bool isOpponentUnableToContinue() const;
+    bool isEveryPokemonFainted(const std::vector<Entity>& team) const;
+    bool isOpponent(Entity) const;
+    Pokemon& pokemon(Entity);
     void loadDetailedPokemonData();
     void loadMoves(Entity);
     void loadSpeciesData(Entity);

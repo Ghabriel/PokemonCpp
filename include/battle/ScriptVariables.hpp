@@ -1,7 +1,7 @@
 #ifndef SCRIPT_VARIABLES_HPP
 #define SCRIPT_VARIABLES_HPP
 
-#include <vector>
+#include <string>
 #include "../engine/entity-system/types.hpp"
 #include "../engine/scripting-system/forward-declarations.hpp"
 
@@ -42,8 +42,9 @@ class ScriptVariables {
     Battle* battle;
     CoreStructures* gameData;
 
-    size_t getPokemonIndex(Entity);
-    void updateScriptVariables(const std::vector<Entity>& pokemonList, Lua&);
+    std::string findPokemonVariable(Entity);
+    void updateScriptVariables(Lua&);
+    void updatePokemonVariables(Entity, const std::string& varName, Lua&);
 };
 
 #endif

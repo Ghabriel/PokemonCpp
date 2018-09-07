@@ -147,8 +147,9 @@ void renderBattle(
             background.setPosition(0, 0);
             window.draw(background);
 
-            if (!manager.hasComponent<Fainted>(battle.playerPokemon)) {
-                Pokemon& playerPokemon = manager.getData<Pokemon>(battle.playerPokemon);
+            // TODO: handle Double Battles
+            if (!manager.hasComponent<Fainted>(battle.playerTeam[0])) {
+                Pokemon& playerPokemon = manager.getData<Pokemon>(battle.playerTeam[0]);
                 renderAllyPokemon(window, camera, storage, playerPokemon);
                 renderInfoCard(
                     window,
@@ -160,8 +161,8 @@ void renderBattle(
                 );
             }
 
-            if (!manager.hasComponent<Fainted>(battle.opponentPokemon)) {
-                Pokemon& opponentPokemon = manager.getData<Pokemon>(battle.opponentPokemon);
+            if (!manager.hasComponent<Fainted>(battle.opponentTeam[0])) {
+                Pokemon& opponentPokemon = manager.getData<Pokemon>(battle.opponentTeam[0]);
                 renderFoePokemon(window, camera, storage, opponentPokemon);
                 renderInfoCard(
                     window,

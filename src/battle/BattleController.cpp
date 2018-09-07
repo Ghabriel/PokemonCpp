@@ -1,6 +1,9 @@
 #include "battle/BattleController.hpp"
 
 #include <cassert>
+#include "battle/data/BoundMove.hpp"
+#include "battle/data/Flag.hpp"
+#include "battle/data/Move.hpp"
 #include "battle/data/Pokemon.hpp"
 #include "battle/data/PokemonSpeciesData.hpp"
 #include "battle/helpers/battle-utils.hpp"
@@ -10,6 +13,7 @@
 #include "components/battle/Battle.hpp"
 #include "components/battle/Fainted.hpp"
 #include "components/battle/VolatileData.hpp"
+#include "constants.hpp"
 #include "core-functions.hpp"
 #include "CoreStructures.hpp"
 #include "events/ImmediateEvent.hpp"
@@ -21,7 +25,7 @@ using engine::entitysystem::Entity;
 
 namespace {
     template<typename TEvent, typename... Args>
-    void enqueueEvent(CoreStructures& gameData, Args&&... args) {
+    void enqueueTurnEvent(CoreStructures& gameData, Args&&... args) {
         EventQueue& queue = resource<EventQueue>("battle-event-queue", gameData);
         queue.addEvent(std::make_unique<TEvent>(std::forward<Args>(args)...));
     }
@@ -30,6 +34,21 @@ namespace {
     void enqueueMoveEvent(CoreStructures& gameData, Args&&... args) {
         EventQueue& queue = resource<EventQueue>("move-event-queue", gameData);
         queue.addEvent(std::make_unique<TEvent>(std::forward<Args>(args)...));
+    }
+
+    template<typename TKey>
+    void updateFlagTable(std::unordered_map<TKey, std::vector<Flag>>& flagTable) {
+        for (auto& [_, flagVector] : flagTable) {
+            auto it = flagVector.begin();
+            while (it != flagVector.end()) {
+                it->duration--;
+                if (it->duration == 0) {
+                    it = flagVector.erase(it);
+                } else {
+                    ++it;
+                }
+            }
+        }
     }
 }
 
@@ -96,7 +115,7 @@ int BattleController::chooseMoveAI(const Pokemon& pokemon) {
     return script("ai", *gameData).call<int>("chooseMoveWildBattle");
 }
 
-void BattleController::processTurn(const std::deque<UsedMove>& usedMoves) {
+void BattleController::processTurn(const std::vector<BoundMove>& usedMoves) {
     assert(state == State::READY);
 
     battle->usedMoves = usedMoves;
@@ -104,19 +123,20 @@ void BattleController::processTurn(const std::deque<UsedMove>& usedMoves) {
     eventManager.triggerEvent("onTurnStart");
     processUsedMoves();
 
-    enqueueEvent<ImmediateEvent>(*gameData, [this] {
+    enqueueTurnEvent<ImmediateEvent>(*gameData, [this] {
         eventManager.triggerEvent("onTurnEnd");
-        updateActiveMoveList();
+        updateActiveFlags();
     });
 }
 
-void BattleController::sortUsedMoves(std::deque<UsedMove>& usedMoves) {
+void BattleController::sortUsedMoves(std::vector<BoundMove>& usedMoves) {
+    // Ensures random move order if both the priority and speed are equal
     shuffle(usedMoves.begin(), usedMoves.end());
 
     std::sort(
         usedMoves.begin(),
         usedMoves.end(),
-        [&](const UsedMove& first, const UsedMove& second) {
+        [&](const BoundMove& first, const BoundMove& second) {
             if (first.move->priority != second.move->priority) {
                 return first.move->priority > second.move->priority;
             }
@@ -128,38 +148,27 @@ void BattleController::sortUsedMoves(std::deque<UsedMove>& usedMoves) {
     );
 }
 
-void BattleController::updateActiveMoveList() {
-    std::vector<std::pair<UsedMove, int>> newList;
-
-    for (auto& [usedMove, duration] : battle->activeMoves) {
-        if (duration != 0) {
-            newList.push_back({std::move(usedMove), duration - 1});
-        }
-    }
-
-    battle->activeMoves.swap(newList);
+void BattleController::updateActiveFlags() {
+    updateFlagTable(battle->playerTeamPositionFlags);
+    updateFlagTable(battle->opponentTeamPositionFlags);
+    updateFlagTable(battle->pokemonFlags);
 }
 
 void BattleController::processUsedMoves() {
-    for (const auto& usedMove : battle->usedMoves) {
-        processMove(usedMove);
+    for (const auto& boundMove : battle->usedMoves) {
+        processMove(boundMove);
     }
 }
 
-void BattleController::processMove(UsedMove usedMove) {
-    enqueueEvent<ImmediateEvent>(*gameData, [&, usedMove] {
-        if (pokemon(usedMove.user).currentHP <= 0) {
+void BattleController::processMove(BoundMove boundMove) {
+    enqueueTurnEvent<ImmediateEvent>(*gameData, [&, boundMove] {
+        if (pokemon(boundMove.user).currentHP <= 0) {
             return;
         }
 
-        effects::internal::setMoveUser(usedMove.user);
-        effects::internal::setMoveTarget(usedMove.target);
-        effects::internal::setMove(*usedMove.move);
-        effects::internal::setUsedMove(usedMove);
-        scriptVariables.updateScriptUserPointer(usedMove.user);
-        scriptVariables.updateScriptTargetPointer(usedMove.target);
+        prepareScriptsForMove(boundMove);
 
-        eventManager.triggerMoveEvent(usedMove, "beforeMove");
+        eventManager.triggerUserEvents(boundMove, "beforeMove");
 
         enqueueMoveEvent<ImmediateEvent>(*gameData, [&] {
             if (effects::isMoveNegated()) {
@@ -167,38 +176,44 @@ void BattleController::processMove(UsedMove usedMove) {
                 return;
             }
 
-            showUsedMoveText(usedMove);
-            deductPPIfApplicable(usedMove);
+            showUsedMoveText(boundMove);
+            deductPPIfApplicable(boundMove);
             // TODO: move animation?
-            processMoveEffects(usedMove);
+            processMoveEffects(boundMove);
         });
     });
 }
 
-void BattleController::showUsedMoveText(const UsedMove& usedMove) {
-    std::string userDisplayName = pokemon(usedMove.user).displayName;
+void BattleController::prepareScriptsForMove(const BoundMove& boundMove) {
+    effects::internal::setMove(boundMove);
+    scriptVariables.updateScriptUserPointer(boundMove.user);
+    scriptVariables.updateScriptTargetPointer(boundMove.target);
+}
 
-    if (usedMove.user == battle->opponentPokemon) {
+void BattleController::showUsedMoveText(const BoundMove& boundMove) {
+    std::string userDisplayName = pokemon(boundMove.user).displayName;
+
+    if (isOpponent(boundMove.user)) {
         userDisplayName = "Foe " + userDisplayName;
     }
 
-    showMoveText(userDisplayName + " used " + usedMove.move->displayName + "!");
+    showText(userDisplayName + " used " + boundMove.move->displayName + "!");
 }
 
-void BattleController::deductPPIfApplicable(const UsedMove& usedMove) {
-    if (usedMove.move->id != "Struggle") {
+void BattleController::deductPPIfApplicable(const BoundMove& usedMove) {
+    if (usedMove.moveIndex >= 0 && usedMove.moveIndex < constants::MOVE_LIMIT) {
         pokemon(usedMove.user).pp[usedMove.moveIndex]--;
     }
 }
 
-void BattleController::processMoveEffects(const UsedMove& usedMove) {
+void BattleController::processMoveEffects(const BoundMove& usedMove) {
     Entity user = usedMove.user;
     Entity target = usedMove.target;
     Move& move = *usedMove.move;
 
     if (checkMiss(user, target, move, *gameData)) {
         std::string& displayName = pokemon(user).displayName;
-        showMoveText(displayName + "'s attack missed!");
+        showText(displayName + "'s attack missed!");
         return;
     }
 
@@ -230,7 +245,7 @@ void BattleController::processMoveEffects(const UsedMove& usedMove) {
             effects::fixedDamage(data<Pokemon>(target, *gameData).currentHP);
             break;
         case 99:
-            eventManager.triggerMoveEvent(usedMove, "onUse");
+            eventManager.triggerUserEvents(usedMove, "onUse");
             break;
     }
 
@@ -240,43 +255,68 @@ void BattleController::processMoveEffects(const UsedMove& usedMove) {
 
 void BattleController::checkFaintedPokemon() {
     enqueueMoveEvent<ImmediateEvent>(*gameData, [&] {
-        std::vector<Entity> pokemonList = {
-            battle->playerPokemon,
-            battle->opponentPokemon
-        };
+        std::vector<Entity> pokemonList = getPokemonList(*battle);
 
         for (const auto& pokemonEntity : pokemonList) {
             const Pokemon& currentPokemon = pokemon(pokemonEntity);
 
             if (currentPokemon.currentHP <= 0) {
-                showMoveText(currentPokemon.displayName + " fainted!");
-                // TODO fainting animation?
-                addComponent(pokemonEntity, Fainted{}, *gameData);
-
-                enqueueMoveEvent<ImmediateEvent>(*gameData, [this, pokemonEntity] {
-                    resource<EventQueue>("move-event-queue", *gameData) = {};
-                    resource<EventQueue>("battle-event-queue", *gameData) = {};
-
-                    if (pokemonEntity == battle->playerPokemon) {
-                        state = State::DEFEAT;
-                    } else {
-                        state = State::VICTORY;
-                    }
+                showText(currentPokemon.displayName + " fainted!");
+                enqueueMoveEvent<ImmediateEvent>(*gameData, [&, pokemonEntity] {
+                    // TODO: fainting animation?
+                    addComponent(pokemonEntity, Fainted{}, *gameData);
                 });
-
-                // TODO: handle multiple knock-outs (may happen via recoil moves/Explosion)
-                break;
             }
         }
+
+        enqueueMoveEvent<ImmediateEvent>(*gameData, [this] {
+            bool playerLost = isPlayerUnableToContinue();
+            bool opponentLost = isOpponentUnableToContinue();
+
+            if (playerLost || opponentLost) {
+                resource<EventQueue>("move-event-queue", *gameData) = {};
+                resource<EventQueue>("battle-event-queue", *gameData) = {};
+
+                state = playerLost
+                    ? (opponentLost ? State::DRAW : State::DEFEAT)
+                    : State::VICTORY;
+            }
+        });
     });
 }
 
 void BattleController::showText(const std::string& content) {
-    textProvider->showBattleText(content, battleEntity, *gameData);
+    textProvider->showMoveText(content, battleEntity, *gameData);
 }
 
-void BattleController::showMoveText(const std::string& content) {
-    textProvider->showMoveText(content, battleEntity, *gameData);
+bool BattleController::isPlayerUnableToContinue() const {
+    // TODO: handle benched Pokémon
+    return isEveryPokemonFainted(battle->playerTeam);
+}
+
+bool BattleController::isOpponentUnableToContinue() const {
+    // TODO: handle benched Pokémon
+    return isEveryPokemonFainted(battle->opponentTeam);
+}
+
+bool BattleController::isEveryPokemonFainted(const std::vector<Entity>& team) const {
+    for (const auto& pokemonEntity : team) {
+        if (!hasComponent<Fainted>(pokemonEntity, *gameData)) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool BattleController::isOpponent(Entity entity) const {
+    for (const auto& opponent : battle->opponentTeam) {
+        if (entity == opponent) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 Pokemon& BattleController::pokemon(Entity entity) {
@@ -284,10 +324,7 @@ Pokemon& BattleController::pokemon(Entity entity) {
 }
 
 void BattleController::loadDetailedPokemonData() {
-    std::vector<Entity> pokemonList = {
-        battle->playerPokemon,
-        battle->opponentPokemon
-    };
+    std::vector<Entity> pokemonList = getPokemonList(*battle);
 
     for (const auto& pokemonEntity : pokemonList) {
         loadMoves(pokemonEntity);

@@ -9,8 +9,8 @@ stats = {
     evasion = 7
 }
 
-pokemon0 = {}
-pokemon1 = {}
+playerTeam = {}
+opponentTeam = {}
 user = {}
 target = {}
 move = {}
