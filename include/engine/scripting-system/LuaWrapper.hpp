@@ -44,12 +44,35 @@ namespace engine::scriptingsystem {
         }
 
         template<typename Ret, typename... Args, size_t... Is>
-        inline void callWithArguments(
+        inline Ret callWithArguments(
             CFunction<Ret, Args...> fn,
             const std::index_sequence<Is...>&,
             lua_State* rawState
         ) {
-            fn(getArgument<std::decay_t<Args>>(rawState, Is + 1)...);
+            return fn(getArgument<std::decay_t<Args>>(rawState, Is + 1)...);
+        }
+
+        template<typename T>
+        void pushValue(lua_State*, const T&);
+
+        template<>
+        inline void pushValue(lua_State* L, const bool& value) {
+            lua_pushboolean(L, value);
+        }
+
+        template<>
+        inline void pushValue(lua_State* L, const float& value) {
+            lua_pushnumber(L, value);
+        }
+
+        template<>
+        inline void pushValue(lua_State* L, const int& value) {
+            lua_pushnumber(L, value);
+        }
+
+        template<>
+        inline void pushValue(lua_State* L, const std::string& value) {
+            lua_pushstring(L, value.c_str());
         }
     }
 
@@ -95,24 +118,9 @@ namespace engine::scriptingsystem {
         lua_pop(L.get(), count);
     }
 
-    template<>
-    inline void LuaWrapper::pushValue(const bool& value) {
-        lua_pushboolean(L.get(), value);
-    }
-
-    template<>
-    inline void LuaWrapper::pushValue(const float& value) {
-        lua_pushnumber(L.get(), value);
-    }
-
-    template<>
-    inline void LuaWrapper::pushValue(const int& value) {
-        lua_pushnumber(L.get(), value);
-    }
-
-    template<>
-    inline void LuaWrapper::pushValue(const std::string& value) {
-        lua_pushstring(L.get(), value.c_str());
+    template<typename T>
+    void LuaWrapper::pushValue(const T& value) {
+        __detail::pushValue(L.get(), value);
     }
 
     template<typename Ret, typename... Args>
@@ -121,15 +129,23 @@ namespace engine::scriptingsystem {
             static int luaWrapper(lua_State* rawState) {
                 void* voidFn = lua_touserdata(rawState, lua_upvalueindex(1));
                 auto retrievedFn = reinterpret_cast<CFunction<Ret, Args...>>(voidFn);
-                __detail::callWithArguments(
-                    retrievedFn,
-                    std::make_index_sequence<sizeof...(Args)>{},
-                    rawState
-                );
 
                 if constexpr (std::is_same_v<Ret, void>) {
+                    __detail::callWithArguments(
+                        retrievedFn,
+                        std::make_index_sequence<sizeof...(Args)>{},
+                        rawState
+                    );
+
                     return 0;
                 } else {
+                    auto returnedValue = __detail::callWithArguments(
+                        retrievedFn,
+                        std::make_index_sequence<sizeof...(Args)>{},
+                        rawState
+                    );
+
+                    __detail::pushValue(rawState, returnedValue);
                     return 1;
                 }
             }

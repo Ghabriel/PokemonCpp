@@ -5,7 +5,6 @@
 #include <vector>
 #include "../../battle/data/BoundMove.hpp"
 #include "../../battle/data/Flag.hpp"
-// #include "../../battle/data/Move.hpp"
 #include "../../engine/entity-system/types.hpp"
 
 struct Battle {

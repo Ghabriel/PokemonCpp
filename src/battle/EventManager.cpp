@@ -4,7 +4,6 @@
 #include "battle/data/Flag.hpp"
 #include "battle/data/Move.hpp"
 #include "battle/helpers/move-effects.hpp"
-#include "battle/ScriptVariables.hpp"
 #include "components/battle/Battle.hpp"
 #include "components/battle/VolatileData.hpp"
 #include "core-functions.hpp"
@@ -25,8 +24,8 @@ namespace {
     }
 }
 
-EventManager::EventManager(ScriptVariables& variables, CoreStructures& gameData)
- : scriptVariables(&variables), gameData(&gameData) { }
+EventManager::EventManager(CoreStructures& gameData)
+ : gameData(&gameData) { }
 
 void EventManager::setBattle(Battle& _battle) {
     battle = &_battle;
@@ -57,12 +56,6 @@ void EventManager::triggerMoveEvent(const BoundMove& boundMove, const std::strin
 }
 
 void EventManager::triggerFlagEvent(const Flag& flag, const std::string& eventName) {
-    // XTRACE(flag.target);
-    // XTRACE(flag.flag);
-    // XTRACE(eventName);
-    // ECHO("----------");
     effects::internal::setFlag(flag);
-    // updateMoveVariables(9999999, target);
-    scriptVariables->updateScriptTargetPointer(flag.target); // TODO: is this needed?
     script("moves", *gameData).call<void>("Flag_" + flag.id + '_' + eventName);
 }

@@ -30,11 +30,15 @@ namespace engine::scriptingsystem {
 
     inline LuaRAII::LuaRAII(const std::string& filename) {
         L = luaL_newstate();
+        luaL_openlibs(L);
 
         if (luaL_loadfile(L, filename.c_str()) || lua_pcall(L, 0, 0, 0)) {
+            std::string errorMessage = lua_tostring(L, -1);
             // TODO: doesn't this cause a memory leak?
             L = nullptr;
-            throw std::runtime_error("Failed to open script: " + filename);
+            throw std::runtime_error(
+                "Failed to open script: " + filename + ".\n" + errorMessage
+            );
         }
     }
 

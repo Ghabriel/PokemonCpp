@@ -5,7 +5,6 @@
 #include <vector>
 #include "../engine/entity-system/types.hpp"
 #include "EventManager.hpp"
-#include "ScriptVariables.hpp"
 
 struct BoundMove;
 struct CoreStructures;
@@ -41,7 +40,6 @@ class BattleController {
     TextProvider* textProvider;
     CoreStructures* gameData;
     Battle* battle;
-    ScriptVariables scriptVariables;
     EventManager eventManager;
     State state;
 

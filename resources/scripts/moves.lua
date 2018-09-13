@@ -9,10 +9,16 @@ stats = {
     evasion = 7
 }
 
-playerTeam = {}
-opponentTeam = {}
-user = {}
-target = {}
+user = { id = 0 }
+target = { id = 1 }
+userTeam = {
+    [0] = { id = 2 },
+    [1] = { id = 3 },
+}
+targetTeam = {
+    [0] = { id = 4 },
+    [1] = { id = 5 },
+}
 move = {}
 
 function Struggle_onUse()

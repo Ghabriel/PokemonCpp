@@ -10,7 +10,6 @@ struct Battle;
 struct BoundMove;
 struct CoreStructures;
 struct Flag;
-struct ScriptVariables;
 
 /**
  * \brief Handles the correct dispatching of battle events.
@@ -20,7 +19,7 @@ class EventManager {
     using Lua = engine::scriptingsystem::Lua;
  public:
     EventManager() = default;
-    EventManager(ScriptVariables&, CoreStructures& gameData);
+    explicit EventManager(CoreStructures& gameData);
 
     /**
      * \brief Sets the internal battle instance.
@@ -44,7 +43,6 @@ class EventManager {
     void triggerFlagEvent(const Flag&, const std::string& eventName);
 
  private:
-    ScriptVariables* scriptVariables;
     CoreStructures* gameData;
     Battle* battle;
 

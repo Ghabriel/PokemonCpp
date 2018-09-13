@@ -292,6 +292,12 @@ void effects::negateMove() {
     moveIsNegated = true;
 }
 
+std::string effects::getPokemonProperty(int entityId, const std::string& property) {
+    // TODO
+    std::cout << "[GET] " << property << " (entity: " << entityId << ")\n";
+    return "42";
+}
+
 
 void effects::showText(const std::string& content) {
     enqueueEvent<TextEvent>(content, battle, *gameData);
@@ -307,5 +313,6 @@ void injectNativeBattleFunctions(engine::scriptingsystem::Lua& script) {
     script.registerNative("ensureCriticalHit", effects::ensureCriticalHit);
     script.registerNative("multiplyDamage", effects::multiplyDamage);
     script.registerNative("negateMove", effects::negateMove);
+    script.registerNative("getPokemonProperty", effects::getPokemonProperty);
     script.registerNative("showText", effects::showText);
 }

@@ -36,6 +36,7 @@ namespace effects {
     // TODO: reimplement addFlag/removeFlag/etc
     void multiplyDamage(float factor);
     void negateMove();
+    std::string getPokemonProperty(int entityId, const std::string& property);
 
     void showText(const std::string& content);
 }

@@ -9,6 +9,7 @@
 #include "battle/helpers/battle-utils.hpp"
 #include "battle/helpers/move-effects.hpp"
 #include "battle/helpers/random.hpp"
+#include "battle/prepare-battle-scripts.hpp"
 #include "battle/TextProvider.hpp"
 #include "components/battle/Battle.hpp"
 #include "components/battle/Fainted.hpp"
@@ -59,8 +60,7 @@ BattleController::BattleController(
 ) : battleEntity(battleEntity),
     textProvider(&textProvider),
     gameData(&gameData),
-    scriptVariables(gameData),
-    eventManager(scriptVariables, gameData),
+    eventManager(gameData),
     state(State::PENDING_START) { }
 
 void BattleController::startBattle() {
@@ -68,7 +68,7 @@ void BattleController::startBattle() {
     gameData->resourceStorage->store("battle-event-queue", EventQueue());
     gameData->resourceStorage->store("move-event-queue", EventQueue());
     battle = &data<Battle>(battleEntity, *gameData);
-    scriptVariables.setBattle(*battle);
+    prepareBattleScripts(*battle, *gameData);
     eventManager.setBattle(*battle);
     loadDetailedPokemonData();
 
@@ -111,7 +111,6 @@ BattleController::State BattleController::getState() const {
 
 int BattleController::chooseMoveAI(const Pokemon& pokemon) {
     assert(state == State::READY);
-    scriptVariables.updateScriptVariables();
     return script("ai", *gameData).call<int>("chooseMoveWildBattle");
 }
 
@@ -186,8 +185,6 @@ void BattleController::processMove(BoundMove boundMove) {
 
 void BattleController::prepareScriptsForMove(const BoundMove& boundMove) {
     effects::internal::setMove(boundMove);
-    scriptVariables.updateScriptUserPointer(boundMove.user);
-    scriptVariables.updateScriptTargetPointer(boundMove.target);
 }
 
 void BattleController::showUsedMoveText(const BoundMove& boundMove) {
