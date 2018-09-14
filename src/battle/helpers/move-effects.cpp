@@ -7,6 +7,7 @@
 #include "battle/data/Move.hpp"
 #include "battle/data/Pokemon.hpp"
 #include "battle/data/PokemonSpeciesData.hpp"
+#include "battle/EventManager.hpp"
 #include "battle/events/ValueAnimationEvent.hpp"
 #include "battle/helpers/battle-utils.hpp"
 #include "battle/helpers/random.hpp"
@@ -26,10 +27,11 @@ using engine::entitysystem::Entity;
 namespace {
     CoreStructures* gameData;
     Entity battle;
+    EventManager* eventManager;
     Entity user;
     Entity target;
     Move* move;
-    std::function<void(const std::string& eventName)> triggerEvent;
+    const BoundMove* boundMove;
 
     bool criticalHitFlag = false;
     bool hitFlag = false;
@@ -54,6 +56,15 @@ namespace {
                 assert(false);
         }
     }
+
+    void removeFlagFrom(const std::string& flagId, std::vector<Flag>& flagList) {
+        for (auto it = flagList.begin(); it != flagList.end(); ++it) {
+            if (it->id == flagId) {
+                flagList.erase(it);
+                break;
+            }
+        }
+    }
 }
 
 void effects::internal::setGameData(CoreStructures& _gameData) {
@@ -64,14 +75,15 @@ void effects::internal::setBattle(Entity _battle) {
     battle = _battle;
 }
 
-void effects::internal::setTriggerEvent(std::function<void(const std::string& eventName)> fn) {
-    triggerEvent = fn;
+void effects::internal::setEventManager(EventManager& _eventManager) {
+    eventManager = &_eventManager;
 }
 
 void effects::internal::setMove(const BoundMove& usedMove) {
     user = usedMove.user;
     target = usedMove.target;
     move = usedMove.move;
+    boundMove = &usedMove;
 }
 
 void effects::internal::setFlag(const Flag& flag) {
@@ -132,7 +144,7 @@ void effects::damage() {
 
     Entity targetCopy = target; // might be changed by beforeDamageInflict
     // TODO: apply this for fixedDamage() (OHKO moves might become bugged)
-    triggerEvent("beforeDamageInflict");
+    eventManager->triggerUserEvents(*boundMove, "beforeDamageInflict");
     damage *= damageMultiplier;
 
     if (damage == 0) {
@@ -305,6 +317,37 @@ void effects::negateMove() {
     moveIsNegated = true;
 }
 
+void effects::addTimedFlagUser(const std::string& flagId, int duration) {
+    data<Battle>(battle, *gameData).pokemonFlags[user].push_back({user, flagId, duration, 0});
+}
+
+void effects::addFlagUser(const std::string& flagId) {
+    addTimedFlagUser(flagId, -1);
+}
+
+void effects::addTimedFlagTarget(const std::string& flagId, int duration) {
+    data<Battle>(battle, *gameData).pokemonFlags[target].push_back({target, flagId, duration, 0});
+}
+
+void effects::addFlagTarget(const std::string& flagId) {
+    addTimedFlagTarget(flagId, -1);
+}
+
+void effects::removeFlagUser(const std::string& flagId) {
+    auto& flagList = data<Battle>(battle, *gameData).pokemonFlags[user];
+    removeFlagFrom(flagId, flagList);
+}
+
+void effects::removeFlagTarget(const std::string& flagId) {
+    auto& flagList = data<Battle>(battle, *gameData).pokemonFlags[target];
+    removeFlagFrom(flagId, flagList);
+}
+
+
+int effects::random(int min, int max) {
+    return ::random(min, max);
+}
+
 std::string effects::getPokemonProperty(int entityId, const std::string& property) {
     Entity pokemonEntity = getPokemonEntity(static_cast<EntityId>(entityId));
     const Pokemon& currentPokemon = data<Pokemon>(pokemonEntity, *gameData);
@@ -350,7 +393,6 @@ std::string effects::getPokemonProperty(int entityId, const std::string& propert
         throwError();
 }
 
-
 void effects::showText(const std::string& content) {
     enqueueEvent<TextEvent>(content, battle, *gameData);
 }
@@ -365,6 +407,14 @@ void injectNativeBattleFunctions(engine::scriptingsystem::Lua& script) {
     script.registerNative("ensureCriticalHit", effects::ensureCriticalHit);
     script.registerNative("multiplyDamage", effects::multiplyDamage);
     script.registerNative("negateMove", effects::negateMove);
+    script.registerNative("addTimedFlagUser", effects::addTimedFlagUser);
+    script.registerNative("addFlagUser", effects::addFlagUser);
+    script.registerNative("addTimedFlagTarget", effects::addTimedFlagTarget);
+    script.registerNative("addFlagTarget", effects::addFlagTarget);
+    script.registerNative("removeFlagUser", effects::removeFlagUser);
+    script.registerNative("removeFlagTarget", effects::removeFlagTarget);
+
+    script.registerNative("random", effects::random);
     script.registerNative("getPokemonProperty", effects::getPokemonProperty);
     script.registerNative("showText", effects::showText);
 }

@@ -9,6 +9,7 @@
 
 struct BoundMove;
 struct CoreStructures;
+class EventManager;
 struct Flag;
 struct Move;
 struct Pokemon;
@@ -17,7 +18,7 @@ namespace effects {
     namespace internal {
         void setGameData(CoreStructures&);
         void setBattle(engine::entitysystem::Entity);
-        void setTriggerEvent(std::function<void(const std::string& eventName)>);
+        void setEventManager(EventManager&);
         void setMove(const BoundMove&);
         void setFlag(const Flag&);
     }
@@ -33,11 +34,17 @@ namespace effects {
     void lowerStat(int statId, int levels);
     void raiseStat(int statId, int levels);
     void ensureCriticalHit();
-    // TODO: reimplement addFlag/removeFlag/etc
     void multiplyDamage(float factor);
     void negateMove();
-    std::string getPokemonProperty(int entityId, const std::string& property);
+    void addTimedFlagUser(const std::string& flagId, int duration);
+    void addFlagUser(const std::string& flagId);
+    void addTimedFlagTarget(const std::string& flagId, int duration);
+    void addFlagTarget(const std::string& flagId);
+    void removeFlagUser(const std::string& flagId);
+    void removeFlagTarget(const std::string& flagId);
 
+    int random(int min, int max);
+    std::string getPokemonProperty(int entityId, const std::string& property);
     void showText(const std::string& content);
 }
 

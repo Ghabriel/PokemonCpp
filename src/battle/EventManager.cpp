@@ -46,16 +46,18 @@ void EventManager::triggerUserEvents(const BoundMove& boundMove, const std::stri
 
     std::vector<Flag>& flags = battle->pokemonFlags[boundMove.user];
     for (const auto& flag : flags) {
-        script("moves", *gameData).call<void>("Flag_" + flag.id + '_' + eventName);
+        triggerFlagEvent(flag, eventName);
     }
 }
 
 void EventManager::triggerMoveEvent(const BoundMove& boundMove, const std::string& eventName) {
+    // ECHO(boundMove.move->id + '_' + eventName);
     effects::internal::setMove(boundMove);
     script("moves", *gameData).call<void>(boundMove.move->id + '_' + eventName);
 }
 
 void EventManager::triggerFlagEvent(const Flag& flag, const std::string& eventName) {
+    // ECHO("Flag_" + flag.id + '_' + eventName);
     effects::internal::setFlag(flag);
     script("moves", *gameData).call<void>("Flag_" + flag.id + '_' + eventName);
 }

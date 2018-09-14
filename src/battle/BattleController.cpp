@@ -20,7 +20,6 @@
 #include "events/ImmediateEvent.hpp"
 #include "events/TextEvent.hpp"
 #include "EventQueue.hpp"
-#include "lua-native-functions.hpp"
 
 using engine::entitysystem::Entity;
 
@@ -72,12 +71,9 @@ void BattleController::startBattle() {
     eventManager.setBattle(*battle);
     loadDetailedPokemonData();
 
-    lua::internal::setBattle(battleEntity);
     effects::internal::setGameData(*gameData);
     effects::internal::setBattle(battleEntity);
-    effects::internal::setTriggerEvent([&](const std::string& eventName) {
-        eventManager.triggerEvent(eventName);
-    });
+    effects::internal::setEventManager(eventManager);
 
     state = State::READY;
 }
@@ -165,8 +161,6 @@ void BattleController::processMove(BoundMove boundMove) {
             return;
         }
 
-        prepareScriptsForMove(boundMove);
-
         eventManager.triggerUserEvents(boundMove, "beforeMove");
 
         enqueueMoveEvent<ImmediateEvent>(*gameData, [&] {
@@ -181,10 +175,6 @@ void BattleController::processMove(BoundMove boundMove) {
             processMoveEffects(boundMove);
         });
     });
-}
-
-void BattleController::prepareScriptsForMove(const BoundMove& boundMove) {
-    effects::internal::setMove(boundMove);
 }
 
 void BattleController::showUsedMoveText(const BoundMove& boundMove) {
@@ -207,6 +197,8 @@ void BattleController::processMoveEffects(const BoundMove& usedMove) {
     Entity user = usedMove.user;
     Entity target = usedMove.target;
     Move& move = *usedMove.move;
+
+    effects::internal::setMove(usedMove);
 
     if (checkMiss(user, target, move, *gameData)) {
         std::string& displayName = pokemon(user).displayName;

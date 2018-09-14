@@ -168,13 +168,6 @@ void lua::possibleWildBattle() {
     });
 }
 
-void lua::showBattleText(const std::string& content) {
-    ECHO("showBattleText");
-    XTRACE(content);
-    XTRACE(battle);
-    enqueueBattleEvent<TextEvent>(content, battle, *gameData);
-}
-
 
 void injectNativeFunctions(engine::scriptingsystem::Lua& script) {
     script.registerNative("log", lua::log);
@@ -197,5 +190,4 @@ void injectNativeFunctions(engine::scriptingsystem::Lua& script) {
     script.registerNative("turnPlayerSouth", lua::turnPlayerSouth);
 
     script.registerNative("possibleWildBattle", lua::possibleWildBattle);
-    script.registerNative("showBattleText", lua::showBattleText);
 }

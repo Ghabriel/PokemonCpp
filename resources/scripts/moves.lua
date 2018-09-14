@@ -34,7 +34,7 @@ end
 function TailWhip_onUse()
     -- lowerStat(stats.defense, 1)
     showText("It's... FREEZING TIME!!")
-    addFlag("Freeze")
+    addFlagTarget("Freeze")
     -- if not hasType("Fire") then
     --     addFlag("Burn")
     -- end
@@ -58,6 +58,7 @@ function Flag_Freeze_beforeMove()
     showText(target.displayName.." is frozen solid!")
     if random(1, 100) <= 20 then
         showText(target.displayName.." thawed out!")
+        removeFlagTarget("Freeze")
     else
         negateMove()
     end

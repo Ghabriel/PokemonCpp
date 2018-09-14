@@ -47,7 +47,6 @@ class BattleController {
     void updateActiveFlags();
     void processUsedMoves();
     void processMove(BoundMove);
-    void prepareScriptsForMove(const BoundMove&);
     void showUsedMoveText(const BoundMove&);
     void deductPPIfApplicable(const BoundMove&);
     void processMoveEffects(const BoundMove&);
