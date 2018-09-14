@@ -1,9 +1,8 @@
 #ifndef PREPARE_BATTLE_SCRIPTS_HPP
 #define PREPARE_BATTLE_SCRIPTS_HPP
 
-struct Battle;
 struct CoreStructures;
 
-void prepareBattleScripts(Battle&, CoreStructures&);
+void prepareBattleScripts(CoreStructures&);
 
 #endif

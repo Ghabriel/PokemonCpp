@@ -4,18 +4,10 @@
 #include "core-functions.hpp"
 #include "CoreStructures.hpp"
 
-void prepareScriptFile(
-    engine::scriptingsystem::Lua& script,
-    Battle& battle,
-    CoreStructures& gameData
-) {
+void prepareScriptFile(engine::scriptingsystem::Lua& script) {
     script.eval(
         "pokemonMetatable = {}\n"
         "function pokemonMetatable:__index(key)\n"
-            // "log(\"__index called: \"..key)\n"
-            // "local r = getPokemonProperty(self.id, key)\n"
-            // "log(\"Returning: \"..r)\n"
-            // "return r\n"
             "return getPokemonProperty(self.id, key)\n"
         "end\n"
 
@@ -33,6 +25,6 @@ void prepareScriptFile(
     );
 }
 
-void prepareBattleScripts(Battle& battle, CoreStructures& gameData) {
-    prepareScriptFile(script("moves", gameData), battle, gameData);
+void prepareBattleScripts(CoreStructures& gameData) {
+    prepareScriptFile(script("moves", gameData));
 }

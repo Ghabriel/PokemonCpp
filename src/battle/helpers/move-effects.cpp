@@ -2,6 +2,7 @@
 
 #include <queue>
 #include "battle/data/BoundMove.hpp"
+#include "battle/data/EntityId.hpp"
 #include "battle/data/Flag.hpp"
 #include "battle/data/Move.hpp"
 #include "battle/data/Pokemon.hpp"
@@ -40,6 +41,18 @@ namespace {
     void enqueueEvent(Args&&... args) {
         EventQueue& queue = resource<EventQueue>("move-event-queue", *gameData);
         queue.addEvent(std::make_unique<TEvent>(std::forward<Args>(args)...));
+    }
+
+    Entity getPokemonEntity(EntityId entityId) {
+        switch (entityId) {
+            case EntityId::User:
+                return user;
+            case EntityId::Target:
+                return target;
+            default:
+                // TODO
+                assert(false);
+        }
     }
 }
 
@@ -293,9 +306,48 @@ void effects::negateMove() {
 }
 
 std::string effects::getPokemonProperty(int entityId, const std::string& property) {
-    // TODO
-    std::cout << "[GET] " << property << " (entity: " << entityId << ")\n";
-    return "42";
+    Entity pokemonEntity = getPokemonEntity(static_cast<EntityId>(entityId));
+    const Pokemon& currentPokemon = data<Pokemon>(pokemonEntity, *gameData);
+
+    for (size_t i = 0; i < constants::MOVE_LIMIT; ++i) {
+        if (property == "move" + std::to_string(i)) {
+            return (i < currentPokemon.moves.size()) ? currentPokemon.moves[i] : "";
+        }
+
+        if (property == "pp" + std::to_string(i)) {
+            return (i < currentPokemon.pp.size()) ? std::to_string(currentPokemon.pp[i]) : "";
+        }
+    }
+
+    const auto getStat = [&](Stat stat) {
+        return getEffectiveStat(pokemonEntity, stat, *gameData);
+    };
+
+    const auto throwError = [] {
+        assert(false);
+        return "";
+    };
+
+    return
+        (property == "species")        ? currentPokemon.species :
+        (property == "nature")         ? std::to_string(static_cast<int>(currentPokemon.nature)) :
+        (property == "heldItem")       ? currentPokemon.heldItem :
+        (property == "ability")        ? currentPokemon.ability :
+        (property == "moveCount")      ? std::to_string(currentPokemon.moves.size()) :
+        (property == "gender")         ? std::to_string(static_cast<int>(currentPokemon.gender)) :
+        (property == "form")           ? std::to_string(currentPokemon.form) :
+        (property == "displayName")    ? currentPokemon.displayName :
+        (property == "status")         ? std::to_string(static_cast<int>(currentPokemon.status)) :
+        (property == "asleepRounds")   ? std::to_string(currentPokemon.asleepRounds) :
+        (property == "level")          ? std::to_string(currentPokemon.level) :
+        (property == "hp")             ? std::to_string(getStat(Stat::HP)) :
+        (property == "attack")         ? std::to_string(getStat(Stat::Attack)) :
+        (property == "defense")        ? std::to_string(getStat(Stat::Defense)) :
+        (property == "specialAttack")  ? std::to_string(getStat(Stat::SpecialAttack)) :
+        (property == "specialDefense") ? std::to_string(getStat(Stat::SpecialDefense)) :
+        (property == "speed")          ? std::to_string(getStat(Stat::Speed)) :
+        (property == "currentHP")      ? std::to_string(static_cast<int>(currentPokemon.currentHP)) :
+        throwError();
 }
 
 

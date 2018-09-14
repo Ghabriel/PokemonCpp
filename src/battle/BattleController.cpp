@@ -68,7 +68,7 @@ void BattleController::startBattle() {
     gameData->resourceStorage->store("battle-event-queue", EventQueue());
     gameData->resourceStorage->store("move-event-queue", EventQueue());
     battle = &data<Battle>(battleEntity, *gameData);
-    prepareBattleScripts(*battle, *gameData);
+    prepareBattleScripts(*gameData);
     eventManager.setBattle(*battle);
     loadDetailedPokemonData();
 
