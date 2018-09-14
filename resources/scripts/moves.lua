@@ -86,8 +86,13 @@ end
 toxicCounter = {}
 function Flag_Toxic_onTurnEnd()
     showText(target.displayName.." is hurt by poison!")
+
+    if toxicCounter[target] == nil then
+        toxicCounter[target] = 0
+    end
+
     toxicCounter[target] = toxicCounter[target] + 1
-    fixedDamage((toxicCounter * target.hp + 7) / 8)
+    fixedDamage((toxicCounter[target] * target.hp + 7) / 8)
 end
 
 function Flag_Toxic_onSwitchIn()
