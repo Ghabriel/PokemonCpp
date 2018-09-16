@@ -44,7 +44,7 @@ namespace effects {
     void addFlagTarget(const std::string& flagId);
     void removeFlagUser(const std::string& flagId);
     void removeFlagTarget(const std::string& flagId);
-    bool hasFlag(engine::entitysystem::Entity, const std::string& flagId);
+    bool hasFlag(int entityId, const std::string& flagId);
 
     int random(int min, int max);
     std::string getPokemonProperty(int entityId, const std::string& property);

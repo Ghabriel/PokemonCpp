@@ -367,7 +367,8 @@ void effects::removeFlagTarget(const std::string& flagId) {
     removeFlagFrom(flagId, flagList);
 }
 
-bool effects::hasFlag(Entity entity, const std::string& flagId) {
+bool effects::hasFlag(int entityId, const std::string& flagId) {
+    Entity entity = getPokemonEntity(static_cast<EntityId>(entityId));
     auto& flagList = data<Battle>(battle, *gameData).pokemonFlags[entity];
     return isFlagIn(flagId, flagList);
 }
