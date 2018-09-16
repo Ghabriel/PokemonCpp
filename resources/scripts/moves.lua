@@ -9,23 +9,31 @@ stats = {
     evasion = 7
 }
 
-user = { id = 0 }
-target = { id = 1 }
+user = { id = -1 }
+target = { id = -2 }
 userTeam = {
-    [0] = { id = 2 },
-    [1] = { id = 3 },
-    [2] = { id = 4 },
-    [3] = { id = 5 },
-    [4] = { id = 6 },
+    [0] = { id = -3 },
+    [1] = { id = -4 },
+    [2] = { id = -5 },
+    [3] = { id = -6 },
+    [4] = { id = -7 },
 }
 targetTeam = {
-    [0] = { id = 7 },
-    [1] = { id = 8 },
-    [2] = { id = 9 },
-    [3] = { id = 10 },
-    [4] = { id = 11 },
+    [0] = { id = -8 },
+    [1] = { id = -9 },
+    [2] = { id = -10 },
+    [3] = { id = -11 },
+    [4] = { id = -12 },
 }
 move = {}
+
+function getTargetEffectiveStat(stat, baseValue)
+    if stat == stats.speed and hasFlag(target.id, "Paralysis") then
+        baseValue = baseValue * 0.5
+    end
+
+    return baseValue
+end
 
 function Struggle_onUse()
     damageWithFixedRecoil((user.hp + 3) / 4)
@@ -33,8 +41,8 @@ end
 
 function TailWhip_onUse()
     -- lowerStat(stats.defense, 1)
-    showText("It's... FREEZING TIME!!")
-    addFlagTarget("Freeze")
+    showText("It's... PARALYSIS TIME!!")
+    addFlagTarget("Paralysis")
     -- if not hasType("Fire") then
     --     addFlag("Burn")
     -- end
@@ -72,10 +80,6 @@ function Flag_Paralysis_beforeMove()
     end
 end
 
-function Flag_Paralysis_onTurnStart()
-    multiplyStat(stats.speed, 0.5)
-end
-
 -- Poison
 function Flag_Poison_onTurnEnd()
     showText(target.displayName.." is hurt by poison!")
@@ -100,8 +104,8 @@ function Flag_Toxic_onSwitchIn()
 end
 
 function Flag_Toxic_onBattleEnd()
-    removeFlag("Toxic")
-    addFlag("Poison")
+    removeFlagTarget("Toxic")
+    addFlagTarget("Poison")
 end
 
 -- Sleep

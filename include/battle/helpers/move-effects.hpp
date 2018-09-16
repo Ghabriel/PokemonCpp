@@ -36,12 +36,15 @@ namespace effects {
     void ensureCriticalHit();
     void multiplyDamage(float factor);
     void negateMove();
+
+    // Flag-related functions
     void addTimedFlagUser(const std::string& flagId, int duration);
     void addFlagUser(const std::string& flagId);
     void addTimedFlagTarget(const std::string& flagId, int duration);
     void addFlagTarget(const std::string& flagId);
     void removeFlagUser(const std::string& flagId);
     void removeFlagTarget(const std::string& flagId);
+    bool hasFlag(engine::entitysystem::Entity, const std::string& flagId);
 
     int random(int min, int max);
     std::string getPokemonProperty(int entityId, const std::string& property);

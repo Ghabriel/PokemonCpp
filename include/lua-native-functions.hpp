@@ -38,7 +38,6 @@ namespace lua {
 
     // Battle-related events
     void possibleWildBattle();
-    void showBattleText(const std::string& content);
 }
 
 void injectNativeFunctions(engine::scriptingsystem::Lua& script);

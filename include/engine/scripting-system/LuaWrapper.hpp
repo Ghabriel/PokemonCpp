@@ -33,6 +33,22 @@ namespace engine::scriptingsystem {
         }
 
         template<>
+        inline unsigned getArgument(lua_State* L, int index) {
+            assert(lua_isnumber(L, index));
+            auto result = lua_tonumber(L, index);
+            assert(result >= 0);
+            return result;
+        }
+
+        template<>
+        inline unsigned long getArgument(lua_State* L, int index) {
+            assert(lua_isnumber(L, index));
+            auto result = lua_tonumber(L, index);
+            assert(result >= 0);
+            return result;
+        }
+
+        template<>
         inline std::string getArgument(lua_State* L, int index) {
             assert(lua_isstring(L, index));
             return std::string(lua_tostring(L, index));

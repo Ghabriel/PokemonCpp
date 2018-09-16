@@ -51,9 +51,21 @@ namespace {
                 return user;
             case EntityId::Target:
                 return target;
-            default:
+            case EntityId::UserTeam0:
+            case EntityId::UserTeam1:
+            case EntityId::UserTeam2:
+            case EntityId::UserTeam3:
+            case EntityId::UserTeam4:
+            case EntityId::TargetTeam0:
+            case EntityId::TargetTeam1:
+            case EntityId::TargetTeam2:
+            case EntityId::TargetTeam3:
+            case EntityId::TargetTeam4:
                 // TODO
                 assert(false);
+            default:
+                assert(static_cast<int>(entityId) >= 0);
+                return static_cast<Entity>(entityId);
         }
     }
 
@@ -64,6 +76,16 @@ namespace {
                 break;
             }
         }
+    }
+
+    bool isFlagIn(const std::string& flagId, std::vector<Flag>& flagList) {
+        for (const auto& flag : flagList) {
+            if (flag.id == flagId) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
 
@@ -318,7 +340,8 @@ void effects::negateMove() {
 }
 
 void effects::addTimedFlagUser(const std::string& flagId, int duration) {
-    data<Battle>(battle, *gameData).pokemonFlags[user].push_back({user, flagId, duration, 0});
+    auto& flagList = data<Battle>(battle, *gameData).pokemonFlags[user];
+    flagList.push_back({user, flagId, duration, 0});
 }
 
 void effects::addFlagUser(const std::string& flagId) {
@@ -326,7 +349,8 @@ void effects::addFlagUser(const std::string& flagId) {
 }
 
 void effects::addTimedFlagTarget(const std::string& flagId, int duration) {
-    data<Battle>(battle, *gameData).pokemonFlags[target].push_back({target, flagId, duration, 0});
+    auto& flagList = data<Battle>(battle, *gameData).pokemonFlags[target];
+    flagList.push_back({target, flagId, duration, 0});
 }
 
 void effects::addFlagTarget(const std::string& flagId) {
@@ -341,6 +365,11 @@ void effects::removeFlagUser(const std::string& flagId) {
 void effects::removeFlagTarget(const std::string& flagId) {
     auto& flagList = data<Battle>(battle, *gameData).pokemonFlags[target];
     removeFlagFrom(flagId, flagList);
+}
+
+bool effects::hasFlag(Entity entity, const std::string& flagId) {
+    auto& flagList = data<Battle>(battle, *gameData).pokemonFlags[entity];
+    return isFlagIn(flagId, flagList);
 }
 
 
@@ -407,12 +436,14 @@ void injectNativeBattleFunctions(engine::scriptingsystem::Lua& script) {
     script.registerNative("ensureCriticalHit", effects::ensureCriticalHit);
     script.registerNative("multiplyDamage", effects::multiplyDamage);
     script.registerNative("negateMove", effects::negateMove);
+
     script.registerNative("addTimedFlagUser", effects::addTimedFlagUser);
     script.registerNative("addFlagUser", effects::addFlagUser);
     script.registerNative("addTimedFlagTarget", effects::addTimedFlagTarget);
     script.registerNative("addFlagTarget", effects::addFlagTarget);
     script.registerNative("removeFlagUser", effects::removeFlagUser);
     script.registerNative("removeFlagTarget", effects::removeFlagTarget);
+    script.registerNative("hasFlag", effects::hasFlag);
 
     script.registerNative("random", effects::random);
     script.registerNative("getPokemonProperty", effects::getPokemonProperty);

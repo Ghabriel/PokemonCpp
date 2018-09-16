@@ -1,6 +1,7 @@
 #include "battle/helpers/battle-utils.hpp"
 
 #include <cmath>
+#include "battle/data/EntityId.hpp"
 #include "battle/data/Move.hpp"
 #include "battle/data/Pokemon.hpp"
 #include "battle/data/PokemonSpeciesData.hpp"
@@ -79,7 +80,13 @@ int getEffectiveStat(
             break;
     }
 
-    return baseStatValue * getStatStageMultiplier(currentStage);
+    float standardValue = baseStatValue * getStatStageMultiplier(currentStage);
+
+    auto& movesScript = script("moves", gameData);
+    movesScript.eval("target.id = " + std::to_string(pokemon));
+    int result = movesScript.call<int>("getTargetEffectiveStat", statId, standardValue);
+    movesScript.eval("target.id = " + std::to_string(static_cast<int>(EntityId::Target)));
+    return result;
 }
 
 bool hasUsableMoves(
