@@ -28,7 +28,7 @@ targetTeam = {
     [3] = { id = -11 },
     [4] = { id = -12 },
 }
-move = {}
+move = { id = -13 }
 
 
 function Struggle_onUse()
@@ -37,8 +37,8 @@ end
 
 function TailWhip_onUse()
     -- lowerStat(stats.defense, 1)
-    showText("It's... PARALYSIS TIME!!")
-    addFlagTarget("Paralysis")
+    showText("Applying status condition: Burn")
+    addFlagTarget("Burn")
     -- if not hasType("Fire") then
     --     addFlag("Burn")
     -- end

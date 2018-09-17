@@ -7,8 +7,13 @@
 void prepareScriptFile(engine::scriptingsystem::Lua& script) {
     script.eval(
         "pokemonMetatable = {}\n"
+        "moveMetatable = {}\n"
         "function pokemonMetatable:__index(key)\n"
             "return getPokemonProperty(self.id, key)\n"
+        "end\n"
+
+        "function moveMetatable:__index(key)\n"
+            "return getMoveProperty(key)\n"
         "end\n"
 
         "for _, pokemon in ipairs(userTeam) do\n"
@@ -21,7 +26,7 @@ void prepareScriptFile(engine::scriptingsystem::Lua& script) {
 
         "setmetatable(user, pokemonMetatable)\n"
         "setmetatable(target, pokemonMetatable)\n"
-        // TODO: move metatable
+        "setmetatable(move, moveMetatable)\n"
     );
 }
 

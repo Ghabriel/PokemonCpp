@@ -1,8 +1,8 @@
 --[[
-    Burn - 85% (not reducing damage, not checking faint)
+    Burn - 90% (not reducing damage, not checking faint)
     Freeze - 100%
     Paralysis - 100%
-    Poison- 90% (not checking faint)
+    Poison - 90% (not checking faint)
     Toxic - 80% (onSwitchIn and onBattleEnd are untestable at the moment)
     Sleep - 0%
 ]]

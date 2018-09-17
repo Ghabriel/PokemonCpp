@@ -63,6 +63,9 @@ namespace {
             case EntityId::TargetTeam4:
                 // TODO
                 assert(false);
+            case EntityId::Move:
+                // should be unreachable
+                assert(false);
             default:
                 assert(static_cast<int>(entityId) >= 0);
                 return static_cast<Entity>(entityId);
@@ -423,6 +426,27 @@ std::string effects::getPokemonProperty(int entityId, const std::string& propert
         throwError();
 }
 
+std::string effects::getMoveProperty(const std::string& property) {
+    const Pokemon& moveUser = data<Pokemon>(boundMove->user, *gameData);
+    int currentPP = moveUser.pp[boundMove->moveIndex];
+
+    const auto throwError = [] {
+        assert(false);
+        return "";
+    };
+
+    return
+        (property == "displayName") ? move->displayName :
+        (property == "type") ? move->type :
+        (property == "kind") ? move->kind :
+        (property == "power") ? std::to_string(move->power) :
+        (property == "accuracy") ? std::to_string(move->accuracy) :
+        (property == "currentPP") ? std::to_string(currentPP) :
+        (property == "targetType") ? move->targetType :
+        (property == "priority") ? std::to_string(move->priority) :
+        throwError();
+}
+
 void effects::showText(const std::string& content) {
     enqueueEvent<TextEvent>(content, battle, *gameData);
 }
@@ -448,5 +472,6 @@ void injectNativeBattleFunctions(engine::scriptingsystem::Lua& script) {
 
     script.registerNative("random", effects::random);
     script.registerNative("getPokemonProperty", effects::getPokemonProperty);
+    script.registerNative("getMoveProperty", effects::getMoveProperty);
     script.registerNative("showText", effects::showText);
 }

@@ -14,6 +14,7 @@ enum class EntityId {
     TargetTeam2 = -10,
     TargetTeam3 = -11,
     TargetTeam4 = -12,
+    Move = -13,
 };
 
 #endif
