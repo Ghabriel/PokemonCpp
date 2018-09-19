@@ -342,6 +342,30 @@ void effects::negateMove() {
     moveIsNegated = true;
 }
 
+void effects::addStatusCondition(int entityId, int statusConditionId) {
+    Entity entity = getPokemonEntity(static_cast<EntityId>(entityId));
+    Pokemon& pokemon = data<Pokemon>(entity, *gameData);
+    pokemon.status = static_cast<StatusCondition>(statusConditionId);
+}
+
+void effects::removeStatusCondition(int entityId) {
+    Entity entity = getPokemonEntity(static_cast<EntityId>(entityId));
+    Pokemon& pokemon = data<Pokemon>(entity, *gameData);
+    pokemon.status = StatusCondition::Normal;
+    pokemon.asleepRounds = 0;
+}
+
+void effects::sleep(int entityId, int duration) {
+    Entity entity = getPokemonEntity(static_cast<EntityId>(entityId));
+    Pokemon& pokemon = data<Pokemon>(entity, *gameData);
+    pokemon.status = StatusCondition::Sleep;
+    pokemon.asleepRounds = duration;
+}
+
+void effects::reduceSleepCounter() {
+    data<Pokemon>(target, *gameData).asleepRounds--;
+}
+
 void effects::addTimedFlagUser(const std::string& flagId, int duration) {
     auto& flagList = data<Battle>(battle, *gameData).pokemonFlags[user];
     flagList.push_back({user, flagId, duration, 0});
@@ -461,6 +485,10 @@ void injectNativeBattleFunctions(engine::scriptingsystem::Lua& script) {
     script.registerNative("ensureCriticalHit", effects::ensureCriticalHit);
     script.registerNative("multiplyDamage", effects::multiplyDamage);
     script.registerNative("negateMove", effects::negateMove);
+    script.registerNative("internalAddStatusCondition", effects::addStatusCondition);
+    script.registerNative("internalRemoveStatusCondition", effects::removeStatusCondition);
+    script.registerNative("sleep", effects::sleep);
+    script.registerNative("reduceSleepCounter", effects::reduceSleepCounter);
 
     script.registerNative("addTimedFlagUser", effects::addTimedFlagUser);
     script.registerNative("addFlagUser", effects::addFlagUser);

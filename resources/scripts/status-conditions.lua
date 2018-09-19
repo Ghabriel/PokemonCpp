@@ -1,11 +1,48 @@
 --[[
-    Burn - 90% (not reducing damage, not checking faint)
+    Burn - 90% (not checking faint)
     Freeze - 100%
     Paralysis - 100%
     Poison - 90% (not checking faint)
     Toxic - 80% (onSwitchIn and onBattleEnd are untestable at the moment)
-    Sleep - 0%
+    Sleep - 100%
 ]]
+
+statusConditions = {
+    burn = 1,
+    freeze = 2,
+    paralysis = 3,
+    poison = 4,
+    toxic = 5,
+    sleep = 6
+}
+
+statusConditionFlags = {
+    [statusConditions.burn] = "Burn",
+    [statusConditions.freeze] = "Freeze",
+    [statusConditions.paralysis] = "Paralysis",
+    [statusConditions.poison] = "Poison",
+    [statusConditions.toxic] = "Toxic",
+    [statusConditions.sleep] = "Sleep"
+}
+
+function addStatusCondition(conditionId, fixedSleepDuration)
+    -- TODO: some pokémon are immune to certain status conditions
+    if conditionId == statusConditions.sleep then
+        sleep(target.id, fixedSleepDuration or random(1, 3))
+    end
+
+    addFlagTarget(statusConditionFlags[conditionId])
+    internalAddStatusCondition(target.id, conditionId)
+    return true
+end
+
+function removeStatusCondition(entity)
+    for condition, flagId in pairs(statusConditionFlags) do
+        removeFlagTarget(flagId)
+    end
+
+    internalRemoveStatusCondition(entity.id)
+end
 
 -- Burn
 function Flag_Burn_beforeDamageInflict()
@@ -25,7 +62,7 @@ function Flag_Freeze_beforeMove()
     showText(target.displayName.." is frozen solid!")
     if random(1, 100) <= 20 then
         showText(target.displayName.." thawed out!")
-        removeFlagTarget("Freeze")
+        removeStatusCondition(target)
     else
         negateMove()
     end
@@ -74,9 +111,14 @@ end
 -- Sleep
 function Flag_Sleep_beforeMove()
     showText(target.displayName.." is fast asleep.")
-    if target.asleepRounds == 0 then
+    if tonumber(target.asleepRounds) == 0 then
         showText(target.displayName.." woke up!")
+        removeStatusCondition(target)
     else
         negateMove()
     end
+end
+
+function Flag_Sleep_onTurnEnd()
+    reduceSleepCounter()
 end

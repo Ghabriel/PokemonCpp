@@ -37,8 +37,8 @@ end
 
 function TailWhip_onUse()
     -- lowerStat(stats.defense, 1)
-    showText("Applying status condition: Burn")
-    addFlagTarget("Burn")
+    showText("Applying status condition: Sleep")
+    addStatusCondition(statusConditions.sleep, 1)
     -- if not hasType("Fire") then
     --     addFlag("Burn")
     -- end

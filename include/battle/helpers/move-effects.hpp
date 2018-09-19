@@ -36,6 +36,10 @@ namespace effects {
     void ensureCriticalHit();
     void multiplyDamage(float factor);
     void negateMove();
+    void addStatusCondition(int entityId, int statusConditionId);
+    void removeStatusCondition(int entityId);
+    void sleep(int entityId, int duration);
+    void reduceSleepCounter();
 
     // Flag-related functions
     void addTimedFlagUser(const std::string& flagId, int duration);
