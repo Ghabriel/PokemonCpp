@@ -1,0 +1,56 @@
+{
+    // Layer 1
+    "grass": {
+        "texture": "terrain-sprite",
+        "rect": [0, 0, 32, 32]
+    },
+    // Layer 2
+    "item": {
+        "texture": "terrain-sprite",
+        "rect": [170, 170, 32, 32]
+    },
+    "rock": {
+        "texture": "terrain-sprite",
+        "rect": [340, 0, 32, 32]
+    },
+    "pokecenter": {
+        "texture": "buildings-sprite",
+        "rect": [503, 193, 79, 64]
+    },
+    "bush-0-0": {
+        "texture": "terrain-sprite",
+        "rect": [34, 34, 32, 32]
+    },
+    "bush-0-1": {
+        "texture": "terrain-sprite",
+        "rect": [34, 68, 32, 32]
+    },
+    "bush-0-2": {
+        "texture": "terrain-sprite",
+        "rect": [34, 102, 32, 32]
+    },
+    "cave-entrance-0-0": {
+        "texture": "terrain-sprite",
+        "rect": [34, 238, 32, 32]
+    },
+    "cave-entrance-1-0": {
+        "texture": "terrain-sprite",
+        "rect": [68, 238, 32, 32]
+    },
+    "cave-entrance-2-0": {
+        "texture": "terrain-sprite",
+        "rect": [102, 238, 32, 32]
+    },
+    "cave-entrance-0-1": {
+        "texture": "terrain-sprite",
+        "rect": [34, 272, 32, 32]
+    },
+    "cave-entrance-1-1": {
+        "texture": "terrain-sprite",
+        "rect": [68, 272, 32, 32]
+    },
+    "cave-entrance-2-1": {
+        "texture": "terrain-sprite",
+        "rect": [102, 272, 32, 32]
+    }
+}

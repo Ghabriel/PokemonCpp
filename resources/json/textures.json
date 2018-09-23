@@ -1,0 +1,7 @@
+{
+    "buildings-sprite": "resources/sprites/buildings.png",
+    "player-sprite": "resources/sprites/player.png",
+    "terrain-sprite": "resources/sprites/terrain.png",
+    "text-skin-1": "resources/sprites/text-skin-1.png",
+    "battle-bg-1": "resources/sprites/battlebgForest.png"
+}

@@ -1,0 +1,54 @@
+{
+    "player-facing-south": {
+        "texture": "player-sprite",
+        "frames": [[0, 0, 32, 48, 9999999]]
+    },
+    "player-facing-west": {
+        "texture": "player-sprite",
+        "frames": [[0, 48, 32, 48, 9999999]]
+    },
+    "player-facing-east": {
+        "texture": "player-sprite",
+        "frames": [[0, 96, 32, 48, 9999999]]
+    },
+    "player-facing-north": {
+        "texture": "player-sprite",
+        "frames": [[0, 144, 32, 48, 9999999]]
+    },
+    "player-walking-south": {
+        "texture": "player-sprite",
+        "frames": [
+            [0, 0, 32, 48, 150],
+            [32, 0, 32, 48, 150],
+            [64, 0, 32, 48, 150],
+            [96, 0, 32, 48, 150]
+        ]
+    },
+    "player-walking-west": {
+        "texture": "player-sprite",
+        "frames": [
+            [0, 48, 32, 48, 150],
+            [32, 48, 32, 48, 150],
+            [64, 48, 32, 48, 150],
+            [96, 48, 32, 48, 150]
+        ]
+    },
+    "player-walking-east": {
+        "texture": "player-sprite",
+        "frames": [
+            [0, 96, 32, 48, 150],
+            [32, 96, 32, 48, 150],
+            [64, 96, 32, 48, 150],
+            [96, 96, 32, 48, 150]
+        ]
+    },
+    "player-walking-north": {
+        "texture": "player-sprite",
+        "frames": [
+            [0, 144, 32, 48, 150],
+            [32, 144, 32, 48, 150],
+            [64, 144, 32, 48, 150],
+            [96, 144, 32, 48, 150]
+        ]
+    }
+}

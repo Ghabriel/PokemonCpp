@@ -1,0 +1,12 @@
+{
+    "initial-state": "menu-state",
+    "window-title": "Pokemon",
+    "initial-window-width": 800,
+    "initial-window-height": 600,
+    "min-window-width": 800,
+    "min-window-height": 600,
+    "player-walking-speed": "0.005", // (tiles/ms)
+    "tile-size": 32,
+    "pokemon-back-sprites": "resources/sprites/pokemon/back/",
+    "pokemon-front-sprites": "resources/sprites/pokemon/front/"
+}
