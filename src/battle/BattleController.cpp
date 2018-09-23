@@ -20,6 +20,7 @@
 #include "events/ImmediateEvent.hpp"
 #include "events/TextEvent.hpp"
 #include "EventQueue.hpp"
+#include "lua-native-functions.hpp"
 
 using engine::entitysystem::Entity;
 
@@ -136,8 +137,8 @@ void BattleController::sortUsedMoves(std::vector<BoundMove>& usedMoves) {
                 return first.move->priority > second.move->priority;
             }
 
-            int firstSpeed = getEffectiveStat(first.user, Stat::Speed, *gameData);
-            int secondSpeed = getEffectiveStat(second.user, Stat::Speed, *gameData);
+            int firstSpeed = lua::call<int>("getEffectiveStat", first.user, Stat::Speed);
+            int secondSpeed = lua::call<int>("getEffectiveStat", second.user, Stat::Speed);
             return firstSpeed >= secondSpeed;
         }
     );
@@ -200,13 +201,13 @@ void BattleController::processMoveEffects(const BoundMove& usedMove) {
 
     effects::internal::setMove(usedMove);
 
-    if (checkMiss(user, target, move, *gameData)) {
+    if (lua::call<bool>("checkMiss", user, target, move)) {
         std::string& displayName = pokemon(user).displayName;
         showText(displayName + "'s attack missed!");
         return;
     }
 
-    if (checkCritical(user, target, move, *gameData)) {
+    if (lua::call<bool>("checkCritical", user, target, move)) {
         effects::ensureCriticalHit();
     }
 

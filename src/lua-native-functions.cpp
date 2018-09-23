@@ -5,7 +5,6 @@
 #include "components/DisabledControls.hpp"
 #include "components/Velocity.hpp"
 #include "CoreStructures.hpp"
-#include "core-functions.hpp"
 #include "engine/scripting-system/include.hpp"
 #include "engine/state-system/include.hpp"
 #include "EventQueue.hpp"
@@ -80,6 +79,10 @@ void lua::internal::setMap(engine::entitysystem::Entity _map) {
 
 void lua::internal::setPlayer(engine::entitysystem::Entity _player) {
     player = _player;
+}
+
+CoreStructures& lua::internal::detail::getCoreStructures() {
+    return *gameData;
 }
 
 void lua::log(const std::string& str) {

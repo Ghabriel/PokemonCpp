@@ -2,6 +2,7 @@
 #define LUA_NATIVE_FUNCTIONS_HPP
 
 #include <string>
+#include "core-functions.hpp"
 #include "engine/entity-system/types.hpp"
 #include "engine/scripting-system/forward-declarations.hpp"
 
@@ -13,6 +14,10 @@ namespace lua {
         void setBattle(engine::entitysystem::Entity);
         void setMap(engine::entitysystem::Entity);
         void setPlayer(engine::entitysystem::Entity);
+
+        namespace detail {
+            CoreStructures& getCoreStructures();
+        }
     }
 
     // Generic events
@@ -21,6 +26,12 @@ namespace lua {
     void enableControls();
     void showText(const std::string& content);
     void wait(int ms);
+
+    template<typename Ret, typename... Args>
+    Ret call(const std::string& functionName, Args&&... args) {
+        CoreStructures& gameData = internal::detail::getCoreStructures();
+        return script("moves", gameData).call<Ret>(functionName, args...);
+    }
 
     // Overworld events
     void movePlayerNorth(int numTiles);

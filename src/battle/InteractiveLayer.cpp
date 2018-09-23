@@ -15,6 +15,7 @@
 #include "events/ImmediateEvent.hpp"
 #include "events/TextEvent.hpp"
 #include "EventQueue.hpp"
+#include "lua-native-functions.hpp"
 
 namespace {
     enum class BattleAction {
@@ -98,7 +99,7 @@ void InteractiveLayer::actionSelectionScreen() {
 
         switch (static_cast<BattleAction>(selectedAction)) {
             case BattleAction::Fight:
-                if (!hasUsableMoves(battle->playerTeam[0], *gameData)) {
+                if (!lua::call<bool>("hasUsableMoves", battle->playerTeam[0])) {
                     std::string& displayName = pokemon(battle->playerTeam[0]).displayName;
                     showText(displayName + " has no moves left!");
                     selectedAction = STRUGGLE;
@@ -229,20 +230,16 @@ void InteractiveLayer::blackOutScreen() {
 }
 
 void InteractiveLayer::rewardScreen() {
-    DEBUG enqueueEvent<ImmediateEvent>(*gameData, [&] {
+    enqueueEvent<ImmediateEvent>(*gameData, [&] {
         music("bgm-wild-battle", *gameData).stop();
         music("bgm-wild-battle-victory", *gameData).play();
     });
 
-    DEBUG Pokemon& playerPokemon = pokemon(battle->playerTeam[0]);
-    DEBUG int exp = calculateExpGain(
-        playerPokemon,
-        pokemon(battle->opponentTeam[0]),
-        data<PokemonSpeciesData>(battle->opponentTeam[0], *gameData)
-    );
-    DEBUG showText(playerPokemon.displayName + " gained " + std::to_string(exp) + " EXP. Points!");
+    Pokemon& playerPokemon = pokemon(battle->playerTeam[0]);
+    int exp = lua::call<int>("calculateExpGain", playerPokemon, battle->opponentTeam[0]);
+    showText(playerPokemon.displayName + " gained " + std::to_string(exp) + " EXP. Points!");
 
-    DEBUG enqueueEvent<ImmediateEvent>(*gameData, [&] {
+    enqueueEvent<ImmediateEvent>(*gameData, [&] {
         deleteEntity(battle->opponentTeam[0], *gameData);
         music("bgm-wild-battle-victory", *gameData).stop();
         gameData->stateMachine->pushState("overworld-state");

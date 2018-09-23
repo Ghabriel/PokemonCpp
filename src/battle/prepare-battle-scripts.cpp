@@ -13,7 +13,7 @@ void prepareScriptFile(engine::scriptingsystem::Lua& script) {
         "end\n"
 
         "function moveMetatable:__index(key)\n"
-            "return getMoveProperty(key)\n"
+            "return getMoveProperty(self.id, key)\n"
         "end\n"
 
         "for _, pokemon in ipairs(userTeam) do\n"
