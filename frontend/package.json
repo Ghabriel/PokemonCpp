@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "bundle": "browserify js/main.js -o js/bundle.js && echo 'Bundling completed.'",
+    "bundle": "browserify js/frontend/src/main.js -o js/bundle.js && echo 'Bundling completed.'",
     "test": "echo \"Error: no test specified\" && exit 1",
     "watch": "tsc-watch --onSuccess \"npm run bundle\""
   },

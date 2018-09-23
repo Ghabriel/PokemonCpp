@@ -1,8 +1,13 @@
-type UpdateFunction = (gameLoop: GameLoop, elapsedTime: number) => void;
-type RenderFunction = (gameLoop: GameLoop) => void;
+export interface UpdateFunction {
+    tick(gameLoop: GameLoop, timeSinceLastFrame: number): void;
+}
+
+export interface RenderFunction {
+    render(gameLoop: GameLoop): void;
+}
 
 export class GameLoop {
-    constructor(private update: UpdateFunction, private render: RenderFunction) {
+    constructor(private update: UpdateFunction, private renderer: RenderFunction) {
         this.updatePeriod = 1000 / this.defaultUpdateFrequency;
     }
 
@@ -12,6 +17,7 @@ export class GameLoop {
 
     start(): void {
         this.running = true;
+        this.currentTime = Date.now();
         this.runLoop();
     }
 
@@ -31,11 +37,11 @@ export class GameLoop {
         this.timeAccumulator += elapsedTime;
 
         while (this.timeAccumulator >= this.updatePeriod) {
-            this.update(this, this.updatePeriod);
+            this.update.tick(this, this.updatePeriod);
             this.timeAccumulator -= this.updatePeriod;
         }
 
-        this.render(this);
+        this.renderer.render(this);
     }
 
     private readonly defaultUpdateFrequency = 25;

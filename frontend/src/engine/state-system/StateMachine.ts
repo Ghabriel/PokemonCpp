@@ -36,6 +36,10 @@ export class StateMachine {
         }
     }
 
+    execute(): void {
+        this.states[this.states.length - 1].execute();
+    }
+
     private getStateByName(stateName: string): State {
         const state = this.registeredStates.get(stateName);
 
