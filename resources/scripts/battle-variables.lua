@@ -25,8 +25,8 @@ defaultEntityIds = {
         [2] = -10,
         [3] = -11,
         [4] = -12,
-    }
-    move = -13,
+    },
+    move = -13
 }
 
 user = { id = defaultEntityIds.user }

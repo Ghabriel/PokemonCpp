@@ -4,7 +4,7 @@
 #include <cstddef>
 
 namespace engine::entitysystem {
-    using Entity = size_t;
+    using Entity = long;
 }
 
 #endif

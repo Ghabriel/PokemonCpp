@@ -52,7 +52,7 @@ namespace effects {
 
     int random(int min, int max);
     std::string getPokemonProperty(int entityId, const std::string& property);
-    std::string getMoveProperty(const std::string& property);
+    std::string getMoveProperty(int pokemonId, int moveIndex, const std::string& property);
     void showText(const std::string& content);
 }
 

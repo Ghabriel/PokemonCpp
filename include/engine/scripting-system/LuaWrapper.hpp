@@ -33,6 +33,12 @@ namespace engine::scriptingsystem {
         }
 
         template<>
+        inline long getArgument(lua_State* L, int index) {
+            assert(lua_isnumber(L, index));
+            return lua_tonumber(L, index);
+        }
+
+        template<>
         inline std::string getArgument(lua_State* L, int index) {
             assert(lua_isstring(L, index));
             return std::string(lua_tostring(L, index));
@@ -71,8 +77,24 @@ namespace engine::scriptingsystem {
         }
 
         template<>
+        inline void pushValue(lua_State* L, const long& value) {
+            lua_pushnumber(L, value);
+        }
+
+        template<>
         inline void pushValue(lua_State* L, const std::string& value) {
             lua_pushstring(L, value.c_str());
+        }
+
+        template<typename Key, typename Value>
+        inline void pushValue(lua_State* L, const std::unordered_map<Key, Value>& table) {
+            lua_newtable(L);
+
+            for (const auto& [key, value] : table) {
+                pushValue(L, key);
+                pushValue(L, value);
+                lua_settable(L, -3);
+            }
         }
     }
 

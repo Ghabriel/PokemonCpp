@@ -2,11 +2,15 @@
 #define LUA_NATIVE_FUNCTIONS_HPP
 
 #include <string>
+#include "battle/data/BoundMove.hpp"
 #include "core-functions.hpp"
 #include "engine/entity-system/types.hpp"
 #include "engine/scripting-system/forward-declarations.hpp"
 
 struct CoreStructures;
+
+enum class Stat;
+enum class StatFlags;
 
 namespace lua {
     namespace internal {
@@ -27,10 +31,48 @@ namespace lua {
     void showText(const std::string& content);
     void wait(int ms);
 
+    template<typename T>
+    struct LuaSupportedType {
+        using type = T;
+    };
+
+    template<>
+    struct LuaSupportedType<StatFlags> {
+        using type = int;
+    };
+
+    template<>
+    struct LuaSupportedType<Stat> {
+        using type = int;
+    };
+
+    template<>
+    struct LuaSupportedType<BoundMove> {
+        using type = std::unordered_map<std::string, int>;
+    };
+
+    template<typename T>
+    inline typename LuaSupportedType<T>::type toLuaValue(const T& value) {
+        return static_cast<typename LuaSupportedType<T>::type>(value);
+    }
+
+    template<>
+    inline typename LuaSupportedType<BoundMove>::type toLuaValue(const BoundMove& value) {
+        return {
+            {"pokemonId", value.user},
+            {"moveIndex", value.moveIndex}
+        };
+    }
+
     template<typename Ret, typename... Args>
     Ret call(const std::string& functionName, Args&&... args) {
         CoreStructures& gameData = internal::detail::getCoreStructures();
-        return script("moves", gameData).call<Ret>(functionName, args...);
+        engine::scriptingsystem::Lua& luaFile = script("moves", gameData);
+        return luaFile.call<Ret>(
+            functionName,
+            toLuaValue(args)...
+            // args...
+        );
     }
 
     // Overworld events

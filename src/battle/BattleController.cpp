@@ -201,13 +201,13 @@ void BattleController::processMoveEffects(const BoundMove& usedMove) {
 
     effects::internal::setMove(usedMove);
 
-    if (lua::call<bool>("checkMiss", user, target, move)) {
+    if (lua::call<bool>("checkMiss", user, target, usedMove)) {
         std::string& displayName = pokemon(user).displayName;
         showText(displayName + "'s attack missed!");
         return;
     }
 
-    if (lua::call<bool>("checkCritical", user, target, move)) {
+    if (lua::call<bool>("checkCritical", user, target, usedMove)) {
         effects::ensureCriticalHit();
     }
 

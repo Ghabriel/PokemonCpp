@@ -17,6 +17,11 @@ enum class StatFlags {
     IgnoreNegative
 };
 
+std::vector<Move*> getMovesOf(
+    engine::entitysystem::Entity pokemonEntity,
+    CoreStructures& gameData
+);
+
 // int getAttackStatForMove(
 //     engine::entitysystem::Entity pokemon,
 //     const Move& move,

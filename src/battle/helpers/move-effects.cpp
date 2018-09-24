@@ -91,13 +91,14 @@ namespace {
         return false;
     }
 
-    // BoundMove requestedMove = getBoundMoveByid(moveId);
-    BoundMove getBoundMoveById(int moveId) {
-        if (moveId == static_cast<int>(EntityId::Move)) {
+    BoundMove getBoundMove(int pokemonId, int moveIndex) {
+        if (pokemonId == static_cast<int>(EntityId::Move)) {
             return *boundMove;
         }
 
-        // TODO: handle other IDs
+        // TODO: handle special move indices (Struggle, Metronome, etc)
+        Move* move = getMovesOf(pokemonId, *gameData)[moveIndex];
+        return {pokemonId, -1, move, moveIndex};
     }
 
 }
@@ -143,8 +144,7 @@ void effects::damage() {
         damageBuffer = 0;
     });
 
-    PokemonSpeciesData& targetSpecies = data<PokemonSpeciesData>(target, *gameData);
-    float type = lua::call<float>("getTypeEffectiveness", target, *move);
+    float type = lua::call<float>("getTypeEffectiveness", target, *boundMove);
 
     if (type < 0.1) {
         showText(
@@ -159,8 +159,8 @@ void effects::damage() {
     StatFlags attackStatFlags = criticalHitFlag ? StatFlags::IgnoreNegative : StatFlags::All;
     StatFlags defenseStatFlags = criticalHitFlag ? StatFlags::IgnorePositive : StatFlags::All;
     int userLevel = data<Pokemon>(user, *gameData).level;
-    int attack = lua::call<int>("getAttackStatForMove", user, *move, attackStatFlags);
-    int defense = lua::call<int>("getDefenseStatForMove", target, *move, defenseStatFlags);
+    int attack = lua::call<int>("getAttackStatForMove", user, *boundMove, attackStatFlags);
+    int defense = lua::call<int>("getDefenseStatForMove", target, *boundMove, defenseStatFlags);
 
     // Modifiers
     float targets = 1; // TODO: handle multi-target moves
@@ -252,8 +252,7 @@ void effects::fixedDamage(int lostHP) {
         damageBuffer = 0;
     });
 
-    PokemonSpeciesData& targetSpecies = data<PokemonSpeciesData>(target, *gameData);
-    float type = lua::call<float>("getTypeEffectiveness", target, *move);
+    float type = lua::call<float>("getTypeEffectiveness", target, *boundMove);
 
     if (type < 0.1) {
         showText(
@@ -460,10 +459,10 @@ std::string effects::getPokemonProperty(int entityId, const std::string& propert
         throwError();
 }
 
-std::string effects::getMoveProperty(int moveId, const std::string& property) {
-    BoundMove requestedMove = getBoundMoveByid(moveId);
-    const Pokemon& moveUser = data<Pokemon>(requestedMove->user, *gameData);
-    int currentPP = moveUser.pp[requestedMove->moveIndex];
+std::string effects::getMoveProperty(int pokemonId, int moveIndex, const std::string& property) {
+    BoundMove requestedMove = getBoundMove(pokemonId, moveIndex);
+    const Pokemon& moveUser = data<Pokemon>(requestedMove.user, *gameData);
+    int currentPP = moveUser.pp[requestedMove.moveIndex];
 
     const auto throwError = [] {
         assert(false);

@@ -13,6 +13,10 @@
 
 using engine::entitysystem::Entity;
 
+std::vector<Move*> getMovesOf(Entity pokemonEntity, CoreStructures& gameData) {
+    return data<std::vector<Move*>>(pokemonEntity, gameData);
+}
+
 // namespace {
 //     constexpr float getStatStageMultiplier(int stage) {
 //         int absStage = std::abs(stage);

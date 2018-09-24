@@ -235,8 +235,9 @@ void InteractiveLayer::rewardScreen() {
         music("bgm-wild-battle-victory", *gameData).play();
     });
 
-    Pokemon& playerPokemon = pokemon(battle->playerTeam[0]);
-    int exp = lua::call<int>("calculateExpGain", playerPokemon, battle->opponentTeam[0]);
+    Entity playerPokemonEntity = battle->playerTeam[0];
+    Pokemon& playerPokemon = pokemon(playerPokemonEntity);
+    int exp = lua::call<int>("calculateExpGain", playerPokemonEntity, battle->opponentTeam[0]);
     showText(playerPokemon.displayName + " gained " + std::to_string(exp) + " EXP. Points!");
 
     enqueueEvent<ImmediateEvent>(*gameData, [&] {
