@@ -47,6 +47,17 @@ namespace engine::scriptingsystem {
         template<typename Functor>
         void registerNative(const std::string& luaFunctionName, Functor fn);
 
+        /**
+         * \brief Similar to registerNative, but registers the function inside
+         * a namespace.
+         */
+        template<typename Functor>
+        void registerNativeInNamespace(
+            const std::string& namespaceName,
+            const std::string& luaFunctionName,
+            Functor fn
+        );
+
      private:
         LuaWrapper luaState;
 
@@ -101,6 +112,17 @@ namespace engine::scriptingsystem {
     inline void Lua::registerNative(const std::string& luaFunctionName, Functor fn) {
         luaState.pushFunction(fn);
         luaState.setGlobal(luaFunctionName);
+    }
+
+    template<typename Functor>
+    inline void Lua::registerNativeInNamespace(
+        const std::string& namespaceName,
+        const std::string& luaFunctionName,
+        Functor fn
+    ) {
+        luaState.pushGlobal(namespaceName);
+        luaState.pushFunction(fn);
+        luaState.setField(luaFunctionName);
     }
 
     inline size_t Lua::pushVariableValue(const std::string& variableName) {

@@ -486,30 +486,36 @@ void effects::showText(const std::string& content) {
 }
 
 void injectNativeBattleFunctions(engine::scriptingsystem::Lua& script) {
-    script.registerNative("damage", effects::damage);
-    script.registerNative("damageWithFixedRecoil", effects::damageWithFixedRecoil);
-    script.registerNative("damageWithRecoil", effects::damageWithRecoil);
-    script.registerNative("fixedDamage", effects::fixedDamage);
-    script.registerNative("lowerStat", effects::lowerStat);
-    script.registerNative("raiseStat", effects::raiseStat);
-    script.registerNative("ensureCriticalHit", effects::ensureCriticalHit);
-    script.registerNative("multiplyDamage", effects::multiplyDamage);
-    script.registerNative("negateMove", effects::negateMove);
-    script.registerNative("internalAddStatusCondition", effects::addStatusCondition);
-    script.registerNative("internalRemoveStatusCondition", effects::removeStatusCondition);
-    script.registerNative("sleep", effects::sleep);
-    script.registerNative("reduceSleepCounter", effects::reduceSleepCounter);
+    script.eval("external = {}");
 
-    script.registerNative("addTimedFlagUser", effects::addTimedFlagUser);
-    script.registerNative("addFlagUser", effects::addFlagUser);
-    script.registerNative("addTimedFlagTarget", effects::addTimedFlagTarget);
-    script.registerNative("addFlagTarget", effects::addFlagTarget);
-    script.registerNative("removeFlagUser", effects::removeFlagUser);
-    script.registerNative("removeFlagTarget", effects::removeFlagTarget);
-    script.registerNative("hasFlag", effects::hasFlag);
+    auto inject = [&](const std::string& name, auto fn) {
+        script.registerNativeInNamespace("external", name, fn);
+    };
 
-    script.registerNative("random", effects::random);
-    script.registerNative("getPokemonProperty", effects::getPokemonProperty);
-    script.registerNative("getMoveProperty", effects::getMoveProperty);
-    script.registerNative("showText", effects::showText);
+    inject("damage", effects::damage);
+    inject("damageWithFixedRecoil", effects::damageWithFixedRecoil);
+    inject("damageWithRecoil", effects::damageWithRecoil);
+    inject("fixedDamage", effects::fixedDamage);
+    inject("lowerStat", effects::lowerStat);
+    inject("raiseStat", effects::raiseStat);
+    inject("ensureCriticalHit", effects::ensureCriticalHit);
+    inject("multiplyDamage", effects::multiplyDamage);
+    inject("negateMove", effects::negateMove);
+    inject("internalAddStatusCondition", effects::addStatusCondition);
+    inject("internalRemoveStatusCondition", effects::removeStatusCondition);
+    inject("sleep", effects::sleep);
+    inject("reduceSleepCounter", effects::reduceSleepCounter);
+
+    inject("addTimedFlagUser", effects::addTimedFlagUser);
+    inject("addFlagUser", effects::addFlagUser);
+    inject("addTimedFlagTarget", effects::addTimedFlagTarget);
+    inject("addFlagTarget", effects::addFlagTarget);
+    inject("removeFlagUser", effects::removeFlagUser);
+    inject("removeFlagTarget", effects::removeFlagTarget);
+    inject("hasFlag", effects::hasFlag);
+
+    inject("random", effects::random);
+    inject("getPokemonProperty", effects::getPokemonProperty);
+    inject("getMoveProperty", effects::getMoveProperty);
+    inject("showText", effects::showText);
 }

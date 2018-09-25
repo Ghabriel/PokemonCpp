@@ -49,13 +49,21 @@ statFlags = {
 -- float(int)
 function getStatStageMultiplier(stage)
     local absStage = math.abs(stage);
-    return stage >= 0 ? (2 + absStage) / 2.0 : 2.0 / (2 + absStage);
+    if stage >= 0 then
+        return (2 + absStage) / 2.0
+    else
+        return 2.0 / (2 + absStage)
+    end
 end
 
 -- float(int)
 function getAccuracyStatStageMultiplier(stage)
     local absStage = math.abs(stage);
-    return stage >= 0 ? (3 + absStage) / 3.0 : 3.0 / (3 + absStage);
+    if stage >= 0 then
+        return (3 + absStage) / 3.0
+    else
+        return 3.0 / (3 + absStage)
+    end
 end
 
 -- int(Pokemon, Move, StatFlags)
@@ -86,10 +94,11 @@ end
 
 -- int(Pokemon, Stat, StatFlags)
 function getEffectiveStat(pokemon, stat, calculationFlags)
-    local standardStatValue = external:getStandardStat(pokemon, stat)
-    local currentStage = getModifiedStatStage(pokemon, stat, calculationFlags)
-    local statValue = standardStatValue * getStatStageMultiplier(currentStage)
-    return specialized:getEffectiveStat(pokemon, stat, statValue)
+    return 7
+    -- local standardStatValue = external:getStandardStat(pokemon, stat)
+    -- local currentStage = getModifiedStatStage(pokemon, stat, calculationFlags)
+    -- local statValue = standardStatValue * getStatStageMultiplier(currentStage)
+    -- return specialized:getEffectiveStat(pokemon, stat, statValue)
 end
 
 -- int(Pokemon, Stat, StatFlags)
@@ -107,13 +116,14 @@ end
 
 -- bool(Pokemon)
 function hasUsableMoves(pokemon)
-    for moveIndex = 0,(pokemon.moveCount - 1) do
-        if canUseMove(pokemon, moveIndex) then
-            return true
-        end
-    end
+    return true
+    -- for moveIndex = 0,(pokemon.moveCount - 1) do
+    --     if canUseMove(pokemon, moveIndex) then
+    --         return true
+    --     end
+    -- end
 
-    return false
+    -- return false
 end
 
 -- bool(Pokemon, int)
@@ -187,7 +197,7 @@ function getTypeEffectiveness(pokemon, move)
 
     if pokemon.typeCount > 1 then
         local secondTypeIndex = typeMapping[pokemon.type1]
-        result *= typeTable[moveTypeIndex][secondTypeIndex]
+        result = result * typeTable[moveTypeIndex][secondTypeIndex]
     end
 
     return result

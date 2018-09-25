@@ -191,7 +191,13 @@ namespace engine::scriptingsystem {
     }
 
     inline void LuaWrapper::call(size_t paramCount, size_t returnCount) {
-        lua_pcall(L.get(), paramCount, returnCount, 0);
+        if (lua_pcall(L.get(), paramCount, returnCount, 0) != 0) {
+            std::string errorMessage = get<std::string>();
+
+            if (errorMessage != "attempt to call a nil value") {
+                throw std::runtime_error("Lua runtime error: " + errorMessage);
+            }
+        }
     }
 
     inline void LuaWrapper::eval(const std::string& code) {
