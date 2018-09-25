@@ -45,8 +45,8 @@ namespace {
         queue.addEvent(std::make_unique<TEvent>(std::forward<Args>(args)...));
     }
 
-    Entity getPokemonEntity(EntityId entityId) {
-        switch (entityId) {
+    Entity getPokemonEntity(int entityId) {
+        switch (static_cast<EntityId>(entityId)) {
             case EntityId::User:
                 return user;
             case EntityId::Target:
@@ -67,7 +67,7 @@ namespace {
                 // should be unreachable
                 assert(false);
             default:
-                assert(static_cast<int>(entityId) >= 0);
+                assert(entityId >= 0);
                 return static_cast<Entity>(entityId);
         }
     }
@@ -352,20 +352,20 @@ void effects::negateMove() {
 }
 
 void effects::addStatusCondition(int entityId, int statusConditionId) {
-    Entity entity = getPokemonEntity(static_cast<EntityId>(entityId));
+    Entity entity = getPokemonEntity(entityId);
     Pokemon& pokemon = data<Pokemon>(entity, *gameData);
     pokemon.status = static_cast<StatusCondition>(statusConditionId);
 }
 
 void effects::removeStatusCondition(int entityId) {
-    Entity entity = getPokemonEntity(static_cast<EntityId>(entityId));
+    Entity entity = getPokemonEntity(entityId);
     Pokemon& pokemon = data<Pokemon>(entity, *gameData);
     pokemon.status = StatusCondition::Normal;
     pokemon.asleepRounds = 0;
 }
 
 void effects::sleep(int entityId, int duration) {
-    Entity entity = getPokemonEntity(static_cast<EntityId>(entityId));
+    Entity entity = getPokemonEntity(entityId);
     Pokemon& pokemon = data<Pokemon>(entity, *gameData);
     pokemon.status = StatusCondition::Sleep;
     pokemon.asleepRounds = duration;
@@ -404,9 +404,14 @@ void effects::removeFlagTarget(const std::string& flagId) {
 }
 
 bool effects::hasFlag(int entityId, const std::string& flagId) {
-    Entity entity = getPokemonEntity(static_cast<EntityId>(entityId));
+    Entity entity = getPokemonEntity(entityId);
     auto& flagList = data<Battle>(battle, *gameData).pokemonFlags[entity];
     return isFlagIn(flagId, flagList);
+}
+
+int effects::getStatStage(int entityId, int statId) {
+    Entity entity = getPokemonEntity(entityId);
+    return data<VolatileData>(entity, *gameData).statStages[statId];
 }
 
 
@@ -415,7 +420,7 @@ int effects::random(int min, int max) {
 }
 
 std::string effects::getPokemonProperty(int entityId, const std::string& property) {
-    Entity pokemonEntity = getPokemonEntity(static_cast<EntityId>(entityId));
+    Entity pokemonEntity = getPokemonEntity(entityId);
     const Pokemon& currentPokemon = data<Pokemon>(pokemonEntity, *gameData);
 
     for (size_t i = 0; i < constants::MOVE_LIMIT; ++i) {
@@ -513,6 +518,8 @@ void injectNativeBattleFunctions(engine::scriptingsystem::Lua& script) {
     inject("removeFlagUser", effects::removeFlagUser);
     inject("removeFlagTarget", effects::removeFlagTarget);
     inject("hasFlag", effects::hasFlag);
+
+    inject("getStatStage", effects::getStatStage);
 
     inject("random", effects::random);
     inject("getPokemonProperty", effects::getPokemonProperty);

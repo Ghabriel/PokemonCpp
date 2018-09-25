@@ -71,7 +71,6 @@ namespace lua {
         return luaFile.call<Ret>(
             functionName,
             toLuaValue(args)...
-            // args...
         );
     }
 

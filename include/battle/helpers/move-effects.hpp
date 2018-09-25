@@ -50,6 +50,9 @@ namespace effects {
     void removeFlagTarget(const std::string& flagId);
     bool hasFlag(int entityId, const std::string& flagId);
 
+    // Getters
+    int getStatStage(int entityId, int statId);
+
     int random(int min, int max);
     std::string getPokemonProperty(int entityId, const std::string& property);
     std::string getMoveProperty(int pokemonId, int moveIndex, const std::string& property);
