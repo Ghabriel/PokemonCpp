@@ -442,25 +442,39 @@ std::string effects::getPokemonProperty(int entityId, const std::string& propert
         return "";
     };
 
+    PokemonSpeciesData& speciesData = data<PokemonSpeciesData>(pokemonEntity, *gameData);
+    size_t typeCount = speciesData.types.size();
+
     return
-        (property == "species")        ? currentPokemon.species :
-        (property == "nature")         ? std::to_string(static_cast<int>(currentPokemon.nature)) :
-        (property == "heldItem")       ? currentPokemon.heldItem :
-        (property == "ability")        ? currentPokemon.ability :
-        (property == "moveCount")      ? std::to_string(currentPokemon.moves.size()) :
-        (property == "gender")         ? std::to_string(static_cast<int>(currentPokemon.gender)) :
-        (property == "form")           ? std::to_string(currentPokemon.form) :
-        (property == "displayName")    ? currentPokemon.displayName :
-        (property == "status")         ? std::to_string(static_cast<int>(currentPokemon.status)) :
-        (property == "asleepRounds")   ? std::to_string(currentPokemon.asleepRounds) :
-        (property == "level")          ? std::to_string(currentPokemon.level) :
-        (property == "hp")             ? std::to_string(getStat(Stat::HP)) :
-        (property == "attack")         ? std::to_string(getStat(Stat::Attack)) :
-        (property == "defense")        ? std::to_string(getStat(Stat::Defense)) :
-        (property == "specialAttack")  ? std::to_string(getStat(Stat::SpecialAttack)) :
-        (property == "specialDefense") ? std::to_string(getStat(Stat::SpecialDefense)) :
-        (property == "speed")          ? std::to_string(getStat(Stat::Speed)) :
-        (property == "currentHP")      ? std::to_string(static_cast<int>(currentPokemon.currentHP)) :
+        // Pokémon data
+        (property == "species")          ? currentPokemon.species :
+        (property == "nature")           ? std::to_string(static_cast<int>(currentPokemon.nature)) :
+        (property == "heldItem")         ? currentPokemon.heldItem :
+        (property == "experiencePoints") ? std::to_string(currentPokemon.experiencePoints) :
+        (property == "ability")          ? currentPokemon.ability :
+        (property == "moveCount")        ? std::to_string(currentPokemon.moves.size()) :
+        (property == "gender")           ? std::to_string(static_cast<int>(currentPokemon.gender)) :
+        (property == "form")             ? std::to_string(currentPokemon.form) :
+        (property == "displayName")      ? currentPokemon.displayName :
+        (property == "pokerus")          ? std::to_string(currentPokemon.pokerus) :
+        (property == "statusCondition")  ? std::to_string(static_cast<int>(currentPokemon.status)) :
+        (property == "asleepRounds")     ? std::to_string(currentPokemon.asleepRounds) :
+        (property == "level")            ? std::to_string(currentPokemon.level) :
+        (property == "hp")               ? std::to_string(getStat(Stat::HP)) :
+        (property == "attack")           ? std::to_string(getStat(Stat::Attack)) :
+        (property == "defense")          ? std::to_string(getStat(Stat::Defense)) :
+        (property == "specialAttack")    ? std::to_string(getStat(Stat::SpecialAttack)) :
+        (property == "specialDefense")   ? std::to_string(getStat(Stat::SpecialDefense)) :
+        (property == "speed")            ? std::to_string(getStat(Stat::Speed)) :
+        (property == "currentHP")        ? std::to_string(static_cast<int>(currentPokemon.currentHP)) :
+        // Species data
+        (property == "typeCount")        ? std::to_string(typeCount) :
+        (property == "type0")            ? speciesData.types[0] :
+        (property == "type1")            ? (typeCount == 1 ? "" : speciesData.types[1]) :
+        (property == "baseExp")          ? std::to_string(speciesData.baseExp) :
+        (property == "captureRate")      ? std::to_string(speciesData.captureRate) :
+        (property == "height")           ? std::to_string(speciesData.height) :
+        (property == "weight")           ? std::to_string(speciesData.weight) :
         throwError();
 }
 
@@ -483,6 +497,7 @@ std::string effects::getMoveProperty(int pokemonId, int moveIndex, const std::st
         (property == "currentPP") ? std::to_string(currentPP) :
         (property == "targetType") ? move->targetType :
         (property == "priority") ? std::to_string(move->priority) :
+        (property == "flags") ? move->flags :
         throwError();
 }
 

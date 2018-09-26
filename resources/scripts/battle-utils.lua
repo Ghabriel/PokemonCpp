@@ -94,16 +94,15 @@ end
 
 -- int(Pokemon, Stat, StatFlags)
 function getEffectiveStat(pokemon, stat, calculationFlags)
-    return 7
-    -- local standardStatValue = external:getStandardStat(pokemon, stat)
-    -- local currentStage = getModifiedStatStage(pokemon, stat, calculationFlags)
-    -- local statValue = standardStatValue * getStatStageMultiplier(currentStage)
-    -- return specialized:getEffectiveStat(pokemon, stat, statValue)
+    local standardStatValue = external.getStandardStat(pokemon, stat)
+    local currentStage = getModifiedStatStage(pokemon, stat, calculationFlags)
+    local statValue = standardStatValue * getStatStageMultiplier(currentStage)
+    return specialized.getEffectiveStat(pokemon, stat, statValue)
 end
 
 -- int(Pokemon, Stat, StatFlags)
 function getModifiedStatStage(pokemon, stat, calculationFlags)
-    local currentStage = external:getStatStage(pokemon, stat)
+    local currentStage = external.getStatStage(pokemon, stat)
 
     if calculationFlags == statFlags.ignorePositive then
         currentStage = math.min(0, currentStage)
@@ -116,19 +115,18 @@ end
 
 -- bool(Pokemon)
 function hasUsableMoves(pokemon)
-    return true
-    -- for moveIndex = 0,(pokemon.moveCount - 1) do
-    --     if canUseMove(pokemon, moveIndex) then
-    --         return true
-    --     end
-    -- end
+    for moveIndex = 0,(pokemon.moveCount - 1) do
+        if canUseMove(pokemon, moveIndex) then
+            return true
+        end
+    end
 
-    -- return false
+    return false
 end
 
 -- bool(Pokemon, int)
 function canUseMove(pokemon, moveIndex)
-    return getPP(pokemon, moveIndex) > 0 and specialized:canUseMove(pokemon, moveIndex)
+    return getPP(pokemon, moveIndex) > 0 and specialized.canUseMove(pokemon, moveIndex)
 end
 
 -- int(Pokemon, int)
@@ -148,11 +146,12 @@ function checkMiss(user, target, move)
         return false
     end
 
-    local userAccuracyStage = external:getStatStage(user, stats.accuracy)
-    local targetEvasionStage = external:getStatStage(target, stats.evasion)
+    local userAccuracyStage = external.getStatStage(user, stats.accuracy)
+    local targetEvasionStage = external.getStatStage(target, stats.evasion)
     local accuracyStage = clamp(userAccuracyStage - targetEvasionStage, -6, 6)
     local accuracyStageMultiplier = getAccuracyStatStageMultiplier(accuracyStage)
     local hitRate = move.accuracy * accuracyStageMultiplier
+    log("Hit rate: "..hitRate)
     return random(1, 100) > hitRate
 end
 
@@ -181,7 +180,7 @@ end
 
 -- int(int, int)
 function random(min, max)
-    return external:random(min, max)
+    return external.random(min, max)
 end
 
 -- float(Pokemon, Move)
