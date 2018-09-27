@@ -31,9 +31,15 @@ namespace lua {
     void showText(const std::string& content);
     void wait(int ms);
 
+    // TODO: move LuaSupportedType-related things to a new file (lua-type-conversion?)
     template<typename T>
     struct LuaSupportedType {
         using type = T;
+    };
+
+    template<>
+    struct LuaSupportedType<engine::entitysystem::Entity> {
+        using type = std::unordered_map<std::string, int>;
     };
 
     template<>
@@ -57,6 +63,15 @@ namespace lua {
     }
 
     template<>
+    inline typename LuaSupportedType<engine::entitysystem::Entity>::type toLuaValue(
+        const engine::entitysystem::Entity& value
+    ) {
+        return {
+            {"id", static_cast<int>(value)}
+        };
+    }
+
+    template<>
     inline typename LuaSupportedType<BoundMove>::type toLuaValue(const BoundMove& value) {
         return {
             {"pokemonId", value.user},
@@ -70,7 +85,7 @@ namespace lua {
         engine::scriptingsystem::Lua& luaFile = script("moves", gameData);
         return luaFile.call<Ret>(
             functionName,
-            toLuaValue(args)...
+            toLuaValue(std::forward<Args>(args))...
         );
     }
 

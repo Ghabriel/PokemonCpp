@@ -51,12 +51,13 @@ namespace effects {
     bool hasFlag(int entityId, const std::string& flagId);
 
     // Getters
+    int getStandardStat(int entityId, int statId);
     int getStatStage(int entityId, int statId);
 
     int random(int min, int max);
+    void showText(const std::string& content);
     std::string getPokemonProperty(int entityId, const std::string& property);
     std::string getMoveProperty(int pokemonId, int moveIndex, const std::string& property);
-    void showText(const std::string& content);
 }
 
 void injectNativeBattleFunctions(engine::scriptingsystem::Lua& script);

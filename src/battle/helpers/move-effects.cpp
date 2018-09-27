@@ -409,6 +409,12 @@ bool effects::hasFlag(int entityId, const std::string& flagId) {
     return isFlagIn(flagId, flagList);
 }
 
+int effects::getStandardStat(int entityId, int statId) {
+    Entity entity = getPokemonEntity(entityId);
+    const Pokemon& pokemon = data<Pokemon>(entity, *gameData);
+    return pokemon.stats[statId];
+}
+
 int effects::getStatStage(int entityId, int statId) {
     Entity entity = getPokemonEntity(entityId);
     return data<VolatileData>(entity, *gameData).statStages[statId];
@@ -417,6 +423,10 @@ int effects::getStatStage(int entityId, int statId) {
 
 int effects::random(int min, int max) {
     return ::random(min, max);
+}
+
+void effects::showText(const std::string& content) {
+    enqueueEvent<TextEvent>(content, battle, *gameData);
 }
 
 std::string effects::getPokemonProperty(int entityId, const std::string& property) {
@@ -501,10 +511,6 @@ std::string effects::getMoveProperty(int pokemonId, int moveIndex, const std::st
         throwError();
 }
 
-void effects::showText(const std::string& content) {
-    enqueueEvent<TextEvent>(content, battle, *gameData);
-}
-
 void injectNativeBattleFunctions(engine::scriptingsystem::Lua& script) {
     script.eval("external = {}");
 
@@ -534,6 +540,7 @@ void injectNativeBattleFunctions(engine::scriptingsystem::Lua& script) {
     inject("removeFlagTarget", effects::removeFlagTarget);
     inject("hasFlag", effects::hasFlag);
 
+    inject("getStandardStat", effects::getStandardStat);
     inject("getStatStage", effects::getStatStage);
 
     inject("random", effects::random);
