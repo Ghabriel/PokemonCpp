@@ -1,7 +1,7 @@
 specialized = {}
 
 function specialized:getEffectiveStat(pokemon, stat, baseValue)
-    if stat == stats.speed and hasFlag(pokemon.id, "Paralysis") then
+    if stat == stats.speed and external.hasFlag(pokemon.id, "Paralysis") then
         baseValue = baseValue * 0.5
     end
 

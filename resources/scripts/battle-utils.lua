@@ -101,16 +101,21 @@ end
 -- int(Pokemon, Stat, StatFlags)
 function getEffectiveStat(pokemon, stat, calculationFlags)
     setmetatable(pokemon, pokemonMetatable)
-    local standardStatValue = external.getStandardStat(pokemon, stat)
+    local standardStatValue = getStandardStat(pokemon, stat)
     local currentStage = getModifiedStatStage(pokemon, stat, calculationFlags)
     local statValue = standardStatValue * getStatStageMultiplier(currentStage)
-    return specialized.getEffectiveStat(pokemon, stat, statValue)
+    return specialized:getEffectiveStat(pokemon, stat, statValue)
+end
+
+-- int(Pokemon, Stat)
+function getStandardStat(pokemon, stat)
+    return external.getStandardStat(pokemon.id, stat)
 end
 
 -- int(Pokemon, Stat, StatFlags)
 function getModifiedStatStage(pokemon, stat, calculationFlags)
     setmetatable(pokemon, pokemonMetatable)
-    local currentStage = external.getStatStage(pokemon, stat)
+    local currentStage = getStatStage(pokemon, stat)
 
     if calculationFlags == statFlags.ignorePositive then
         currentStage = math.min(0, currentStage)
@@ -119,6 +124,10 @@ function getModifiedStatStage(pokemon, stat, calculationFlags)
     end
 
     return currentStage
+end
+
+function getStatStage(pokemon, stat)
+    return external.getStatStage(pokemon.id, stat)
 end
 
 -- bool(Pokemon)
@@ -136,16 +145,16 @@ end
 -- bool(Pokemon, int)
 function canUseMove(pokemon, moveIndex)
     setmetatable(pokemon, pokemonMetatable)
-    return getPP(pokemon, moveIndex) > 0 and specialized.canUseMove(pokemon, moveIndex)
+    return getPP(pokemon, moveIndex) > 0 and specialized:canUseMove(pokemon, moveIndex)
 end
 
 -- int(Pokemon, int)
 function getPP(pokemon, moveIndex)
     setmetatable(pokemon, pokemonMetatable)
-    if     moveIndex == 0 then return pokemon.pp0
-    elseif moveIndex == 1 then return pokemon.pp1
-    elseif moveIndex == 2 then return pokemon.pp2
-    elseif moveIndex == 3 then return pokemon.pp3
+    if     moveIndex == 0 then return tonumber(pokemon.pp0)
+    elseif moveIndex == 1 then return tonumber(pokemon.pp1)
+    elseif moveIndex == 2 then return tonumber(pokemon.pp2)
+    elseif moveIndex == 3 then return tonumber(pokemon.pp3)
     end
 
     return 0
@@ -160,8 +169,8 @@ function checkMiss(user, target, move)
         return false
     end
 
-    local userAccuracyStage = external.getStatStage(user, stats.accuracy)
-    local targetEvasionStage = external.getStatStage(target, stats.evasion)
+    local userAccuracyStage = getStatStage(user, stats.accuracy)
+    local targetEvasionStage = getStatStage(target, stats.evasion)
     local accuracyStage = clamp(userAccuracyStage - targetEvasionStage, -6, 6)
     local accuracyStageMultiplier = getAccuracyStatStageMultiplier(accuracyStage)
     local hitRate = move.accuracy * accuracyStageMultiplier
