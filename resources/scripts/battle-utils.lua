@@ -204,6 +204,12 @@ function checkCritical(user, target, move)
     return random(1, 24) <= chancesIn24
 end
 
+-- int(Pokemon)
+function getCriticalHitStage(pokemon)
+    -- TODO
+    return 0
+end
+
 -- int(int, int)
 function random(min, max)
     return external.random(min, max)
@@ -223,7 +229,7 @@ function getTypeEffectiveness(pokemon, move)
     local firstTypeIndex = typeMapping[pokemon.type0]
     local result = typeTable[moveTypeIndex][firstTypeIndex]
 
-    if pokemon.typeCount > 1 then
+    if tonumber(pokemon.typeCount) > 1 then
         local secondTypeIndex = typeMapping[pokemon.type1]
         result = result * typeTable[moveTypeIndex][secondTypeIndex]
     end

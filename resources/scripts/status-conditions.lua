@@ -28,43 +28,43 @@ statusConditionFlags = {
 function addStatusCondition(conditionId, fixedSleepDuration)
     -- TODO: some pokémon are immune to certain status conditions
     if conditionId == statusConditions.sleep then
-        sleep(target.id, fixedSleepDuration or random(1, 3))
+        external.sleep(target.id, fixedSleepDuration or random(1, 3))
     end
 
-    addFlagTarget(statusConditionFlags[conditionId])
-    internalAddStatusCondition(target.id, conditionId)
+    external.addFlagTarget(statusConditionFlags[conditionId])
+    external.addStatusCondition(target.id, conditionId)
     return true
 end
 
 function removeStatusCondition(entity)
     for condition, flagId in pairs(statusConditionFlags) do
-        removeFlagTarget(flagId)
+        external.removeFlagTarget(flagId)
     end
 
-    internalRemoveStatusCondition(entity.id)
+    external.removeStatusCondition(entity.id)
 end
 
 -- Burn
 function Flag_Burn_beforeDamageInflict()
     if move.kind == "Physical" then
-        multiplyDamage(0.5)
+        external.multiplyDamage(0.5)
     end
 end
 
 function Flag_Burn_onTurnEnd()
-    showText(target.displayName.." is hurt by its burn!")
-    fixedDamage((target.hp + 15) / 16)
+    external.showText(target.displayName.." is hurt by its burn!")
+    external.fixedDamage((target.hp + 15) / 16)
 end
 
 
 -- Freeze
 function Flag_Freeze_beforeMove()
-    showText(target.displayName.." is frozen solid!")
+    external.showText(target.displayName.." is frozen solid!")
     if random(1, 100) <= 20 then
-        showText(target.displayName.." thawed out!")
-        removeStatusCondition(target)
+        external.showText(target.displayName.." thawed out!")
+        external.removeStatusCondition(target)
     else
-        negateMove()
+        external.negateMove()
     end
 end
 
@@ -72,30 +72,30 @@ end
 -- Paralysis
 function Flag_Paralysis_beforeMove()
     if random(1, 100) <= 25 then
-        showText(target.displayName.." is paralyzed! It can't move!")
-        negateMove()
+        external.showText(target.displayName.." is paralyzed! It can't move!")
+        external.negateMove()
     end
 end
 
 
 -- Poison
 function Flag_Poison_onTurnEnd()
-    showText(target.displayName.." is hurt by poison!")
-    fixedDamage((target.hp + 7) / 8)
+    external.showText(target.displayName.." is hurt by poison!")
+    external.fixedDamage((target.hp + 7) / 8)
 end
 
 
 -- Toxic
 toxicCounter = {}
 function Flag_Toxic_onTurnEnd()
-    showText(target.displayName.." is hurt by poison!")
+    external.showText(target.displayName.." is hurt by poison!")
 
     if toxicCounter[target] == nil then
         toxicCounter[target] = 0
     end
 
     toxicCounter[target] = toxicCounter[target] + 1
-    fixedDamage((toxicCounter[target] * target.hp + 7) / 8)
+    external.fixedDamage((toxicCounter[target] * target.hp + 7) / 8)
 end
 
 function Flag_Toxic_onSwitchIn()
@@ -103,22 +103,22 @@ function Flag_Toxic_onSwitchIn()
 end
 
 function Flag_Toxic_onBattleEnd()
-    removeFlagTarget("Toxic")
-    addFlagTarget("Poison")
+    external.removeFlagTarget("Toxic")
+    external.addFlagTarget("Poison")
 end
 
 
 -- Sleep
 function Flag_Sleep_beforeMove()
-    showText(target.displayName.." is fast asleep.")
+    external.showText(target.displayName.." is fast asleep.")
     if tonumber(target.asleepRounds) == 0 then
-        showText(target.displayName.." woke up!")
+        external.showText(target.displayName.." woke up!")
         removeStatusCondition(target)
     else
-        negateMove()
+        external.negateMove()
     end
 end
 
 function Flag_Sleep_onTurnEnd()
-    reduceSleepCounter()
+    external.reduceSleepCounter()
 end

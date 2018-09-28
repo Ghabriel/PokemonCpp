@@ -527,8 +527,8 @@ void injectNativeBattleFunctions(engine::scriptingsystem::Lua& script) {
     inject("ensureCriticalHit", effects::ensureCriticalHit);
     inject("multiplyDamage", effects::multiplyDamage);
     inject("negateMove", effects::negateMove);
-    inject("internalAddStatusCondition", effects::addStatusCondition);
-    inject("internalRemoveStatusCondition", effects::removeStatusCondition);
+    inject("addStatusCondition", effects::addStatusCondition);
+    inject("removeStatusCondition", effects::removeStatusCondition);
     inject("sleep", effects::sleep);
     inject("reduceSleepCounter", effects::reduceSleepCounter);
 

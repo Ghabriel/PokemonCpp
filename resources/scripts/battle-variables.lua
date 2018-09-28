@@ -45,4 +45,4 @@ targetTeam = {
     [3] = { id = defaultEntityIds.targetTeam[3] },
     [4] = { id = defaultEntityIds.targetTeam[4] },
 }
-move = { id = defaultEntityIds.move }
+move = { pokemonId = defaultEntityIds.move }
