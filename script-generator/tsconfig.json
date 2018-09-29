@@ -58,6 +58,7 @@
   },
   "include": [
     "../resources/scripts/original/*.ts",
+    "./print-ast.ts",
     "./transpiler.ts"
   ]
 }

@@ -9,38 +9,21 @@ export class LuaBaseTranspiler {
     }
 
     private transpileNode(node: ts.Node): void {
-        switch (node.kind) {
-            case ts.SyntaxKind.FunctionDeclaration:
-                this.transpileFunctionDeclaration(node as ts.FunctionDeclaration);
-                break;
-            case ts.SyntaxKind.EndOfFileToken:
-                break;
-            default:
-                return this.handleUnsupportedNode(node, 'transpileNode');
+        if (node.kind === ts.SyntaxKind.EndOfFileToken) {
+            return;
         }
-    }
 
-    private transpileFunctionDeclaration(node: ts.FunctionDeclaration): void {
-        this.transpileFunctionSignature(node);
-        this.indentationLevel++;
-        this.transpileBlock(node.body!);
-        this.indentationLevel--;
-        this.emitIndented('end\n');
-    }
-
-    private transpileFunctionSignature(node: ts.FunctionDeclaration): void {
-        const parameterNames = node.parameters.map(parameter => parameter.name.getText());
-        const parameterList = parameterNames.join(', ');
-        const result = `function ${node.name!.text}(${parameterList})\n`;
-        this.emitIndented(result);
-    }
-
-    private transpileBlock(node: ts.Block): void {
-        node.statements.forEach(statement => this.transpileStatement(statement));
+        this.transpileStatement(node as ts.Statement);
     }
 
     private transpileStatement(node: ts.Statement): void {
         switch (node.kind) {
+            case ts.SyntaxKind.FunctionDeclaration:
+                this.transpileFunctionDeclaration(node as ts.FunctionDeclaration);
+                break;
+            case ts.SyntaxKind.EnumDeclaration:
+                this.transpileEnumDeclaration(node as ts.EnumDeclaration);
+                break;
             case ts.SyntaxKind.Block:
                 this.transpileBlock(node as ts.Block);
                 break;
@@ -65,6 +48,43 @@ export class LuaBaseTranspiler {
             default:
                 return this.handleUnsupportedNode(node, 'transpileStatement');
         }
+    }
+
+    private transpileFunctionDeclaration(node: ts.FunctionDeclaration): void {
+        this.transpileFunctionSignature(node);
+        this.indentationLevel++;
+        this.transpileBlock(node.body!);
+        this.indentationLevel--;
+        this.emitIndented('end\n');
+    }
+
+    private transpileFunctionSignature(node: ts.FunctionDeclaration): void {
+        const parameterNames = node.parameters.map(parameter => parameter.name.getText());
+        const parameterList = parameterNames.join(', ');
+        this.emitIndented(`function ${node.name!.text}(${parameterList})\n`);
+    }
+
+    private transpileEnumDeclaration(node: ts.EnumDeclaration): void {
+        this.emitIndented(`${node.name.text} = {\n`);
+        this.indentationLevel++;
+
+        let nextEnumValue: number = 0;
+        for (const member of node.members) {
+            if (member.initializer) {
+                console.log('Warning: enums with initializers are not supported');
+                continue;
+            }
+
+            this.emitIndented(`${member.name.getText()} = ${nextEnumValue},\n`);
+            nextEnumValue++;
+        }
+
+        this.indentationLevel--;
+        this.emitIndented('}\n');
+    }
+
+    private transpileBlock(node: ts.Block): void {
+        node.statements.forEach(statement => this.transpileStatement(statement));
     }
 
     private transpileVariableStatement(node: ts.VariableStatement): void {
@@ -133,6 +153,12 @@ export class LuaBaseTranspiler {
             case ts.SyntaxKind.ParenthesizedExpression:
                 this.transpileParenthesizedExpression(node as ts.ParenthesizedExpression);
                 break;
+            case ts.SyntaxKind.ArrayLiteralExpression:
+                this.transpileArrayLiteralExpression(node as ts.ArrayLiteralExpression);
+                break;
+            case ts.SyntaxKind.ObjectLiteralExpression:
+                this.transpileObjectLiteralExpression(node as ts.ObjectLiteralExpression);
+                break;
             default:
                 return this.handleUnsupportedNode(node, 'transpileExpression');
         }
@@ -193,6 +219,57 @@ export class LuaBaseTranspiler {
         this.emit('(');
         this.transpileExpression(node.expression);
         this.emit(')');
+    }
+
+    private transpileArrayLiteralExpression(node: ts.ArrayLiteralExpression): void {
+        this.emit('{');
+
+        let first = true;
+        for (const element of node.elements) {
+            if (!first) {
+                this.emit(', ');
+            }
+
+            this.transpileExpression(element);
+            first = false;
+        }
+
+        this.emit('}');
+    }
+
+    private transpileObjectLiteralExpression(node: ts.ObjectLiteralExpression): void {
+        this.emit('{');
+        this.indentationLevel++;
+
+        let first = true;
+        for (const property of node.properties) {
+            if (!first) {
+                this.emit(',');
+            }
+
+            this.emit('\n');
+            this.emitIndented('');
+            this.transpileObjectLiteralProperty(property);
+            first = false;
+        }
+
+        if (!first) {
+            this.emit('\n');
+        }
+
+        this.indentationLevel--;
+        this.emit('}');
+    }
+
+    private transpileObjectLiteralProperty(node: ts.ObjectLiteralElementLike): void {
+        if (node.kind !== ts.SyntaxKind.PropertyAssignment) {
+            return this.handleUnsupportedNode(node, 'transpileObjectLiteralProperty');
+        }
+
+        const property = node as ts.PropertyAssignment;
+
+        this.emit(`[${property.name.getText()}] = `);
+        this.transpileExpression(node.initializer);
     }
 
     private emitIndented(content: string): void {
