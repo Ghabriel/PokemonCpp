@@ -1,0 +1,17 @@
+{
+  "name": "compiler-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "tsc-watch --onSuccess \"node script-generator/transpiler.js\""
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^10.11.2",
+    "tsc-watch": "^1.0.29",
+    "typescript": "^3.1.1"
+  }
+}
