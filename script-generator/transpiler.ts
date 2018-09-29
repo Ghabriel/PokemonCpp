@@ -22,4 +22,6 @@ for (const fileName of fileNames) {
 
     const luaCode = transpiler.transpile(sourceFile);
     fs.writeFileSync(outputPath, luaCode);
+
+    console.log('[ COMPLETED ]');
 }

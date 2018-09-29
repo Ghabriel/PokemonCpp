@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "tsc-watch --onSuccess \"node script-generator/transpiler.js\""
+    "start": "tsc-watch --onSuccess \"node js/script-generator/transpiler.js\""
   },
   "author": "",
   "license": "ISC",
