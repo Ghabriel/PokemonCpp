@@ -4,6 +4,6 @@ const opponentTeam = {};
 const user = {};
 const target = {};
 
-function chooseMoveWildBattle() {
+export function chooseMoveWildBattle() {
     return 0;
 }

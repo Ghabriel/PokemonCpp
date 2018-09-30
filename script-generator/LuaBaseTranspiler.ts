@@ -328,6 +328,8 @@ export class LuaBaseTranspiler {
                 return 'and';
             case '||':
                 return 'or';
+            case '===':
+                return '==';
             default:
                 return tokenText;
         }
@@ -375,11 +377,13 @@ export class LuaBaseTranspiler {
             first = false;
         }
 
+        this.indentationLevel--;
+
         if (!first) {
             this.emit('\n');
+            this.emitIndented('');
         }
 
-        this.indentationLevel--;
         this.emit('}');
     }
 

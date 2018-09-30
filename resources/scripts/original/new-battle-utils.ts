@@ -106,8 +106,7 @@ export function getEffectiveStat(
     const standardStatValue = getStandardStat(pokemon, stat);
     const currentStage = getModifiedStatStage(pokemon, stat, calculationFlags);
     const statValue = standardStatValue * getStatStageMultiplier(currentStage);
-    // TODO: specialized
-    return statValue;
+    return specialized.getEffectiveStat(pokemon, stat, statValue);
 }
 
 export function getStandardStat(pokemon: Pokemon, stat: Stat): number {
@@ -144,8 +143,17 @@ export function canUseMove(pokemon: Pokemon, moveIndex: number): boolean {
 }
 
 export function getPP(pokemon: Pokemon, moveIndex: number): number {
-    // TODO
-    return 42;
+    if (moveIndex === 0) {
+        return pokemon.pp0;
+    } else if (moveIndex === 1) {
+        return pokemon.pp1;
+    } else if (moveIndex === 2) {
+        return pokemon.pp2;
+    } else if (moveIndex === 3) {
+        return pokemon.pp3;
+    }
+
+    return 0
 }
 
 export function checkMiss(user: Pokemon, target: Pokemon, move: Move): boolean {
@@ -207,4 +215,13 @@ export function getTypeEffectiveness(pokemon: Pokemon, move: Move): number {
     }
 
     return result
+}
+
+export function calculateExpGain(winner: Pokemon, fainted: Pokemon) {
+    const luckyEgg = 1; // TODO: handle Lucky Egg
+    const shareFactor = 1; // TODO: handle Exp.Share
+    const factor1 = (fainted.baseExp * fainted.level) / (5 * shareFactor);
+    const factor2 = Math.pow(2 * fainted.level + 10, 2.5);
+    const factor3 = Math.pow(fainted.level + winner.level + 10, 2.5);
+    return (factor1 * (factor2 / factor3) + 1) * luckyEgg;
 }
