@@ -4,10 +4,15 @@ import { LuaTranspiler } from './LuaTranspiler';
 
 const originPath = '../resources/scripts/original/';
 const targetPath = '../resources/scripts/';
-const fileNames = fs.readdirSync(originPath);
+const ignoredFiles = ['types.ts'];
 const transpiler = new LuaTranspiler();
+const fileNames = fs.readdirSync(originPath);
 
 for (const fileName of fileNames) {
+    if (ignoredFiles.indexOf(fileName) >= 0) {
+        continue;
+    }
+
     console.log(`[TRANSPILING] ${fileName}`);
 
     const inputPath = originPath + fileName;

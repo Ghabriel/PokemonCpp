@@ -19,9 +19,11 @@ export class LuaBaseTranspiler {
     protected transpileStatement(node: ts.Statement): void {
         switch (node.kind) {
             case ts.SyntaxKind.ImportDeclaration:
-            case ts.SyntaxKind.ModuleDeclaration:
             case ts.SyntaxKind.InterfaceDeclaration:
                 // type-only, nothing to do
+                break;
+            case ts.SyntaxKind.ModuleDeclaration:
+                this.transpileNamespaceDeclaration(node as ts.ModuleDeclaration);
                 break;
             case ts.SyntaxKind.FunctionDeclaration:
                 this.transpileFunctionDeclaration(node as ts.FunctionDeclaration);
@@ -55,6 +57,20 @@ export class LuaBaseTranspiler {
         }
     }
 
+    protected transpileNamespaceDeclaration(node: ts.ModuleDeclaration): void {
+        if (!node.body || node.body.kind !== ts.SyntaxKind.ModuleBlock) {
+            return this.handleUnsupportedNode(node, 'transpileModuleDeclaration');
+        }
+
+        const namespaceName = node.name.text;
+        this.emitIndented(`${namespaceName} = {}\n`);
+
+        this.namespace = namespaceName;
+        const body = node.body as ts.ModuleBlock;
+        body.statements.forEach(statement => this.transpileStatement(statement));
+        this.namespace = null;
+    }
+
     protected transpileFunctionDeclaration(node: ts.FunctionDeclaration): void {
         this.transpileFunctionSignature(node);
         this.indentationLevel++;
@@ -64,9 +80,17 @@ export class LuaBaseTranspiler {
     }
 
     protected transpileFunctionSignature(node: ts.FunctionDeclaration): void {
+        const functionName = node.name!.text;
         const parameterNames = node.parameters.map(parameter => parameter.name.getText());
         const parameterList = parameterNames.join(', ');
-        this.emitIndented(`function ${node.name!.text}(${parameterList})\n`);
+
+        this.emitIndented('function ');
+
+        if (this.namespace !== null) {
+            this.emit(`${this.namespace}:`);
+        }
+
+        this.emit(`${functionName}(${parameterList})\n`);
     }
 
     protected transpileEnumDeclaration(node: ts.EnumDeclaration): void {
@@ -99,8 +123,13 @@ export class LuaBaseTranspiler {
     }
 
     protected transpileVariableDeclaration(node: ts.VariableDeclaration): void {
-        const varName = node.name.getText();
-        this.emitIndented(`local ${varName}`);
+        this.emitIndented('');
+
+        if (!this.isInGlobalScope()) {
+            this.emit('local ');
+        }
+
+        this.emit(node.name.getText());
 
         if (node.initializer) {
             this.emit(' = ');
@@ -270,7 +299,7 @@ export class LuaBaseTranspiler {
         if (!this.isCompoundAssignmentOperator(node.operatorToken)) {
             this.transpileExpression(node.left);
             this.emit(' ');
-            this.emit(node.operatorToken.getText());
+            this.emit(this.convertBinaryOperator(node.operatorToken));
             this.emit(' ');
             this.transpileExpression(node.right);
             return;
@@ -289,6 +318,19 @@ export class LuaBaseTranspiler {
         const options: string[] = ['+=', '-=', '*=', '/=', '%=', '**=', '&=', '|=', '^='];
         const tokenText = token.getText();
         return options.indexOf(tokenText) >= 0;
+    }
+
+    protected convertBinaryOperator(token: ts.Token<ts.BinaryOperator>): string {
+        const tokenText = token.getText();
+
+        switch (tokenText) {
+            case '&&':
+                return 'and';
+            case '||':
+                return 'or';
+            default:
+                return tokenText;
+        }
     }
 
     protected transpileParenthesizedExpression(node: ts.ParenthesizedExpression): void {
@@ -374,7 +416,12 @@ export class LuaBaseTranspiler {
         return indentedLines.join('\n');
     }
 
+    protected isInGlobalScope(): boolean {
+        return this.indentationLevel === 0;
+    }
+
     private output: string = '';
     private indentationLevel: number = 0;
+    private namespace: string | null = null;
     private readonly indentation = '    ';
 }

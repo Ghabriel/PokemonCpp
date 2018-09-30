@@ -1,4 +1,6 @@
-import { external, Move, Pokemon } from "./types";
+import { Stat, StatFlag } from './enums';
+import { specialized } from './new-battle-formulas';
+import { external, luaImplicitSelf, Move, Pokemon } from './types';
 
 const typeTable = [
     [ 1, 1, 1, 1, 1, 0.5, 1, 0, 0.5, 1, 1, 1, 1, 1, 1, 1, 1, 1 ],
@@ -22,42 +24,27 @@ const typeTable = [
 ];
 
 const typeMapping = {
-    "Normal": 1,
-    "Fighting": 2,
-    "Flying": 3,
-    "Poison": 4,
-    "Ground": 5,
-    "Rock": 6,
-    "Bug": 7,
-    "Ghost": 8,
-    "Steel": 9,
-    "Fire": 10,
-    "Water": 11,
-    "Grass": 12,
-    "Electric": 13,
-    "Psychic": 14,
-    "Ice": 15,
-    "Dragon": 16,
-    "Dark": 17,
-    "Fairy": 18,
+    'Normal': 1,
+    'Fighting': 2,
+    'Flying': 3,
+    'Poison': 4,
+    'Ground': 5,
+    'Rock': 6,
+    'Bug': 7,
+    'Ghost': 8,
+    'Steel': 9,
+    'Fire': 10,
+    'Water': 11,
+    'Grass': 12,
+    'Electric': 13,
+    'Psychic': 14,
+    'Ice': 15,
+    'Dragon': 16,
+    'Dark': 17,
+    'Fairy': 18,
 };
 
-enum StatFlag {
-    All,
-    IgnorePositive,
-    IgnoreNegative
-}
-
-enum Stat {
-    HP,
-    Attack,
-    Defense,
-    SpecialAttack,
-    SpecialDefense,
-    Speed,
-    Accuracy,
-    Evasion,
-}
+luaImplicitSelf(specialized);
 
 export function getStatStageMultiplier(stage: number): number {
     const absStage = Math.abs(stage);
@@ -152,6 +139,10 @@ export function hasUsableMoves(pokemon: Pokemon): boolean {
     return true;
 }
 
+export function canUseMove(pokemon: Pokemon, moveIndex: number): boolean {
+    return getPP(pokemon, moveIndex) > 0 && specialized.canUseMove(pokemon, moveIndex);
+}
+
 export function getPP(pokemon: Pokemon, moveIndex: number): number {
     // TODO
     return 42;
@@ -167,7 +158,7 @@ export function checkMiss(user: Pokemon, target: Pokemon, move: Move): boolean {
     const accuracyStage = clamp(userAccuracyStage - targetEvasionStage, -6, 6);
     const accuracyStageMultiplier = getAccuracyStatStageMultiplier(accuracyStage);
     const hitRate = move.accuracy * accuracyStageMultiplier;
-    external.log("Hit rate: " + hitRate);
+    external.log('Hit rate: ' + hitRate);
     return random(1, 100) > hitRate
 }
 
