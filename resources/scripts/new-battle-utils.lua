@@ -35,7 +35,7 @@ Stat = {
     Evasion = 7,
 }
 function getStatStageMultiplier(stage)
-    local absStage = Math.abs(stage)
+    local absStage = math.abs(stage)
     if stage >= 0 then
         return (2 + absStage) / 2
     else
@@ -43,7 +43,7 @@ function getStatStageMultiplier(stage)
     end
 end
 function getAccuracyStatStageMultiplier(stage)
-    local absStage = Math.abs(stage)
+    local absStage = math.abs(stage)
     if stage >= 0 then
         return (3 + absStage) / 3
     else
@@ -80,10 +80,10 @@ end
 function getModifiedStatStage(pokemon, stat, calculationFlags)
     local currentStage = getStatStage(pokemon, stat)
     if calculationFlags === StatFlag.IgnorePositive then
-        currentStage = Math.min(0, currentStage)
+        currentStage = math.min(0, currentStage)
     else
         if calculationFlags === StatFlag.IgnoreNegative then
-            currentStage = Math.max(0, currentStage)
+            currentStage = math.max(0, currentStage)
         end
     end
     return currentStage
@@ -110,7 +110,7 @@ function checkMiss(user, target, move)
     return random(1, 100) > hitRate
 end
 function clamp(value, minValue, maxValue)
-    return Math.max(minValue, Math.min(maxValue, value))
+    return math.max(minValue, math.min(maxValue, value))
 end
 function checkCritical(user, target, move)
     local criticalHitStage = getCriticalHitStage(user)

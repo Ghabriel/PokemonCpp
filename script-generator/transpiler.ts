@@ -1,11 +1,11 @@
 import * as fs from 'fs';
 import ts from 'typescript';
-import { LuaBaseTranspiler } from './LuaBaseTranspiler';
+import { LuaTranspiler } from './LuaTranspiler';
 
 const originPath = '../resources/scripts/original/';
 const targetPath = '../resources/scripts/';
 const fileNames = fs.readdirSync(originPath);
-const transpiler = new LuaBaseTranspiler();
+const transpiler = new LuaTranspiler();
 
 for (const fileName of fileNames) {
     console.log(`[TRANSPILING] ${fileName}`);

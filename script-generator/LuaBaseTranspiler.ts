@@ -8,7 +8,7 @@ export class LuaBaseTranspiler {
         return this.output;
     }
 
-    private transpileNode(node: ts.Node): void {
+    protected transpileNode(node: ts.Node): void {
         if (node.kind === ts.SyntaxKind.EndOfFileToken) {
             return;
         }
@@ -16,7 +16,7 @@ export class LuaBaseTranspiler {
         this.transpileStatement(node as ts.Statement);
     }
 
-    private transpileStatement(node: ts.Statement): void {
+    protected transpileStatement(node: ts.Statement): void {
         switch (node.kind) {
             case ts.SyntaxKind.ImportDeclaration:
             case ts.SyntaxKind.ModuleDeclaration:
@@ -55,7 +55,7 @@ export class LuaBaseTranspiler {
         }
     }
 
-    private transpileFunctionDeclaration(node: ts.FunctionDeclaration): void {
+    protected transpileFunctionDeclaration(node: ts.FunctionDeclaration): void {
         this.transpileFunctionSignature(node);
         this.indentationLevel++;
         this.transpileBlock(node.body!);
@@ -63,13 +63,13 @@ export class LuaBaseTranspiler {
         this.emitIndented('end\n');
     }
 
-    private transpileFunctionSignature(node: ts.FunctionDeclaration): void {
+    protected transpileFunctionSignature(node: ts.FunctionDeclaration): void {
         const parameterNames = node.parameters.map(parameter => parameter.name.getText());
         const parameterList = parameterNames.join(', ');
         this.emitIndented(`function ${node.name!.text}(${parameterList})\n`);
     }
 
-    private transpileEnumDeclaration(node: ts.EnumDeclaration): void {
+    protected transpileEnumDeclaration(node: ts.EnumDeclaration): void {
         this.emitIndented(`${node.name.text} = {\n`);
         this.indentationLevel++;
 
@@ -88,17 +88,17 @@ export class LuaBaseTranspiler {
         this.emitIndented('}\n');
     }
 
-    private transpileBlock(node: ts.Block): void {
+    protected transpileBlock(node: ts.Block): void {
         node.statements.forEach(statement => this.transpileStatement(statement));
     }
 
-    private transpileVariableStatement(node: ts.VariableStatement): void {
+    protected transpileVariableStatement(node: ts.VariableStatement): void {
         node.declarationList.declarations.forEach(varDeclaration => {
             this.transpileVariableDeclaration(varDeclaration);
         });
     }
 
-    private transpileVariableDeclaration(node: ts.VariableDeclaration): void {
+    protected transpileVariableDeclaration(node: ts.VariableDeclaration): void {
         const varName = node.name.getText();
         this.emitIndented(`local ${varName}`);
 
@@ -108,7 +108,7 @@ export class LuaBaseTranspiler {
         }
     }
 
-    private transpileIfStatement(node: ts.IfStatement): void {
+    protected transpileIfStatement(node: ts.IfStatement): void {
         this.emitIndented('if ');
         this.transpileExpression(node.expression);
         this.emit(' then\n');
@@ -126,7 +126,7 @@ export class LuaBaseTranspiler {
         this.emitIndented('end');
     }
 
-    private transpileReturnStatement(node: ts.ReturnStatement): void {
+    protected transpileReturnStatement(node: ts.ReturnStatement): void {
         this.emit('return');
 
         if (node.expression) {
@@ -135,7 +135,7 @@ export class LuaBaseTranspiler {
         }
     }
 
-    private transpileExpression(node: ts.Expression): void {
+    protected transpileExpression(node: ts.Expression): void {
         switch (node.kind) {
             case ts.SyntaxKind.AsExpression:
                 this.transpileAsExpression(node as ts.AsExpression);
@@ -187,11 +187,11 @@ export class LuaBaseTranspiler {
         }
     }
 
-    private transpileAsExpression(node: ts.AsExpression): void {
+    protected transpileAsExpression(node: ts.AsExpression): void {
         this.transpileExpression(node.expression);
     }
 
-    private transpileCallExpression(node: ts.CallExpression): void {
+    protected transpileCallExpression(node: ts.CallExpression): void {
         this.transpileExpression(node.expression);
         this.emit('(');
 
@@ -208,24 +208,24 @@ export class LuaBaseTranspiler {
         this.emit(')');
     }
 
-    private transpilePropertyAccessExpression(node: ts.PropertyAccessExpression): void {
+    protected transpilePropertyAccessExpression(node: ts.PropertyAccessExpression): void {
         this.transpileExpression(node.expression);
         this.emit('.');
         this.transpileIdentifier(node.name);
     }
 
-    private transpileElementAccessExpression(node: ts.ElementAccessExpression): void {
+    protected transpileElementAccessExpression(node: ts.ElementAccessExpression): void {
         this.transpileExpression(node.expression);
         this.emit('[');
         this.transpileExpression(node.argumentExpression);
         this.emit(']');
     }
 
-    private transpileIdentifier(node: ts.Identifier) {
+    protected transpileIdentifier(node: ts.Identifier) {
         this.emit(node.text);
     }
 
-    private transpilePrefixUnaryExpression(node: ts.PrefixUnaryExpression): void {
+    protected transpilePrefixUnaryExpression(node: ts.PrefixUnaryExpression): void {
         switch (node.operator) {
             case ts.SyntaxKind.PlusToken:
                 this.emit('+');
@@ -244,11 +244,11 @@ export class LuaBaseTranspiler {
         }
     }
 
-    private transpilePostfixUnaryExpression(node: ts.PostfixUnaryExpression): void {
+    protected transpilePostfixUnaryExpression(node: ts.PostfixUnaryExpression): void {
         this.transpileUnaryIncrementOrDecrement(node);
     }
 
-    private transpileUnaryIncrementOrDecrement(
+    protected transpileUnaryIncrementOrDecrement(
         node: ts.PrefixUnaryExpression | ts.PostfixUnaryExpression
     ): void {
         this.transpileExpression(node.operand);
@@ -266,7 +266,7 @@ export class LuaBaseTranspiler {
         this.emit('1');
     }
 
-    private transpileBinaryExpression(node: ts.BinaryExpression): void {
+    protected transpileBinaryExpression(node: ts.BinaryExpression): void {
         if (!this.isCompoundAssignmentOperator(node.operatorToken)) {
             this.transpileExpression(node.left);
             this.emit(' ');
@@ -285,23 +285,23 @@ export class LuaBaseTranspiler {
         this.transpileExpression(node.right);
     }
 
-    private isCompoundAssignmentOperator(token: ts.Token<ts.SyntaxKind>): boolean {
+    protected isCompoundAssignmentOperator(token: ts.Token<ts.SyntaxKind>): boolean {
         const options: string[] = ['+=', '-=', '*=', '/=', '%=', '**=', '&=', '|=', '^='];
         const tokenText = token.getText();
         return options.indexOf(tokenText) >= 0;
     }
 
-    private transpileParenthesizedExpression(node: ts.ParenthesizedExpression): void {
+    protected transpileParenthesizedExpression(node: ts.ParenthesizedExpression): void {
         this.emit('(');
         this.transpileExpression(node.expression);
         this.emit(')');
     }
 
-    private transpileStringLiteral(node: ts.StringLiteral): void {
+    protected transpileStringLiteral(node: ts.StringLiteral): void {
         this.emit(`"${node.text}"`);
     }
 
-    private transpileArrayLiteralExpression(node: ts.ArrayLiteralExpression): void {
+    protected transpileArrayLiteralExpression(node: ts.ArrayLiteralExpression): void {
         this.emit('{');
 
         let first = true;
@@ -317,7 +317,7 @@ export class LuaBaseTranspiler {
         this.emit('}');
     }
 
-    private transpileObjectLiteralExpression(node: ts.ObjectLiteralExpression): void {
+    protected transpileObjectLiteralExpression(node: ts.ObjectLiteralExpression): void {
         this.emit('{');
         this.indentationLevel++;
 
@@ -341,7 +341,7 @@ export class LuaBaseTranspiler {
         this.emit('}');
     }
 
-    private transpileObjectLiteralProperty(node: ts.ObjectLiteralElementLike): void {
+    protected transpileObjectLiteralProperty(node: ts.ObjectLiteralElementLike): void {
         if (node.kind !== ts.SyntaxKind.PropertyAssignment) {
             return this.handleUnsupportedNode(node, 'transpileObjectLiteralProperty');
         }
@@ -352,23 +352,23 @@ export class LuaBaseTranspiler {
         this.transpileExpression(node.initializer);
     }
 
-    private emitIndented(content: string): void {
+    protected emitIndented(content: string): void {
         const indentation = Array(this.indentationLevel + 1).join(this.indentation);
         this.emit(indentation + content);
     }
 
-    private emit(content: string): void {
+    protected emit(content: string): void {
         this.output += content;
     }
 
-    private handleUnsupportedNode(node: ts.Node, method: string) {
+    protected handleUnsupportedNode(node: ts.Node, method: string) {
         const nodeKind = ts.SyntaxKind[node.kind];
         const message = `(${method}) Warning: Node kind not supported: ${nodeKind}`;
         const nodeText = node.getText();
         console.log(message + '\n' + this.indentText(nodeText));
     }
 
-    private indentText(text: string): string {
+    protected indentText(text: string): string {
         const lines = text.split('\n');
         const indentedLines = lines.map(line => this.indentation + line);
         return indentedLines.join('\n');
