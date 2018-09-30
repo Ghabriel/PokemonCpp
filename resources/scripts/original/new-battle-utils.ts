@@ -1,3 +1,5 @@
+import { external, Move, Pokemon } from "./types";
+
 const typeTable = [
     [ 1, 1, 1, 1, 1, 0.5, 1, 0, 0.5, 1, 1, 1, 1, 1, 1, 1, 1, 1 ],
     [ 2, 1, 0.5, 0.5, 1, 2, 0.5, 0, 2, 1, 1, 1, 1, 0.5, 2, 1, 2, 0.5 ],
@@ -40,10 +42,21 @@ const typeMapping = {
     "Fairy": 18,
 };
 
-enum StatFlags {
+enum StatFlag {
     All,
     IgnorePositive,
     IgnoreNegative
+}
+
+enum Stat {
+    HP,
+    Attack,
+    Defense,
+    SpecialAttack,
+    SpecialDefense,
+    Speed,
+    Accuracy,
+    Evasion,
 }
 
 export function getStatStageMultiplier(stage: number): number {
@@ -64,4 +77,143 @@ export function getAccuracyStatStageMultiplier(stage: number): number {
     } else {
         return 3 / (3 + absStage);
     }
+}
+
+export function getAttackStatForMove(
+    pokemon: Pokemon,
+    move: Move,
+    calculationFlags: StatFlag
+): number {
+    if (move.kind === 'Physical') {
+        return getEffectiveStat(pokemon, Stat.Attack, calculationFlags);
+    }
+
+    if (move.kind === 'Special') {
+        return getEffectiveStat(pokemon, Stat.SpecialAttack, calculationFlags);
+    }
+
+    return 0;
+}
+
+export function getDefenseStatForMove(
+    pokemon: Pokemon,
+    move: Move,
+    calculationFlags: StatFlag
+): number {
+    if (move.kind === 'Physical') {
+        return getEffectiveStat(pokemon, Stat.Defense, calculationFlags);
+    }
+
+    if (move.kind === 'Special') {
+        return getEffectiveStat(pokemon, Stat.SpecialDefense, calculationFlags);
+    }
+
+    return 0;
+}
+
+export function getEffectiveStat(
+    pokemon: Pokemon,
+    stat: Stat,
+    calculationFlags: StatFlag
+): number {
+    const standardStatValue = getStandardStat(pokemon, stat);
+    const currentStage = getModifiedStatStage(pokemon, stat, calculationFlags);
+    const statValue = standardStatValue * getStatStageMultiplier(currentStage);
+    // TODO: specialized
+    return statValue;
+}
+
+export function getStandardStat(pokemon: Pokemon, stat: Stat): number {
+    return external.getStandardStat(pokemon.id, stat);
+}
+
+export function getModifiedStatStage(
+    pokemon: Pokemon,
+    stat: Stat,
+    calculationFlags: StatFlag
+): number {
+    let currentStage = getStatStage(pokemon, stat);
+
+    if (calculationFlags === StatFlag.IgnorePositive) {
+        currentStage = Math.min(0, currentStage);
+    } else if (calculationFlags === StatFlag.IgnoreNegative) {
+        currentStage = Math.max(0, currentStage);
+    }
+
+    return currentStage;
+}
+
+export function getStatStage(pokemon: Pokemon, stat: Stat): number {
+    return external.getStatStage(pokemon.id, stat);
+}
+
+export function hasUsableMoves(pokemon: Pokemon): boolean {
+    // TODO
+    return true;
+}
+
+export function getPP(pokemon: Pokemon, moveIndex: number): number {
+    // TODO
+    return 42;
+}
+
+export function checkMiss(user: Pokemon, target: Pokemon, move: Move): boolean {
+    if (move.accuracy === 0) {
+        return false;
+    }
+
+    const userAccuracyStage = getStatStage(user, Stat.Accuracy);
+    const targetEvasionStage = getStatStage(target, Stat.Evasion);
+    const accuracyStage = clamp(userAccuracyStage - targetEvasionStage, -6, 6);
+    const accuracyStageMultiplier = getAccuracyStatStageMultiplier(accuracyStage);
+    const hitRate = move.accuracy * accuracyStageMultiplier;
+    external.log("Hit rate: " + hitRate);
+    return random(1, 100) > hitRate
+}
+
+export function clamp(value: number, minValue: number, maxValue: number): number {
+    return Math.max(minValue, Math.min(maxValue, value));
+}
+
+export function checkCritical(user: Pokemon, target: Pokemon, move: Move): boolean {
+    const criticalHitStage = getCriticalHitStage(user);
+    let chancesIn24: number;
+
+    if (criticalHitStage === 0) {
+        chancesIn24 = 1;
+    } else if (criticalHitStage === 1) {
+        chancesIn24 = 3;
+    } else if (criticalHitStage === 2) {
+        chancesIn24 = 12;
+    } else {
+        chancesIn24 = 24;
+    }
+
+    return random(1, 24) <= chancesIn24;
+}
+
+export function getCriticalHitStage(pokemon: Pokemon): number {
+    // TODO
+    return 0;
+}
+
+export function random(min: number, max: number): number {
+    return external.random(min, max);
+}
+
+export function getTypeEffectiveness(pokemon: Pokemon, move: Move): number {
+    if (move.type === '???') {
+        return 1;
+    }
+
+    const moveTypeIndex = typeMapping[move.type as keyof typeof typeMapping];
+    const firstTypeIndex = typeMapping[pokemon.type0 as keyof typeof typeMapping];
+    let result = typeTable[moveTypeIndex][firstTypeIndex];
+
+    if (pokemon.typeCount > 1) {
+        const secondTypeIndex = typeMapping[pokemon.type1 as keyof typeof typeMapping];
+        result *= typeTable[moveTypeIndex][secondTypeIndex];
+    }
+
+    return result
 }

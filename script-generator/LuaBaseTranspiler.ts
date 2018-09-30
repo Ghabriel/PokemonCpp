@@ -18,6 +18,11 @@ export class LuaBaseTranspiler {
 
     private transpileStatement(node: ts.Statement): void {
         switch (node.kind) {
+            case ts.SyntaxKind.ImportDeclaration:
+            case ts.SyntaxKind.ModuleDeclaration:
+            case ts.SyntaxKind.InterfaceDeclaration:
+                // type-only, nothing to do
+                break;
             case ts.SyntaxKind.FunctionDeclaration:
                 this.transpileFunctionDeclaration(node as ts.FunctionDeclaration);
                 break;
@@ -132,14 +137,23 @@ export class LuaBaseTranspiler {
 
     private transpileExpression(node: ts.Expression): void {
         switch (node.kind) {
+            case ts.SyntaxKind.AsExpression:
+                this.transpileAsExpression(node as ts.AsExpression);
+                break;
             case ts.SyntaxKind.CallExpression:
                 this.transpileCallExpression(node as ts.CallExpression);
                 break;
             case ts.SyntaxKind.PropertyAccessExpression:
                 this.transpilePropertyAccessExpression(node as ts.PropertyAccessExpression);
                 break;
+            case ts.SyntaxKind.ElementAccessExpression:
+                this.transpileElementAccessExpression(node as ts.ElementAccessExpression);
+                break;
             case ts.SyntaxKind.Identifier:
                 this.transpileIdentifier(node as ts.Identifier);
+                break;
+            case ts.SyntaxKind.PrefixUnaryExpression:
+                this.transpilePrefixUnaryExpression(node as ts.PrefixUnaryExpression);
                 break;
             case ts.SyntaxKind.PostfixUnaryExpression:
                 this.transpilePostfixUnaryExpression(node as ts.PostfixUnaryExpression);
@@ -153,6 +167,15 @@ export class LuaBaseTranspiler {
             case ts.SyntaxKind.ParenthesizedExpression:
                 this.transpileParenthesizedExpression(node as ts.ParenthesizedExpression);
                 break;
+            case ts.SyntaxKind.StringLiteral:
+                this.transpileStringLiteral(node as ts.StringLiteral);
+                break;
+            case ts.SyntaxKind.TrueKeyword:
+                this.emit('true');
+                break;
+            case ts.SyntaxKind.FalseKeyword:
+                this.emit('false');
+                break;
             case ts.SyntaxKind.ArrayLiteralExpression:
                 this.transpileArrayLiteralExpression(node as ts.ArrayLiteralExpression);
                 break;
@@ -162,6 +185,10 @@ export class LuaBaseTranspiler {
             default:
                 return this.handleUnsupportedNode(node, 'transpileExpression');
         }
+    }
+
+    private transpileAsExpression(node: ts.AsExpression): void {
+        this.transpileExpression(node.expression);
     }
 
     private transpileCallExpression(node: ts.CallExpression): void {
@@ -187,11 +214,43 @@ export class LuaBaseTranspiler {
         this.transpileIdentifier(node.name);
     }
 
+    private transpileElementAccessExpression(node: ts.ElementAccessExpression): void {
+        this.transpileExpression(node.expression);
+        this.emit('[');
+        this.transpileExpression(node.argumentExpression);
+        this.emit(']');
+    }
+
     private transpileIdentifier(node: ts.Identifier) {
         this.emit(node.text);
     }
 
+    private transpilePrefixUnaryExpression(node: ts.PrefixUnaryExpression): void {
+        switch (node.operator) {
+            case ts.SyntaxKind.PlusToken:
+                this.emit('+');
+                this.transpileExpression(node.operand);
+                break;
+            case ts.SyntaxKind.MinusToken:
+                this.emit('-');
+                this.transpileExpression(node.operand);
+                break;
+            case ts.SyntaxKind.PlusPlusToken:
+            case ts.SyntaxKind.MinusMinusToken:
+                this.transpileUnaryIncrementOrDecrement(node);
+                break;
+            default:
+                return this.handleUnsupportedNode(node, 'transpilePrefixUnaryExpression');
+        }
+    }
+
     private transpilePostfixUnaryExpression(node: ts.PostfixUnaryExpression): void {
+        this.transpileUnaryIncrementOrDecrement(node);
+    }
+
+    private transpileUnaryIncrementOrDecrement(
+        node: ts.PrefixUnaryExpression | ts.PostfixUnaryExpression
+    ): void {
         this.transpileExpression(node.operand);
         this.emit(' = ');
         this.transpileExpression(node.operand);
@@ -201,24 +260,45 @@ export class LuaBaseTranspiler {
         } else if (node.operator == ts.SyntaxKind.MinusMinusToken) {
             this.emit(' - ');
         } else {
-            return this.handleUnsupportedNode(node, 'transpilePostfixUnaryExpression');
+            return this.handleUnsupportedNode(node, 'transpileUnaryIncrementOrDecrement');
         }
 
         this.emit('1');
     }
 
     private transpileBinaryExpression(node: ts.BinaryExpression): void {
+        if (!this.isCompoundAssignmentOperator(node.operatorToken)) {
+            this.transpileExpression(node.left);
+            this.emit(' ');
+            this.emit(node.operatorToken.getText());
+            this.emit(' ');
+            this.transpileExpression(node.right);
+            return;
+        }
+
+        this.transpileExpression(node.left);
+        this.emit(' = ');
         this.transpileExpression(node.left);
         this.emit(' ');
-        this.emit(node.operatorToken.getText());
+        this.emit(node.operatorToken.getText().slice(0, -1));
         this.emit(' ');
         this.transpileExpression(node.right);
+    }
+
+    private isCompoundAssignmentOperator(token: ts.Token<ts.SyntaxKind>): boolean {
+        const options: string[] = ['+=', '-=', '*=', '/=', '%=', '**=', '&=', '|=', '^='];
+        const tokenText = token.getText();
+        return options.indexOf(tokenText) >= 0;
     }
 
     private transpileParenthesizedExpression(node: ts.ParenthesizedExpression): void {
         this.emit('(');
         this.transpileExpression(node.expression);
         this.emit(')');
+    }
+
+    private transpileStringLiteral(node: ts.StringLiteral): void {
+        this.emit(`"${node.text}"`);
     }
 
     private transpileArrayLiteralExpression(node: ts.ArrayLiteralExpression): void {
@@ -273,7 +353,7 @@ export class LuaBaseTranspiler {
     }
 
     private emitIndented(content: string): void {
-        const indentation = Array(this.indentationLevel + 1).join('    ');
+        const indentation = Array(this.indentationLevel + 1).join(this.indentation);
         this.emit(indentation + content);
     }
 
@@ -283,10 +363,18 @@ export class LuaBaseTranspiler {
 
     private handleUnsupportedNode(node: ts.Node, method: string) {
         const nodeKind = ts.SyntaxKind[node.kind];
-        // throw Error(`Node kind not supported: ${ts.SyntaxKind[node.kind]}`);
-        console.log(`(${method}) Warning: Node kind not supported: ${nodeKind}`);
+        const message = `(${method}) Warning: Node kind not supported: ${nodeKind}`;
+        const nodeText = node.getText();
+        console.log(message + '\n' + this.indentText(nodeText));
+    }
+
+    private indentText(text: string): string {
+        const lines = text.split('\n');
+        const indentedLines = lines.map(line => this.indentation + line);
+        return indentedLines.join('\n');
     }
 
     private output: string = '';
     private indentationLevel: number = 0;
+    private readonly indentation = '    ';
 }
