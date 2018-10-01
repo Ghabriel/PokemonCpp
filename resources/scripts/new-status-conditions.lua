@@ -8,12 +8,12 @@ StatusCondition = {
     Sleep = 6,
 }
 statusConditionFlags = {
-    [[StatusCondition.Burn]] = "Burn",
-    [[StatusCondition.Freeze]] = "Freeze",
-    [[StatusCondition.Paralysis]] = "Paralysis",
-    [[StatusCondition.Poison]] = "Poison",
-    [[StatusCondition.Toxic]] = "Toxic",
-    [[StatusCondition.Sleep]] = "Sleep"
+    [StatusCondition.Burn] = "Burn",
+    [StatusCondition.Freeze] = "Freeze",
+    [StatusCondition.Paralysis] = "Paralysis",
+    [StatusCondition.Poison] = "Poison",
+    [StatusCondition.Toxic] = "Toxic",
+    [StatusCondition.Sleep] = "Sleep"
 }
 function addStatusCondition(condition, fixedSleepDuration)
     if condition == StatusCondition.Normal then

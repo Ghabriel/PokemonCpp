@@ -515,9 +515,17 @@ export class LuaBaseTranspiler {
             return this.handleUnsupportedNode(node, 'transpileObjectLiteralProperty');
         }
 
-        const property = node as ts.PropertyAssignment;
+        const propertyName = (node as ts.PropertyAssignment).name;
 
-        this.emit(`[${property.name.getText()}] = `);
+        if (ts.isLiteralExpression(propertyName)) {
+            this.emit(`[${propertyName.getText()}]`);
+        } else if (ts.isComputedPropertyName(propertyName)) {
+            this.emit(propertyName.getText());
+        } else {
+            return this.handleUnsupportedNode(propertyName, 'transpileObjectLiteralProperty');
+        }
+
+        this.emit(' = ');
         this.transpileExpression(node.initializer);
     }
 
