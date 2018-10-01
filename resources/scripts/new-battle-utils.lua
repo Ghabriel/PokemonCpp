@@ -77,7 +77,12 @@ function getStatStage(pokemon, stat)
     return external.getStatStage(pokemon.id, stat)
 end
 function hasUsableMoves(pokemon)
-    return true
+    for i = 0, pokemon.moveCount - 1 do
+        if canUseMove(pokemon, i) then
+            return true
+        end
+    end
+    return false
 end
 function canUseMove(pokemon, moveIndex)
     return getPP(pokemon, moveIndex) > 0 and specialized:canUseMove(pokemon, moveIndex)

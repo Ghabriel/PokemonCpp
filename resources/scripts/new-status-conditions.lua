@@ -36,7 +36,7 @@ function Flag_Burn_beforeDamageInflict()
 end
 function Flag_Burn_onTurnEnd()
     external.showText(target.displayName + " is hurt by its burn!")
-    external.fixedDamage((target.hp + 15) / 16)
+    external.fixedDamage(math.ceil(target.hp / 16))
 end
 function Flag_Freeze_beforeMove()
     external.showText(target.displayName + " is frozen solid!")

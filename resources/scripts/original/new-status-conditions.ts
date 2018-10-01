@@ -68,7 +68,7 @@ export function Flag_Burn_beforeDamageInflict() {
 export function Flag_Burn_onTurnEnd() {
     // TODO: transform '+' -> '..'
     external.showText(target.displayName + ' is hurt by its burn!');
-    external.fixedDamage((target.hp + 15) / 16)
+    external.fixedDamage(Math.ceil(target.hp / 16));
 }
 
 
@@ -79,7 +79,7 @@ export function Flag_Freeze_beforeMove() {
         external.showText(target.displayName + ' thawed out!');
         removeStatusCondition(target);
     } else {
-        external.negateMove()
+        external.negateMove();
     }
 }
 

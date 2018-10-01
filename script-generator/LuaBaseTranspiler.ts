@@ -47,6 +47,10 @@ export class LuaBaseTranspiler {
                 this.transpileIfStatement(node as ts.IfStatement);
                 this.emit('\n');
                 break;
+            case ts.SyntaxKind.ForStatement:
+                this.transpileForStatement(node as ts.ForStatement);
+                this.emit('\n');
+                break;
             case ts.SyntaxKind.ReturnStatement:
                 this.emitIndented('');
                 this.transpileReturnStatement(node as ts.ReturnStatement);
@@ -153,6 +157,84 @@ export class LuaBaseTranspiler {
         }
 
         this.emitIndented('end');
+    }
+
+    protected transpileForStatement(node: ts.ForStatement): void {
+        const initializer = this.decomposeForInitializer(node);
+        const upperBound = this.getForUpperBound(node);
+        const incrementor = node.incrementor;
+
+        if (
+            initializer === null ||
+            upperBound === null ||
+            incrementor === undefined ||
+            incrementor.kind !== ts.SyntaxKind.PostfixUnaryExpression ||
+            (incrementor as ts.PostfixUnaryExpression).operator !== ts.SyntaxKind.PlusPlusToken
+        ) {
+            return this.handleUnsupportedNode(node, 'transpileForStatement');
+        }
+
+        const { loopVariable, initialValue } = initializer;
+        this.emitIndented(`for ${loopVariable} = ${initialValue}, ${upperBound} do\n`);
+        this.indentationLevel++;
+        this.transpileStatement(node.statement);
+        this.indentationLevel--;
+        this.emitIndented('end');
+    }
+
+    private decomposeForInitializer(
+        node: ts.ForStatement
+    ): { loopVariable: string, initialValue: string } | null {
+        const initDeclaration = this.getForInitializerDeclaration(node);
+
+        if (initDeclaration === null) {
+            return null;
+        }
+
+        const loopVariable = initDeclaration.name.getText();
+        const initializer = initDeclaration.initializer;
+
+        if (initializer === undefined || initializer.kind !== ts.SyntaxKind.FirstLiteralToken) {
+            return null;
+        }
+
+        const initialValue = (initializer as ts.LiteralExpression).text;
+        return { loopVariable, initialValue };
+    }
+
+    private getForInitializerDeclaration(node: ts.ForStatement): ts.VariableDeclaration | null {
+        if (!node.initializer || node.initializer.kind !== ts.SyntaxKind.VariableDeclarationList) {
+            return null;
+        }
+
+        const initializer = node.initializer as ts.VariableDeclarationList;
+
+        if (initializer.declarations.length !== 1) {
+            return null;
+        }
+
+        return initializer.declarations[0];
+    }
+
+    private getForUpperBound(node: ts.ForStatement): string | null {
+        if (
+            node.condition === undefined ||
+            node.condition.kind !== ts.SyntaxKind.BinaryExpression
+        ) {
+            return null;
+        }
+
+        const condition = node.condition as ts.BinaryExpression;
+        const rhsText = condition.right.getText();
+
+        switch (condition.operatorToken.getText()) {
+            case '<':
+                return rhsText + ' - 1';
+            case '<=':
+                return rhsText;
+            default:
+                return null;
+        }
     }
 
     protected transpileReturnStatement(node: ts.ReturnStatement): void {

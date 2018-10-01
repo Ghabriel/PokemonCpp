@@ -134,8 +134,13 @@ export function getStatStage(pokemon: Pokemon, stat: Stat): number {
 }
 
 export function hasUsableMoves(pokemon: Pokemon): boolean {
-    // TODO
-    return true;
+    for (let i = 0; i < pokemon.moveCount; i++) {
+        if (canUseMove(pokemon, i)) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 export function canUseMove(pokemon: Pokemon, moveIndex: number): boolean {
@@ -167,7 +172,7 @@ export function checkMiss(user: Pokemon, target: Pokemon, move: Move): boolean {
     const accuracyStageMultiplier = getAccuracyStatStageMultiplier(accuracyStage);
     const hitRate = move.accuracy * accuracyStageMultiplier;
     external.log('Hit rate: ' + hitRate);
-    return random(1, 100) > hitRate
+    return random(1, 100) > hitRate;
 }
 
 export function clamp(value: number, minValue: number, maxValue: number): number {
