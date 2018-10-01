@@ -183,14 +183,19 @@ export function checkCritical(user: Pokemon, target: Pokemon, move: Move): boole
     const criticalHitStage = getCriticalHitStage(user);
     let chancesIn24: number;
 
-    if (criticalHitStage === 0) {
-        chancesIn24 = 1;
-    } else if (criticalHitStage === 1) {
-        chancesIn24 = 3;
-    } else if (criticalHitStage === 2) {
-        chancesIn24 = 12;
-    } else {
-        chancesIn24 = 24;
+    switch (criticalHitStage) {
+        case 0:
+            chancesIn24 = 1;
+            break;
+        case 1:
+            chancesIn24 = 3;
+            break;
+        case 2:
+            chancesIn24 = 12;
+            break;
+        default:
+            chancesIn24 = 24;
+            break;
     }
 
     return random(1, 24) <= chancesIn24;

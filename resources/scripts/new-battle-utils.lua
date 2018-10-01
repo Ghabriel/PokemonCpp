@@ -125,16 +125,12 @@ function checkCritical(user, target, move)
     local chancesIn24
     if criticalHitStage == 0 then
         chancesIn24 = 1
+    elseif criticalHitStage == 1 then
+        chancesIn24 = 3
+    elseif criticalHitStage == 2 then
+        chancesIn24 = 12
     else
-        if criticalHitStage == 1 then
-            chancesIn24 = 3
-        else
-            if criticalHitStage == 2 then
-                chancesIn24 = 12
-            else
-                chancesIn24 = 24
-            end
-        end
+        chancesIn24 = 24
     end
     return random(1, 24) <= chancesIn24
 end

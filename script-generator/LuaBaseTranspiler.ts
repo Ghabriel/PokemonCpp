@@ -47,6 +47,13 @@ export class LuaBaseTranspiler {
                 this.transpileIfStatement(node as ts.IfStatement);
                 this.emit('\n');
                 break;
+            case ts.SyntaxKind.SwitchStatement:
+                this.transpileSwitchStatement(node as ts.SwitchStatement);
+                this.emit('\n');
+                break;
+            case ts.SyntaxKind.BreakStatement:
+                // handled in switch statements, not handled in other cases
+                break;
             case ts.SyntaxKind.ForStatement:
                 this.transpileForStatement(node as ts.ForStatement);
                 this.emit('\n');
@@ -155,6 +162,40 @@ export class LuaBaseTranspiler {
             this.transpileStatement(node.elseStatement);
             this.indentationLevel--;
         }
+
+        this.emitIndented('end');
+    }
+
+    protected transpileSwitchStatement(node: ts.SwitchStatement): void {
+        const expression = node.expression.getText();
+
+        let first = true;
+        node.caseBlock.clauses.forEach(caseOrDefaultClause => {
+            this.emitIndented('');
+
+            if (!first) {
+                this.emit('else');
+            }
+            first = false;
+
+            if (ts.isCaseClause(caseOrDefaultClause)) {
+                const caseExpression = caseOrDefaultClause.expression.getText();
+                this.emit(`if ${expression} == ${caseExpression} then`);
+            }
+
+            this.emit('\n');
+
+            this.indentationLevel++;
+            caseOrDefaultClause.statements.forEach(
+                statement => this.transpileStatement(statement)
+            );
+            this.indentationLevel--;
+
+            const statementList = caseOrDefaultClause.statements;
+            if (statementList[statementList.length - 1].kind !== ts.SyntaxKind.BreakStatement) {
+                this.handleUnsupportedNode(node, 'transpileSwitchStatement');
+            }
+        });
 
         this.emitIndented('end');
     }
