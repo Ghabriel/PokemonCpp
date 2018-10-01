@@ -1,4 +1,5 @@
 export declare function luaImplicitSelf(namespace: any): void;
+export declare function luaUseStringConcatenation(): void;
 
 export declare namespace external {
     function log(content: string): void;

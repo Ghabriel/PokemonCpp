@@ -1,6 +1,6 @@
 import { random } from "./new-battle-utils";
 import { move, target } from "./new-battle-variables";
-import { external, Pokemon } from "./types";
+import { external, luaUseStringConcatenation, Pokemon } from "./types";
 
 /**
  * Burn - 90% (not checking faint)
@@ -30,6 +30,8 @@ const statusConditionFlags = {
     [StatusCondition.Toxic]: 'Toxic',
     [StatusCondition.Sleep]: 'Sleep'
 };
+
+luaUseStringConcatenation();
 
 export function addStatusCondition(
     condition: StatusCondition,

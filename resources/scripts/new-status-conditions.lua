@@ -35,13 +35,13 @@ function Flag_Burn_beforeDamageInflict()
     end
 end
 function Flag_Burn_onTurnEnd()
-    external.showText(target.displayName + " is hurt by its burn!")
+    external.showText(target.displayName .. " is hurt by its burn!")
     external.fixedDamage(math.ceil(target.hp / 16))
 end
 function Flag_Freeze_beforeMove()
-    external.showText(target.displayName + " is frozen solid!")
+    external.showText(target.displayName .. " is frozen solid!")
     if random(1, 100) <= 20 then
-        external.showText(target.displayName + " thawed out!")
+        external.showText(target.displayName .. " thawed out!")
         removeStatusCondition(target)
     else
         external.negateMove()
@@ -49,18 +49,18 @@ function Flag_Freeze_beforeMove()
 end
 function Flag_Paralysis_beforeMove()
     if random(1, 100) <= 25 then
-        external.showText(target.displayName + " is paralyzed! It can't move!")
+        external.showText(target.displayName .. " is paralyzed! It can't move!")
         external.negateMove()
     end
 end
 function Flag_Poison_onTurnEnd()
-    external.showText(target.displayName + " is hurt by poison!")
+    external.showText(target.displayName .. " is hurt by poison!")
     external.fixedDamage(math.ceil(target.hp / 8))
 end
 function Flag_Sleep_beforeMove()
-    external.showText(target.displayName + " is fast asleep.")
+    external.showText(target.displayName .. " is fast asleep.")
     if target.asleepRounds == 0 then
-        external.showText(target.displayName + " woke up!")
+        external.showText(target.displayName .. " woke up!")
         removeStatusCondition(target)
     else
         external.negateMove()
