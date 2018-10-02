@@ -31,6 +31,17 @@ const statusConditionFlags = {
     [StatusCondition.Sleep]: 'Sleep'
 };
 
+const statusConditionList: (keyof typeof statusConditionFlags)[] = [
+    StatusCondition.Burn,
+    StatusCondition.Freeze,
+    StatusCondition.Paralysis,
+    StatusCondition.Poison,
+    StatusCondition.Toxic,
+    StatusCondition.Sleep,
+];
+
+const numStatusConditions = 6;
+
 luaUseStringConcatenation();
 
 export function addStatusCondition(
@@ -52,10 +63,11 @@ export function addStatusCondition(
 }
 
 export function removeStatusCondition(entity: Pokemon): void {
-    // TODO
-    // for condition, flagId in pairs(statusConditionFlags) do
-    //     external.removeFlagTarget(flagId)
-    // end
+    for (let i = 0; i < numStatusConditions; i++) {
+        const statusCondition = statusConditionList[i];
+        const flagId = statusConditionFlags[statusCondition];
+        external.removeFlagTarget(flagId);
+    }
 
     external.removeStatusCondition(entity.id);
 }

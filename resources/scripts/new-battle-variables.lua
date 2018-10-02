@@ -18,43 +18,43 @@ defaultEntityIds = {
     ['move'] = -13
 }
 user = {
-    ['id'] = defaultEntityIds.user
+    ['relativeId'] = defaultEntityIds.user
 }
 target = {
-    ['id'] = defaultEntityIds.target
+    ['relativeId'] = defaultEntityIds.target
 }
 userTeam = {
     [0] = {
-        ['id'] = defaultEntityIds.userTeam[0]
+        ['relativeId'] = defaultEntityIds.userTeam[0]
     },
     [1] = {
-        ['id'] = defaultEntityIds.userTeam[1]
+        ['relativeId'] = defaultEntityIds.userTeam[1]
     },
     [2] = {
-        ['id'] = defaultEntityIds.userTeam[2]
+        ['relativeId'] = defaultEntityIds.userTeam[2]
     },
     [3] = {
-        ['id'] = defaultEntityIds.userTeam[3]
+        ['relativeId'] = defaultEntityIds.userTeam[3]
     },
     [4] = {
-        ['id'] = defaultEntityIds.userTeam[4]
+        ['relativeId'] = defaultEntityIds.userTeam[4]
     }
 }
 targetTeam = {
     [0] = {
-        ['id'] = defaultEntityIds.targetTeam[0]
+        ['relativeId'] = defaultEntityIds.targetTeam[0]
     },
     [1] = {
-        ['id'] = defaultEntityIds.targetTeam[1]
+        ['relativeId'] = defaultEntityIds.targetTeam[1]
     },
     [2] = {
-        ['id'] = defaultEntityIds.targetTeam[2]
+        ['relativeId'] = defaultEntityIds.targetTeam[2]
     },
     [3] = {
-        ['id'] = defaultEntityIds.targetTeam[3]
+        ['relativeId'] = defaultEntityIds.targetTeam[3]
     },
     [4] = {
-        ['id'] = defaultEntityIds.targetTeam[4]
+        ['relativeId'] = defaultEntityIds.targetTeam[4]
     }
 }
 move = {

@@ -15,6 +15,8 @@ statusConditionFlags = {
     [StatusCondition.Toxic] = "Toxic",
     [StatusCondition.Sleep] = "Sleep"
 }
+statusConditionList = {StatusCondition.Burn, StatusCondition.Freeze, StatusCondition.Paralysis, StatusCondition.Poison, StatusCondition.Toxic, StatusCondition.Sleep}
+numStatusConditions = 6
 function addStatusCondition(condition, fixedSleepDuration)
     if condition == StatusCondition.Normal then
         return true
@@ -27,6 +29,11 @@ function addStatusCondition(condition, fixedSleepDuration)
     return true
 end
 function removeStatusCondition(entity)
+    for i = 0, numStatusConditions - 1 do
+        local statusCondition = statusConditionList[i]
+        local flagId = statusConditionFlags[statusCondition]
+        external.removeFlagTarget(flagId)
+    end
     external.removeStatusCondition(entity.id)
 end
 function Flag_Burn_beforeDamageInflict()
