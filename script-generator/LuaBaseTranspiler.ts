@@ -85,6 +85,7 @@ export class LuaBaseTranspiler {
     protected transpileFunctionDeclaration(node: ts.FunctionDeclaration): void {
         this.transpileFunctionSignature(node);
         this.indentationLevel++;
+        this.transpileFunctionMetadata(node);
         this.transpileBlock(node.body!);
         this.indentationLevel--;
         this.emitIndented('end\n');
@@ -102,6 +103,10 @@ export class LuaBaseTranspiler {
         }
 
         this.emit(`${functionName}(${parameterList})\n`);
+    }
+
+    protected transpileFunctionMetadata(_: ts.FunctionDeclaration): void {
+        // Does nothing by default, may be overriden to provide custom behavior
     }
 
     protected transpileEnumDeclaration(node: ts.EnumDeclaration): void {

@@ -36,6 +36,8 @@ function getAccuracyStatStageMultiplier(stage)
     end
 end
 function getAttackStatForMove(pokemon, move, calculationFlags)
+    setmetatable(pokemon, pokemonMetatable)
+    setmetatable(move, moveMetatable)
     if move.kind == "Physical" then
         return getEffectiveStat(pokemon, Stat.Attack, calculationFlags)
     end
@@ -45,6 +47,8 @@ function getAttackStatForMove(pokemon, move, calculationFlags)
     return 0
 end
 function getDefenseStatForMove(pokemon, move, calculationFlags)
+    setmetatable(pokemon, pokemonMetatable)
+    setmetatable(move, moveMetatable)
     if move.kind == "Physical" then
         return getEffectiveStat(pokemon, Stat.Defense, calculationFlags)
     end
@@ -54,15 +58,18 @@ function getDefenseStatForMove(pokemon, move, calculationFlags)
     return 0
 end
 function getEffectiveStat(pokemon, stat, calculationFlags)
+    setmetatable(pokemon, pokemonMetatable)
     local standardStatValue = getStandardStat(pokemon, stat)
     local currentStage = getModifiedStatStage(pokemon, stat, calculationFlags)
     local statValue = standardStatValue * getStatStageMultiplier(currentStage)
     return specialized:getEffectiveStat(pokemon, stat, statValue)
 end
 function getStandardStat(pokemon, stat)
+    setmetatable(pokemon, pokemonMetatable)
     return external.getStandardStat(pokemon.id, stat)
 end
 function getModifiedStatStage(pokemon, stat, calculationFlags)
+    setmetatable(pokemon, pokemonMetatable)
     local currentStage = getStatStage(pokemon, stat)
     if calculationFlags == StatFlag.IgnorePositive then
         currentStage = math.min(0, currentStage)
@@ -74,9 +81,11 @@ function getModifiedStatStage(pokemon, stat, calculationFlags)
     return currentStage
 end
 function getStatStage(pokemon, stat)
+    setmetatable(pokemon, pokemonMetatable)
     return external.getStatStage(pokemon.id, stat)
 end
 function hasUsableMoves(pokemon)
+    setmetatable(pokemon, pokemonMetatable)
     for i = 0, pokemon.moveCount - 1 do
         if canUseMove(pokemon, i) then
             return true
@@ -85,9 +94,11 @@ function hasUsableMoves(pokemon)
     return false
 end
 function canUseMove(pokemon, moveIndex)
+    setmetatable(pokemon, pokemonMetatable)
     return getPP(pokemon, moveIndex) > 0 and specialized:canUseMove(pokemon, moveIndex)
 end
 function getPP(pokemon, moveIndex)
+    setmetatable(pokemon, pokemonMetatable)
     if moveIndex == 0 then
         return pokemon.pp0
     else
@@ -106,6 +117,9 @@ function getPP(pokemon, moveIndex)
     return 0
 end
 function checkMiss(user, target, move)
+    setmetatable(user, pokemonMetatable)
+    setmetatable(target, pokemonMetatable)
+    setmetatable(move, moveMetatable)
     if move.accuracy == 0 then
         return false
     end
@@ -121,6 +135,9 @@ function clamp(value, minValue, maxValue)
     return math.max(minValue, math.min(maxValue, value))
 end
 function checkCritical(user, target, move)
+    setmetatable(user, pokemonMetatable)
+    setmetatable(target, pokemonMetatable)
+    setmetatable(move, moveMetatable)
     local criticalHitStage = getCriticalHitStage(user)
     local chancesIn24
     if criticalHitStage == 0 then
@@ -135,12 +152,15 @@ function checkCritical(user, target, move)
     return random(1, 24) <= chancesIn24
 end
 function getCriticalHitStage(pokemon)
+    setmetatable(pokemon, pokemonMetatable)
     return 0
 end
 function random(min, max)
     return external.random(min, max)
 end
 function getTypeEffectiveness(pokemon, move)
+    setmetatable(pokemon, pokemonMetatable)
+    setmetatable(move, moveMetatable)
     if move.type == "???" then
         return 1
     end
@@ -154,6 +174,8 @@ function getTypeEffectiveness(pokemon, move)
     return result
 end
 function calculateExpGain(winner, fainted)
+    setmetatable(winner, pokemonMetatable)
+    setmetatable(fainted, pokemonMetatable)
     local luckyEgg = 1
     local shareFactor = 1
     local factor1 = (fainted.baseExp * fainted.level) / (5 * shareFactor)

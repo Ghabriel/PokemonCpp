@@ -46,6 +46,32 @@ export class LuaTranspiler extends LuaBaseTranspiler {
         return callExpression.arguments;
     }
 
+    protected transpileFunctionMetadata(node: ts.FunctionDeclaration): void {
+        for (const parameter of node.parameters) {
+            if (parameter.type === undefined) {
+                continue;
+            }
+
+            const metaTable = this.getMetaTableForType(parameter.type);
+
+            if (metaTable !== null) {
+                const parameterName = parameter.name.getText();
+                this.emitIndented(`setmetatable(${parameterName}, ${metaTable})\n`);
+            }
+        }
+    }
+
+    private getMetaTableForType(type: ts.TypeNode): string | null {
+        switch (type.getText()) {
+            case 'Pokemon':
+                return 'pokemonMetatable';
+            case 'Move':
+                return 'moveMetatable';
+            default:
+                return null;
+        }
+    }
+
     protected transpilePropertyAccessExpression(node: ts.PropertyAccessExpression): void {
         if (node.expression.kind === ts.SyntaxKind.Identifier) {
             const aggregate = (node.expression as ts.Identifier).text;

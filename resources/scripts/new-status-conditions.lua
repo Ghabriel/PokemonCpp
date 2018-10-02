@@ -29,6 +29,7 @@ function addStatusCondition(condition, fixedSleepDuration)
     return true
 end
 function removeStatusCondition(entity)
+    setmetatable(entity, pokemonMetatable)
     for i = 0, numStatusConditions - 1 do
         local statusCondition = statusConditionList[i]
         local flagId = statusConditionFlags[statusCondition]
