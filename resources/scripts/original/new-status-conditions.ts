@@ -21,7 +21,6 @@ export enum StatusCondition {
     Sleep
 }
 
-// TODO: this transpiles incorrectly
 const statusConditionFlags = {
     [StatusCondition.Burn]: 'Burn',
     [StatusCondition.Freeze]: 'Freeze',
@@ -40,7 +39,7 @@ const statusConditionList: (keyof typeof statusConditionFlags)[] = [
     StatusCondition.Sleep,
 ];
 
-const numStatusConditions = 6;
+const numStatusConditions = 6; // TODO: find a Lua-compatible way to calculate this
 
 export function addStatusCondition(
     condition: StatusCondition,

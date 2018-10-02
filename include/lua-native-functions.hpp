@@ -67,6 +67,7 @@ namespace lua {
         const engine::entitysystem::Entity& value
     ) {
         return {
+            {"relativeId", static_cast<int>(value)},
             {"id", static_cast<int>(value)}
         };
     }
