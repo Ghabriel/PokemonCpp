@@ -374,7 +374,7 @@ export class LuaBaseTranspiler {
     }
 
     protected transpileIdentifier(node: ts.Identifier) {
-        this.emit(node.text);
+        this.emit(node.text === 'undefined' ? 'nil' : node.text);
     }
 
     protected transpilePrefixUnaryExpression(node: ts.PrefixUnaryExpression): void {

@@ -103,27 +103,26 @@ export function Flag_Poison_onTurnEnd() {
 
 
 // Toxic
-// TODO: transform 'new Map<...>()' -> '{}', etc
-// let toxicCounter = new Map<Pokemon, number>();
-// export function Flag_Toxic_onTurnEnd() {
-//     external.showText(target.displayName + ' is hurt by poison!');
+let toxicCounter: { [pokemonId: number]: number } = {};
+export function Flag_Toxic_onTurnEnd() {
+    external.showText(target.displayName + ' is hurt by poison!');
 
-//     if toxicCounter[target] == nil then
-//         toxicCounter[target] = 0
-//     end
+    if (toxicCounter[target.id] === undefined) {
+        toxicCounter[target.id] = 0;
+    }
 
-//     toxicCounter[target] = toxicCounter[target] + 1
-//     external.fixedDamage((toxicCounter[target] * target.hp + 7) / 8)
-// end
+    toxicCounter[target.id]++;
+    external.fixedDamage(Math.ceil(toxicCounter[target.id] * target.hp / 8));
+}
 
-// export function Flag_Toxic_onSwitchIn() {
-//     toxicCounter[target] = 0
-// end
+export function Flag_Toxic_onSwitchIn() {
+    toxicCounter[target.id] = 0;
+}
 
-// export function Flag_Toxic_onBattleEnd() {
-//     external.removeFlagTarget('Toxic')
-//     external.addFlagTarget('Poison')
-// end
+export function Flag_Toxic_onBattleEnd() {
+    external.removeFlagTarget('Toxic');
+    external.addFlagTarget('Poison');
+}
 
 
 // Sleep

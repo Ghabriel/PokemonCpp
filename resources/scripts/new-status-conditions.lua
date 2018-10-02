@@ -57,6 +57,22 @@ function Flag_Poison_onTurnEnd()
     external.showText(target.displayName .. " is hurt by poison!")
     external.fixedDamage(math.ceil(target.hp / 8))
 end
+toxicCounter = {}
+function Flag_Toxic_onTurnEnd()
+    external.showText(target.displayName .. " is hurt by poison!")
+    if toxicCounter[target.id] == nil then
+        toxicCounter[target.id] = 0
+    end
+    toxicCounter[target.id] = toxicCounter[target.id] + 1
+    external.fixedDamage(math.ceil(toxicCounter[target.id] * target.hp / 8))
+end
+function Flag_Toxic_onSwitchIn()
+    toxicCounter[target.id] = 0
+end
+function Flag_Toxic_onBattleEnd()
+    external.removeFlagTarget("Toxic")
+    external.addFlagTarget("Poison")
+end
 function Flag_Sleep_beforeMove()
     external.showText(target.displayName .. " is fast asleep.")
     if target.asleepRounds == 0 then

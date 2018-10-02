@@ -67,7 +67,14 @@ export class LuaTranspiler extends LuaBaseTranspiler {
     }
 
     protected transpileIdentifier(node: ts.Identifier): void {
-        this.emit(this.getAdaptedIdentifierText(node));
+        const adaptedText = this.getAdaptedIdentifierText(node);
+
+        if (adaptedText !== node.text) {
+            this.emit(adaptedText);
+            return;
+        }
+
+        super.transpileIdentifier(node);
     }
 
     private getAdaptedIdentifierText(node: ts.Identifier): string {

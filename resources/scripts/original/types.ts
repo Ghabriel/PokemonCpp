@@ -36,6 +36,7 @@ export declare namespace external {
 }
 
 export interface Pokemon {
+    relativeId?: number;
     id: number;
     move0: string;
     move1: string;

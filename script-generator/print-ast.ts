@@ -2,7 +2,7 @@ import * as fs from 'fs';
 import ts from 'typescript';
 
 const originPath = '../resources/scripts/original/';
-const fileNames = ['new-battle-utils.ts'];
+const fileNames = ['new-status-conditions.ts'];
 
 for (const fileName of fileNames) {
     console.log(`[PRINTING] ${fileName}`);
