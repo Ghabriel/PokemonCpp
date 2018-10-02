@@ -197,7 +197,13 @@ export class LuaBaseTranspiler {
             this.indentationLevel--;
 
             const statementList = caseOrDefaultClause.statements;
-            if (statementList[statementList.length - 1].kind !== ts.SyntaxKind.BreakStatement) {
+            const lastStatement = statementList[statementList.length - 1];
+            const escapingStatements = [
+                ts.SyntaxKind.BreakStatement,
+                ts.SyntaxKind.ReturnStatement
+            ];
+
+            if (escapingStatements.indexOf(lastStatement.kind) < 0) {
                 this.handleUnsupportedNode(node, 'transpileSwitchStatement');
             }
         });

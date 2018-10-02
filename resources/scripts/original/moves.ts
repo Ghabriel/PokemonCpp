@@ -1,5 +1,5 @@
-import { user } from './new-battle-variables';
-import { addStatusCondition, StatusCondition } from './new-status-conditions';
+import { user } from './battle-variables';
+import { addStatusCondition, StatusCondition } from './status-conditions';
 import { external } from './types';
 
 // require 'resources.scripts.battle-formulas'

@@ -1,104 +1,62 @@
-typeTable = {
-    {1, 1, 1, 1, 1, 0.5, 1, 0, 0.5, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-    {2, 1, 0.5, 0.5, 1, 2, 0.5, 0, 2, 1, 1, 1, 1, 0.5, 2, 1, 2, 0.5},
-    {1, 2, 1, 1, 1, 0.5, 2, 1, 0.5, 1, 1, 2, 0.5, 1, 1, 1, 1, 1},
-    {1, 1, 1, 0.5, 0.5, 0.5, 1, 0.5, 0, 1, 1, 2, 1, 1, 1, 1, 1, 2},
-    {1, 1, 0, 2, 1, 2, 0.5, 1, 2, 2, 1, 0.5, 2, 1, 1, 1, 1, 1},
-    {1, 0.5, 2, 1, 0.5, 1, 2, 1, 0.5, 2, 1, 1, 1, 1, 2, 1, 1, 1},
-    {1, 0.5, 0.5, 0.5, 1, 1, 1, 0.5, 0.5, 0.5, 1, 2, 1, 2, 1, 1, 2, 0.5},
-    {0, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 2, 1, 1, 0.5, 1},
-    {1, 1, 1, 1, 1, 2, 1, 1, 0.5, 0.5, 0.5, 1, 0.5, 1, 2, 1, 1, 2},
-    {1, 1, 1, 1, 1, 0.5, 2, 1, 2, 0.5, 0.5, 2, 1, 1, 2, 0.5, 1, 1},
-    {1, 1, 1, 1, 2, 2, 1, 1, 1, 2, 0.5, 0.5, 1, 1, 1, 0.5, 1, 1},
-    {1, 1, 0.5, 0.5, 2, 2, 0.5, 1, 0.5, 0.5, 2, 0.5, 1, 1, 1, 0.5, 1, 1},
-    {1, 1, 2, 1, 0, 1, 1, 1, 1, 1, 2, 0.5, 0.5, 1, 1, 0.5, 1, 1},
-    {1, 2, 1, 2, 1, 1, 1, 1, 0.5, 1, 1, 1, 1, 0.5, 1, 1, 0, 1},
-    {1, 1, 2, 1, 2, 1, 1, 1, 0.5, 0.5, 0.5, 2, 1, 1, 0.5, 2, 1, 1},
-    {1, 1, 1, 1, 1, 1, 1, 1, 0.5, 1, 1, 1, 1, 1, 1, 2, 1, 0},
-    {1, 0.5, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 2, 1, 1, 0.5, 0.5},
-    {1, 2, 1, 0.5, 1, 1, 1, 1, 0.5, 0.5, 1, 1, 1, 1, 1, 2, 2, 1},
-}
-
+typeTable = {{1, 1, 1, 1, 1, 0.5, 1, 0, 0.5, 1, 1, 1, 1, 1, 1, 1, 1, 1}, {2, 1, 0.5, 0.5, 1, 2, 0.5, 0, 2, 1, 1, 1, 1, 0.5, 2, 1, 2, 0.5}, {1, 2, 1, 1, 1, 0.5, 2, 1, 0.5, 1, 1, 2, 0.5, 1, 1, 1, 1, 1}, {1, 1, 1, 0.5, 0.5, 0.5, 1, 0.5, 0, 1, 1, 2, 1, 1, 1, 1, 1, 2}, {1, 1, 0, 2, 1, 2, 0.5, 1, 2, 2, 1, 0.5, 2, 1, 1, 1, 1, 1}, {1, 0.5, 2, 1, 0.5, 1, 2, 1, 0.5, 2, 1, 1, 1, 1, 2, 1, 1, 1}, {1, 0.5, 0.5, 0.5, 1, 1, 1, 0.5, 0.5, 0.5, 1, 2, 1, 2, 1, 1, 2, 0.5}, {0, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 2, 1, 1, 0.5, 1}, {1, 1, 1, 1, 1, 2, 1, 1, 0.5, 0.5, 0.5, 1, 0.5, 1, 2, 1, 1, 2}, {1, 1, 1, 1, 1, 0.5, 2, 1, 2, 0.5, 0.5, 2, 1, 1, 2, 0.5, 1, 1}, {1, 1, 1, 1, 2, 2, 1, 1, 1, 2, 0.5, 0.5, 1, 1, 1, 0.5, 1, 1}, {1, 1, 0.5, 0.5, 2, 2, 0.5, 1, 0.5, 0.5, 2, 0.5, 1, 1, 1, 0.5, 1, 1}, {1, 1, 2, 1, 0, 1, 1, 1, 1, 1, 2, 0.5, 0.5, 1, 1, 0.5, 1, 1}, {1, 2, 1, 2, 1, 1, 1, 1, 0.5, 1, 1, 1, 1, 0.5, 1, 1, 0, 1}, {1, 1, 2, 1, 2, 1, 1, 1, 0.5, 0.5, 0.5, 2, 1, 1, 0.5, 2, 1, 1}, {1, 1, 1, 1, 1, 1, 1, 1, 0.5, 1, 1, 1, 1, 1, 1, 2, 1, 0}, {1, 0.5, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 2, 1, 1, 0.5, 0.5}, {1, 2, 1, 0.5, 1, 1, 1, 1, 0.5, 0.5, 1, 1, 1, 1, 1, 2, 2, 1}}
 typeMapping = {
-    ["Normal"] = 1,
-    ["Fighting"] = 2,
-    ["Flying"] = 3,
-    ["Poison"] = 4,
-    ["Ground"] = 5,
-    ["Rock"] = 6,
-    ["Bug"] = 7,
-    ["Ghost"] = 8,
-    ["Steel"] = 9,
-    ["Fire"] = 10,
-    ["Water"] = 11,
-    ["Grass"] = 12,
-    ["Electric"] = 13,
-    ["Psychic"] = 14,
-    ["Ice"] = 15,
-    ["Dragon"] = 16,
-    ["Dark"] = 17,
-    ["Fairy"] = 18,
+    ['Normal'] = 1,
+    ['Fighting'] = 2,
+    ['Flying'] = 3,
+    ['Poison'] = 4,
+    ['Ground'] = 5,
+    ['Rock'] = 6,
+    ['Bug'] = 7,
+    ['Ghost'] = 8,
+    ['Steel'] = 9,
+    ['Fire'] = 10,
+    ['Water'] = 11,
+    ['Grass'] = 12,
+    ['Electric'] = 13,
+    ['Psychic'] = 14,
+    ['Ice'] = 15,
+    ['Dragon'] = 16,
+    ['Dark'] = 17,
+    ['Fairy'] = 18
 }
-
-statFlags = {
-    all = 0,
-    ignorePositive = 1,
-    ignoreNegative = 2
-}
-
--- float(int)
 function getStatStageMultiplier(stage)
-    local absStage = math.abs(stage);
+    local absStage = math.abs(stage)
     if stage >= 0 then
-        return (2 + absStage) / 2.0
+        return (2 + absStage) / 2
     else
-        return 2.0 / (2 + absStage)
+        return 2 / (2 + absStage)
     end
 end
-
--- float(int)
 function getAccuracyStatStageMultiplier(stage)
-    local absStage = math.abs(stage);
+    local absStage = math.abs(stage)
     if stage >= 0 then
-        return (3 + absStage) / 3.0
+        return (3 + absStage) / 3
     else
-        return 3.0 / (3 + absStage)
+        return 3 / (3 + absStage)
     end
 end
-
--- int(Pokemon, Move, StatFlags)
 function getAttackStatForMove(pokemon, move, calculationFlags)
     setmetatable(pokemon, pokemonMetatable)
     setmetatable(move, moveMetatable)
-
     if move.kind == "Physical" then
-        return getEffectiveStat(pokemon, stats.attack, calculationFlags)
+        return getEffectiveStat(pokemon, Stat.Attack, calculationFlags)
     end
-
     if move.kind == "Special" then
-        return getEffectiveStat(pokemon, stats.specialAttack, calculationFlags)
+        return getEffectiveStat(pokemon, Stat.SpecialAttack, calculationFlags)
     end
-
     return 0
 end
-
--- int(Pokemon, Move, StatFlags)
 function getDefenseStatForMove(pokemon, move, calculationFlags)
     setmetatable(pokemon, pokemonMetatable)
     setmetatable(move, moveMetatable)
-
     if move.kind == "Physical" then
-        return getEffectiveStat(pokemon, stats.defense, calculationFlags)
+        return getEffectiveStat(pokemon, Stat.Defense, calculationFlags)
     end
-
     if move.kind == "Special" then
-        return getEffectiveStat(pokemon, stats.specialDefense, calculationFlags)
+        return getEffectiveStat(pokemon, Stat.SpecialDefense, calculationFlags)
     end
-
     return 0
 end
-
--- int(Pokemon, Stat, StatFlags)
 function getEffectiveStat(pokemon, stat, calculationFlags)
     setmetatable(pokemon, pokemonMetatable)
     local standardStatValue = getStandardStat(pokemon, stat)
@@ -106,61 +64,52 @@ function getEffectiveStat(pokemon, stat, calculationFlags)
     local statValue = standardStatValue * getStatStageMultiplier(currentStage)
     return specialized:getEffectiveStat(pokemon, stat, statValue)
 end
-
--- int(Pokemon, Stat)
 function getStandardStat(pokemon, stat)
+    setmetatable(pokemon, pokemonMetatable)
     return external.getStandardStat(pokemon.id, stat)
 end
-
--- int(Pokemon, Stat, StatFlags)
 function getModifiedStatStage(pokemon, stat, calculationFlags)
     setmetatable(pokemon, pokemonMetatable)
     local currentStage = getStatStage(pokemon, stat)
-
-    if calculationFlags == statFlags.ignorePositive then
+    if calculationFlags == StatFlag.IgnorePositive then
         currentStage = math.min(0, currentStage)
-    elseif calculationFlags == statFlags.ignoreNegative then
-        currentStage = math.max(0, currentStage)
+    else
+        if calculationFlags == StatFlag.IgnoreNegative then
+            currentStage = math.max(0, currentStage)
+        end
     end
-
     return currentStage
 end
-
 function getStatStage(pokemon, stat)
+    setmetatable(pokemon, pokemonMetatable)
     return external.getStatStage(pokemon.id, stat)
 end
-
--- bool(Pokemon)
 function hasUsableMoves(pokemon)
     setmetatable(pokemon, pokemonMetatable)
-    for moveIndex = 0,(pokemon.moveCount - 1) do
-        if canUseMove(pokemon, moveIndex) then
+    for i = 0, pokemon.moveCount - 1 do
+        if canUseMove(pokemon, i) then
             return true
         end
     end
-
     return false
 end
-
--- bool(Pokemon, int)
 function canUseMove(pokemon, moveIndex)
     setmetatable(pokemon, pokemonMetatable)
     return getPP(pokemon, moveIndex) > 0 and specialized:canUseMove(pokemon, moveIndex)
 end
-
--- int(Pokemon, int)
 function getPP(pokemon, moveIndex)
     setmetatable(pokemon, pokemonMetatable)
-    if     moveIndex == 0 then return tonumber(pokemon.pp0)
-    elseif moveIndex == 1 then return tonumber(pokemon.pp1)
-    elseif moveIndex == 2 then return tonumber(pokemon.pp2)
-    elseif moveIndex == 3 then return tonumber(pokemon.pp3)
+    if moveIndex == 0 then
+        return pokemon.pp0
+    elseif moveIndex == 1 then
+        return pokemon.pp1
+    elseif moveIndex == 2 then
+        return pokemon.pp2
+    elseif moveIndex == 3 then
+        return pokemon.pp3
     end
-
     return 0
 end
-
--- bool(Pokemon, Pokemon, Move)
 function checkMiss(user, target, move)
     setmetatable(user, pokemonMetatable)
     setmetatable(target, pokemonMetatable)
@@ -168,81 +117,61 @@ function checkMiss(user, target, move)
     if move.accuracy == 0 then
         return false
     end
-
-    local userAccuracyStage = getStatStage(user, stats.accuracy)
-    local targetEvasionStage = getStatStage(target, stats.evasion)
+    local userAccuracyStage = getStatStage(user, Stat.Accuracy)
+    local targetEvasionStage = getStatStage(target, Stat.Evasion)
     local accuracyStage = clamp(userAccuracyStage - targetEvasionStage, -6, 6)
     local accuracyStageMultiplier = getAccuracyStatStageMultiplier(accuracyStage)
     local hitRate = move.accuracy * accuracyStageMultiplier
-    log("Hit rate: "..hitRate)
+    external.log("Hit rate: " .. hitRate)
     return random(1, 100) > hitRate
 end
-
--- int(int, int, int)
 function clamp(value, minValue, maxValue)
     return math.max(minValue, math.min(maxValue, value))
 end
-
--- bool(Pokemon, Pokemon, Move)
 function checkCritical(user, target, move)
     setmetatable(user, pokemonMetatable)
     setmetatable(target, pokemonMetatable)
     setmetatable(move, moveMetatable)
     local criticalHitStage = getCriticalHitStage(user)
-    local chancesIn24;
-
+    local chancesIn24
     if criticalHitStage == 0 then
         chancesIn24 = 1
     elseif criticalHitStage == 1 then
         chancesIn24 = 3
-    elseif criticalHitStage == 2 then 
+    elseif criticalHitStage == 2 then
         chancesIn24 = 12
     else
         chancesIn24 = 24
     end
-
     return random(1, 24) <= chancesIn24
 end
-
--- int(Pokemon)
 function getCriticalHitStage(pokemon)
-    -- TODO
+    setmetatable(pokemon, pokemonMetatable)
     return 0
 end
-
--- int(int, int)
 function random(min, max)
     return external.random(min, max)
 end
-
--- float(Pokemon, Move)
 function getTypeEffectiveness(pokemon, move)
     setmetatable(pokemon, pokemonMetatable)
     setmetatable(move, moveMetatable)
-
-    -- Struggle and other typeless moves
     if move.type == "???" then
         return 1
     end
-
     local moveTypeIndex = typeMapping[move.type]
     local firstTypeIndex = typeMapping[pokemon.type0]
     local result = typeTable[moveTypeIndex][firstTypeIndex]
-
-    if tonumber(pokemon.typeCount) > 1 then
+    if pokemon.typeCount > 1 then
         local secondTypeIndex = typeMapping[pokemon.type1]
         result = result * typeTable[moveTypeIndex][secondTypeIndex]
     end
-
     return result
 end
-
--- int(Pokemon, Pokemon)
 function calculateExpGain(winner, fainted)
     setmetatable(winner, pokemonMetatable)
     setmetatable(fainted, pokemonMetatable)
-    local luckyEgg = 1 -- TODO: handle Lucky Egg
-    local shareFactor = 1 -- TODO: handle Exp. Share
+    local luckyEgg = 1
+    local shareFactor = 1
     local factor1 = (fainted.baseExp * fainted.level) / (5 * shareFactor)
     local factor2 = math.pow(2 * fainted.level + 10, 2.5)
     local factor3 = math.pow(fainted.level + winner.level + 10, 2.5)

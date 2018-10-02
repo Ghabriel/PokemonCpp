@@ -1,5 +1,5 @@
+import { specialized } from './battle-formulas';
 import { Stat, StatFlag } from './enums';
-import { specialized } from './new-battle-formulas';
 import { external, luaImplicitSelf, Move, Pokemon } from './types';
 
 const typeTable = [
@@ -148,14 +148,15 @@ export function canUseMove(pokemon: Pokemon, moveIndex: number): boolean {
 }
 
 export function getPP(pokemon: Pokemon, moveIndex: number): number {
-    if (moveIndex === 0) {
-        return pokemon.pp0;
-    } else if (moveIndex === 1) {
-        return pokemon.pp1;
-    } else if (moveIndex === 2) {
-        return pokemon.pp2;
-    } else if (moveIndex === 3) {
-        return pokemon.pp3;
+    switch (moveIndex) {
+        case 0:
+            return pokemon.pp0;
+        case 1:
+            return pokemon.pp1;
+        case 2:
+            return pokemon.pp2;
+        case 3:
+            return pokemon.pp3;
     }
 
     return 0

@@ -1,5 +1,5 @@
-import { random } from "./new-battle-utils";
-import { move, target } from "./new-battle-variables";
+import { random } from "./battle-utils";
+import { move, target } from "./battle-variables";
 import { external, Pokemon } from "./types";
 
 /**
