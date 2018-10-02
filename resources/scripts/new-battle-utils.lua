@@ -114,7 +114,7 @@ function checkMiss(user, target, move)
     local accuracyStage = clamp(userAccuracyStage - targetEvasionStage, -6, 6)
     local accuracyStageMultiplier = getAccuracyStatStageMultiplier(accuracyStage)
     local hitRate = move.accuracy * accuracyStageMultiplier
-    external.log("Hit rate: " + hitRate)
+    external.log("Hit rate: " .. hitRate)
     return random(1, 100) > hitRate
 end
 function clamp(value, minValue, maxValue)

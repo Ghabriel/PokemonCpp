@@ -422,7 +422,7 @@ export class LuaBaseTranspiler {
         if (!this.isCompoundAssignmentOperator(node.operatorToken)) {
             this.transpileExpression(node.left);
             this.emit(' ');
-            this.emit(this.convertBinaryOperator(node.operatorToken));
+            this.emit(this.convertBinaryOperator(node.operatorToken, node.left, node.right));
             this.emit(' ');
             this.transpileExpression(node.right);
             return;
@@ -443,8 +443,14 @@ export class LuaBaseTranspiler {
         return options.indexOf(tokenText) >= 0;
     }
 
-    protected convertBinaryOperator(token: ts.Token<ts.BinaryOperator>): string {
+    protected convertBinaryOperator(
+        token: ts.Token<ts.BinaryOperator>,
+        leftOperand: ts.Expression,
+        rightOperand: ts.Expression
+    ): string {
         const tokenText = token.getText();
+        const leftOperandText = leftOperand.getText();
+        const rightOperandText = rightOperand.getText();
 
         switch (tokenText) {
             case '&&':
@@ -453,9 +459,19 @@ export class LuaBaseTranspiler {
                 return 'or';
             case '===':
                 return '==';
+            case '+':
+                if (this.isQuote(leftOperandText[0]) || this.isQuote(rightOperandText[0])) {
+                    return '..';
+                }
+
+                return '+';
             default:
                 return tokenText;
         }
+    }
+
+    protected isQuote(ch: string): boolean {
+        return ch === '"' || ch === '\'' || ch === '`';
     }
 
     protected transpileParenthesizedExpression(node: ts.ParenthesizedExpression): void {

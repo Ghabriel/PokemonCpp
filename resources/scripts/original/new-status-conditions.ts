@@ -1,6 +1,6 @@
 import { random } from "./new-battle-utils";
 import { move, target } from "./new-battle-variables";
-import { external, luaUseStringConcatenation, Pokemon } from "./types";
+import { external, Pokemon } from "./types";
 
 /**
  * Burn - 90% (not checking faint)
@@ -42,8 +42,6 @@ const statusConditionList: (keyof typeof statusConditionFlags)[] = [
 
 const numStatusConditions = 6;
 
-luaUseStringConcatenation();
-
 export function addStatusCondition(
     condition: StatusCondition,
     fixedSleepDuration?: number
@@ -80,7 +78,6 @@ export function Flag_Burn_beforeDamageInflict() {
 }
 
 export function Flag_Burn_onTurnEnd() {
-    // TODO: transform '+' -> '..'
     external.showText(target.displayName + ' is hurt by its burn!');
     external.fixedDamage(Math.ceil(target.hp / 16));
 }

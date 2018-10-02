@@ -16,11 +16,6 @@ export class LuaTranspiler extends LuaBaseTranspiler {
             }
         }
 
-        if (this.isFunctionCallTo(node, 'luaUseStringConcatenation')) {
-            this.useStringConcatenation = true;
-            return;
-        }
-
         super.transpileStatement(node);
     }
 
@@ -86,16 +81,5 @@ export class LuaTranspiler extends LuaBaseTranspiler {
         }
     }
 
-    protected convertBinaryOperator(token: ts.Token<ts.BinaryOperator>): string {
-        const tokenText = token.getText();
-
-        if (tokenText === '+' && this.useStringConcatenation) {
-            return '..';
-        }
-
-        return super.convertBinaryOperator(token);
-    }
-
     private implicitSelf: string[] = [];
-    private useStringConcatenation: boolean = false;
 }
