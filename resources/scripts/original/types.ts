@@ -1,9 +1,11 @@
+// Lua transpilation functions
 export declare function luaImplicitSelf(namespace: any): void;
 export declare function luaImport(path: string): void;
 
-export declare namespace external {
-    function log(content: string): void;
+// Externalized via C++ but not battle-related
+export declare function log(content: string): void;
 
+export declare namespace external {
     function damage(): void;
     function damageWithFixedRecoil(lostHP: number): void;
     function damageWithRecoil(recoilRate: number): void;

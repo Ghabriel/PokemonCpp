@@ -1,3 +1,4 @@
+require "resources.scripts.enums"
 require "resources.scripts.battle-formulas"
 require "resources.scripts.battle-utils"
 require "resources.scripts.battle-variables"

@@ -2,6 +2,7 @@ import { user } from './battle-variables';
 import { addStatusCondition, StatusCondition } from './status-conditions';
 import { external, luaImport } from './types';
 
+luaImport('resources.scripts.enums');
 luaImport('resources.scripts.battle-formulas');
 luaImport('resources.scripts.battle-utils');
 luaImport('resources.scripts.battle-variables');

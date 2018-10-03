@@ -434,7 +434,7 @@ void effects::pushPokemonProperty(int entityId, const std::string& property) {
     const Pokemon& currentPokemon = data<Pokemon>(pokemonEntity, *gameData);
 
     const auto setValue = [&](const auto& value) {
-        script("moves", *gameData).set("dataRegister", value);
+        script("moves", *gameData).set("external.dataRegister", value);
     };
 
     for (size_t i = 0; i < constants::MOVE_LIMIT; ++i) {
@@ -521,7 +521,7 @@ void effects::pushMoveProperty(int pokemonId, int moveIndex, const std::string& 
     int currentPP = moveUser.pp[requestedMove.moveIndex];
 
     const auto setValue = [&](const auto& value) {
-        script("moves", *gameData).set("dataRegister", value);
+        script("moves", *gameData).set("external.dataRegister", value);
     };
 
     if (property == "displayName") {

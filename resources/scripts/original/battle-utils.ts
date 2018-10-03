@@ -1,6 +1,6 @@
 import { specialized } from './battle-formulas';
 import { Stat, StatFlag } from './enums';
-import { external, luaImplicitSelf, Move, Pokemon } from './types';
+import { external, log, luaImplicitSelf, Move, Pokemon } from './types';
 
 const typeTable = [
     [ 1, 1, 1, 1, 1, 0.5, 1, 0, 0.5, 1, 1, 1, 1, 1, 1, 1, 1, 1 ],
@@ -172,7 +172,7 @@ export function checkMiss(user: Pokemon, target: Pokemon, move: Move): boolean {
     const accuracyStage = clamp(userAccuracyStage - targetEvasionStage, -6, 6);
     const accuracyStageMultiplier = getAccuracyStatStageMultiplier(accuracyStage);
     const hitRate = move.accuracy * accuracyStageMultiplier;
-    external.log('Hit rate: ' + hitRate);
+    log('Hit rate: ' + hitRate);
     return random(1, 100) > hitRate;
 }
 
