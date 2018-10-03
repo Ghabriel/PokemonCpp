@@ -9,11 +9,13 @@ void prepareScriptFile(engine::scriptingsystem::Lua& script) {
         "pokemonMetatable = {}\n"
         "moveMetatable = {}\n"
         "function pokemonMetatable:__index(key)\n"
-            "return external.getPokemonProperty(self.id, key)\n"
+            "external.pushPokemonProperty(self.id, key)\n"
+            "return dataRegister\n"
         "end\n"
 
         "function moveMetatable:__index(key)\n"
-            "return external.getMoveProperty(self.pokemonId, self.moveIndex, key)\n"
+            "external.pushMoveProperty(self.pokemonId, self.moveIndex, key)\n"
+            "return dataRegister\n"
         "end\n"
 
         "for _, pokemon in ipairs(userTeam) do\n"

@@ -56,8 +56,8 @@ namespace effects {
 
     int random(int min, int max);
     void showText(const std::string& content);
-    std::string getPokemonProperty(int entityId, const std::string& property);
-    std::string getMoveProperty(int pokemonId, int moveIndex, const std::string& property);
+    void pushPokemonProperty(int entityId, const std::string& property);
+    void pushMoveProperty(int pokemonId, int moveIndex, const std::string& property);
 }
 
 void injectNativeBattleFunctions(engine::scriptingsystem::Lua& script);

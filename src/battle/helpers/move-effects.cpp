@@ -429,17 +429,23 @@ void effects::showText(const std::string& content) {
     enqueueEvent<TextEvent>(content, battle, *gameData);
 }
 
-std::string effects::getPokemonProperty(int entityId, const std::string& property) {
+void effects::pushPokemonProperty(int entityId, const std::string& property) {
     Entity pokemonEntity = getPokemonEntity(entityId);
     const Pokemon& currentPokemon = data<Pokemon>(pokemonEntity, *gameData);
 
+    const auto setValue = [&](const auto& value) {
+        script("moves", *gameData).set("dataRegister", value);
+    };
+
     for (size_t i = 0; i < constants::MOVE_LIMIT; ++i) {
         if (property == "move" + std::to_string(i)) {
-            return (i < currentPokemon.moves.size()) ? currentPokemon.moves[i] : "";
+            setValue((i < currentPokemon.moves.size()) ? currentPokemon.moves[i] : "");
+            return;
         }
 
         if (property == "pp" + std::to_string(i)) {
-            return (i < currentPokemon.pp.size()) ? std::to_string(currentPokemon.pp[i]) : "";
+            setValue((i < currentPokemon.pp.size()) ? currentPokemon.pp[i] : -1);
+            return;
         }
     }
 
@@ -447,68 +453,98 @@ std::string effects::getPokemonProperty(int entityId, const std::string& propert
         return lua::call<int>("getEffectiveStat", pokemonEntity, stat, StatFlags::All);
     };
 
-    const auto throwError = [] {
-        assert(false);
-        return "";
-    };
-
     PokemonSpeciesData& speciesData = data<PokemonSpeciesData>(pokemonEntity, *gameData);
     size_t typeCount = speciesData.types.size();
 
-    return
-        // Pokémon data
-        (property == "species")          ? currentPokemon.species :
-        (property == "nature")           ? std::to_string(static_cast<int>(currentPokemon.nature)) :
-        (property == "heldItem")         ? currentPokemon.heldItem :
-        (property == "experiencePoints") ? std::to_string(currentPokemon.experiencePoints) :
-        (property == "ability")          ? currentPokemon.ability :
-        (property == "moveCount")        ? std::to_string(currentPokemon.moves.size()) :
-        (property == "gender")           ? std::to_string(static_cast<int>(currentPokemon.gender)) :
-        (property == "form")             ? std::to_string(currentPokemon.form) :
-        (property == "displayName")      ? currentPokemon.displayName :
-        (property == "pokerus")          ? std::to_string(currentPokemon.pokerus) :
-        (property == "statusCondition")  ? std::to_string(static_cast<int>(currentPokemon.status)) :
-        (property == "asleepRounds")     ? std::to_string(currentPokemon.asleepRounds) :
-        (property == "level")            ? std::to_string(currentPokemon.level) :
-        (property == "hp")               ? std::to_string(getStat(Stat::HP)) :
-        (property == "attack")           ? std::to_string(getStat(Stat::Attack)) :
-        (property == "defense")          ? std::to_string(getStat(Stat::Defense)) :
-        (property == "specialAttack")    ? std::to_string(getStat(Stat::SpecialAttack)) :
-        (property == "specialDefense")   ? std::to_string(getStat(Stat::SpecialDefense)) :
-        (property == "speed")            ? std::to_string(getStat(Stat::Speed)) :
-        (property == "currentHP")        ? std::to_string(static_cast<int>(currentPokemon.currentHP)) :
-        // Species data
-        (property == "typeCount")        ? std::to_string(typeCount) :
-        (property == "type0")            ? speciesData.types[0] :
-        (property == "type1")            ? (typeCount == 1 ? "" : speciesData.types[1]) :
-        (property == "baseExp")          ? std::to_string(speciesData.baseExp) :
-        (property == "captureRate")      ? std::to_string(speciesData.captureRate) :
-        (property == "height")           ? std::to_string(speciesData.height) :
-        (property == "weight")           ? std::to_string(speciesData.weight) :
-        throwError();
+    if (property == "species") {
+        setValue(currentPokemon.species);
+    } else if (property == "nature") {
+        setValue(static_cast<int>(currentPokemon.nature));
+    } else if (property == "heldItem") {
+        setValue(currentPokemon.heldItem);
+    } else if (property == "experiencePoints") {
+        setValue(currentPokemon.experiencePoints);
+    } else if (property == "ability") {
+        setValue(currentPokemon.ability);
+    } else if (property == "moveCount") {
+        setValue(static_cast<int>(currentPokemon.moves.size()));
+    } else if (property == "gender") {
+        setValue(static_cast<int>(currentPokemon.gender));
+    } else if (property == "form") {
+        setValue(currentPokemon.form);
+    } else if (property == "displayName") {
+        setValue(currentPokemon.displayName);
+    } else if (property == "pokerus") {
+        setValue(currentPokemon.pokerus);
+    } else if (property == "statusCondition") {
+        setValue(static_cast<int>(currentPokemon.status));
+    } else if (property == "asleepRounds") {
+        setValue(currentPokemon.asleepRounds);
+    } else if (property == "level") {
+        setValue(currentPokemon.level);
+    } else if (property == "hp") {
+        setValue(getStat(Stat::HP));
+    } else if (property == "attack") {
+        setValue(getStat(Stat::Attack));
+    } else if (property == "defense") {
+        setValue(getStat(Stat::Defense));
+    } else if (property == "specialAttack") {
+        setValue(getStat(Stat::SpecialAttack));
+    } else if (property == "specialDefense") {
+        setValue(getStat(Stat::SpecialDefense));
+    } else if (property == "speed") {
+        setValue(getStat(Stat::Speed));
+    } else if (property == "currentHP") {
+        setValue(static_cast<int>(currentPokemon.currentHP));
+    } else if (property == "typeCount") {
+        setValue(static_cast<int>(typeCount));
+    } else if (property == "type0") {
+        setValue(speciesData.types[0]);
+    } else if (property == "type1") {
+        setValue((typeCount == 1 ? "" : speciesData.types[1]));
+    } else if (property == "baseExp") {
+        setValue(speciesData.baseExp);
+    } else if (property == "captureRate") {
+        setValue(speciesData.captureRate);
+    } else if (property == "height") {
+        setValue(speciesData.height);
+    } else if (property == "weight") {
+        setValue(speciesData.weight);
+    } else {
+        assert(false);
+    }
 }
 
-std::string effects::getMoveProperty(int pokemonId, int moveIndex, const std::string& property) {
+void effects::pushMoveProperty(int pokemonId, int moveIndex, const std::string& property) {
     BoundMove requestedMove = getBoundMove(pokemonId, moveIndex);
     const Pokemon& moveUser = data<Pokemon>(requestedMove.user, *gameData);
     int currentPP = moveUser.pp[requestedMove.moveIndex];
 
-    const auto throwError = [] {
-        assert(false);
-        return "";
+    const auto setValue = [&](const auto& value) {
+        script("moves", *gameData).set("dataRegister", value);
     };
 
-    return
-        (property == "displayName") ? move->displayName :
-        (property == "type") ? move->type :
-        (property == "kind") ? move->kind :
-        (property == "power") ? std::to_string(move->power) :
-        (property == "accuracy") ? std::to_string(move->accuracy) :
-        (property == "currentPP") ? std::to_string(currentPP) :
-        (property == "targetType") ? move->targetType :
-        (property == "priority") ? std::to_string(move->priority) :
-        (property == "flags") ? move->flags :
-        throwError();
+    if (property == "displayName") {
+        setValue(move->displayName);
+    } else if (property == "type") {
+        setValue(move->type);
+    } else if (property == "kind") {
+        setValue(move->kind);
+    } else if (property == "power") {
+        setValue(move->power);
+    } else if (property == "accuracy") {
+        setValue(move->accuracy);
+    } else if (property == "currentPP") {
+        setValue(currentPP);
+    } else if (property == "targetType") {
+        setValue(move->targetType);
+    } else if (property == "priority") {
+        setValue(move->priority);
+    } else if (property == "flags") {
+        setValue(move->flags);
+    } else {
+        assert(false);
+    }
 }
 
 void injectNativeBattleFunctions(engine::scriptingsystem::Lua& script) {
@@ -544,7 +580,7 @@ void injectNativeBattleFunctions(engine::scriptingsystem::Lua& script) {
     inject("getStatStage", effects::getStatStage);
 
     inject("random", effects::random);
-    inject("getPokemonProperty", effects::getPokemonProperty);
-    inject("getMoveProperty", effects::getMoveProperty);
+    inject("pushPokemonProperty", effects::pushPokemonProperty);
+    inject("pushMoveProperty", effects::pushMoveProperty);
     inject("showText", effects::showText);
 }
