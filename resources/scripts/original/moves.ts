@@ -1,11 +1,11 @@
 import { user } from './battle-variables';
 import { addStatusCondition, StatusCondition } from './status-conditions';
-import { external } from './types';
+import { external, luaImport } from './types';
 
-// require 'resources.scripts.battle-formulas'
-// require 'resources.scripts.battle-utils'
-// require 'resources.scripts.battle-variables'
-// require 'resources.scripts.status-conditions'
+luaImport('resources.scripts.battle-formulas');
+luaImport('resources.scripts.battle-utils');
+luaImport('resources.scripts.battle-variables');
+luaImport('resources.scripts.status-conditions');
 
 export function Struggle_onUse() {
     external.damageWithFixedRecoil(Math.ceil(user.hp / 4));

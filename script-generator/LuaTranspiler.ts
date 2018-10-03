@@ -16,6 +16,16 @@ export class LuaTranspiler extends LuaBaseTranspiler {
             }
         }
 
+        if (this.isFunctionCallTo(node, 'luaImport')) {
+            const args = this.getFunctionCallArguments(node);
+
+            if (args.length === 1 && args[0].kind === ts.SyntaxKind.StringLiteral) {
+                const path = (args[0] as ts.StringLiteral).text;
+                this.emitIndented(`require "${path}"\n`);
+                return;
+            }
+        }
+
         super.transpileStatement(node);
     }
 
