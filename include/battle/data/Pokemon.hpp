@@ -4,6 +4,8 @@
 #include <array>
 #include <string>
 #include <vector>
+#include "Gender.hpp"
+#include "StatusCondition.hpp"
 
 enum class Nature {
     Hardy,
@@ -32,22 +34,6 @@ enum class Nature {
     Naive,
     Serious,
     Count // for generation only
-};
-
-enum class Gender {
-    Male,
-    Female,
-    Genderless
-};
-
-enum class StatusCondition {
-    Normal,
-    Burn,
-    Freeze,
-    Paralysis,
-    Poison,
-    Toxic,
-    Sleep
 };
 
 struct Pokemon {
